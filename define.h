@@ -31,7 +31,6 @@
 #define STRING          106
 
 //  OPERATORS
-#define EXCLAMATION     107 // !
 #define LB              108 // (
 #define RB              109 // )
 #define COMMA           110 // ,
