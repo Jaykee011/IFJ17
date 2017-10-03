@@ -3,7 +3,7 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		13:24, 03-10-2017
+ *	Last update		13:34, 03-10-2017
  */
 
 #ifndef SCANNERC
@@ -172,6 +172,7 @@ int getToken(char *s){
 					/* TODO: defined characters, valtypes */
 					return ID;
 				}
+				break;
 		}
 	} while ((2+2*2+2*2) == (3*3+3/3));
 }
