@@ -4,14 +4,15 @@
 *	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
 */
 
-#include <string.h> // knihovna pro praci s retezci
+// #include <string.h> // pro testy knihovna pro praci s retezci
 #include <malloc.h> // knihovna pro praci s dinamycky alokovanou pameti
 #include "string.h" // hlavickovy soubor
 
+#include "define.h" // define pro testování ERR
 
 #define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
 
-int stringInit(string* s){ // inicializuje retezec
+int stringInit(String* s){ // inicializuje retezec
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		if ((s->data = malloc(STR_LEN_INC)) == NULL) // test, zda-li alokace probehla v poradku
 			return INTERN_ERR;
@@ -25,7 +26,7 @@ int stringInit(string* s){ // inicializuje retezec
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-void stringFree(string *s){ // uvolni pamet
+void stringFree(String *s){ // uvolni pamet
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		free(s->data);
 
@@ -36,7 +37,7 @@ void stringFree(string *s){ // uvolni pamet
 	}
 }
 
-void stringClear(string *s){ // vymaze obsah -> nastavi vychozi hodnoty
+void stringClear(String *s){ // vymaze obsah -> nastavi vychozi hodnoty
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		s->data[0] = '\0'; // pro pripad vypisu prazdneho retezce
 		s->size = 0;
@@ -44,7 +45,7 @@ void stringClear(string *s){ // vymaze obsah -> nastavi vychozi hodnoty
 	}
 }
 
-int stringAddData(string *s1, char c){ // prida na konec retezce 1 znak
+int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 		if (s1->size + 1 >= s1->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
 			s1->data = realloc(s1->data, s1->size + STR_LEN_INC);
@@ -62,7 +63,7 @@ int stringAddData(string *s1, char c){ // prida na konec retezce 1 znak
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-int stringCopyToString(string *s1, string *s2){ // prekopiruje retezec s1 do s2
+int stringCopyToString(String *s1, String *s2){ // prekopiruje retezec s1 do s2
 	if (s1 != NULL && s2 != NULL){ // test, zda-li neni na vstupu NULL
 		int tempSize = s1->size; // uchovani velikosti kopirovaneho retezce
 		if (tempSize >= s2->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
@@ -80,35 +81,35 @@ int stringCopyToString(string *s1, string *s2){ // prekopiruje retezec s1 do s2
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-int stringCmpString(string *s1, string *s2){ // porovna velikosti dvou retezcu
+int stringCmpString(String *s1, String *s2){ // porovna velikosti dvou retezcu
 	if (s1 != NULL && s2 != NULL){ // test, zda-li neni na vstupu NULL
 		return strcmp(s1->data, s2->data);
 	}
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-int stringCmpConstString(string *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
+int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 		return strcmp(s1->data, s2);
 	}
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-char *stringGetString(string *s){ // vraci textovou cast retezce
+char *stringGetString(String *s){ // vraci textovou cast retezce
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		return s->data;
 	}
 	return NULL; // pro pripad, ze se neprovede ani jeden if
 }
 
-int stringGetSize(string *s){ // vraci delku retezce
+int stringGetSize(String *s){ // vraci delku retezce
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		return s->size;
 	}
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-void stringToChar(char **c, string *s){ // prekopirovani "naseho" stringu do c charu
+void stringToChar(char **c, String *s){ // prekopirovani "naseho" stringu do c charu
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
 		if (s->size == 0){ // pokud neexistuje zadny retezec
 			(*c) = malloc(sizeof(char)); // naalokuje velikost charu
