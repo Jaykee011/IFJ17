@@ -22,3 +22,15 @@ int DoubleToStr(char **String, double d){ // double na string
 int length(char *s){ // funkce pro vrácení délky řetězce --- TO-DO 
 	return strlen(s);
 }
+
+char *SubStr(char* s, int i, int j){ // funkce pro vrácení podřetězce v řtězci s --- TO-DO
+
+}
+
+int Asc(char* s, int i){ // funkce pro vrácení ordinární hodnoty (ASCII) na pozici i v řetězci s --- TO-DO
+
+}
+
+char *Chr(int i){ // funkce pro vrácení jednoznakového řetězce, jehož ASCII je zadán parametrem i --- TO-DO
+
+}

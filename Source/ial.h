@@ -9,5 +9,8 @@
 int length(char *s);
 int IntToStr(char **String, int i);
 int DoubleToStr(char **String, double d);
+char *SubStr(char* s, int i, int j);
+int Asc(char* s, int i);
+char *Chr(int i);
 
 #endif // #ifndef IALH
