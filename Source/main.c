@@ -14,16 +14,15 @@ int main(int argc, char** argv) {
 	
 	char str[100];
 	clearString(str);
-	int result = getToken(str);
+	int result = 5;
 
 	while(result != T_EOF) {
-		printf("%d\n", result);
 
 		clearString(str);
 		result = getToken(str);
+		printf("%d (%s)\n", result, str);
 		if(result == LEX_ERR) break;
 	}
-	printf("%d\n", result);
 	fclose(f);
 
 	return 0;
