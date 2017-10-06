@@ -3,7 +3,7 @@
  *	File			scanner.h
  *	Description		Header file for scanner.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		10:00, 06-10-2017
+ *	Last update		11:45, 06-10-2017
  */
 
 #ifndef SCANNERH
@@ -24,6 +24,9 @@
 #define LEX_EFLOAT		12
 #define LEX_FLOATF		13
 #define LEX_COMMENT		14
+#define LEX_BLOCKDIV	15
+#define LEX_BLOCK		16
+#define LEX_BLOCKE		17
 
 #include <stdio.h>
 #include <ctype.h>
@@ -34,5 +37,8 @@ void setFile(FILE *f);
 int scannerFailed();
 /*int getToken(String *s);*/
 int getToken(char *s);
+
+/* TODO: remove */
+void clearString(char *s);
 
 #endif

@@ -3,7 +3,7 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		10:08, 06-10-2017
+ *	Last update		11:45, 06-10-2017
  */
 
 #ifndef SCANNERC
@@ -22,8 +22,13 @@ void setFile(FILE *f) {
 /* TODO: Remove after string.c */
 void addCharToString(char *s, char c) {
 	int i;
-	for(i = 0; s[i] != '\n'; i++);
+	for(i = 0; s[i] != '\0'; i++);
 	s[i] = c;
+	s[i+1] = '\0';
+}
+
+void clearString(char *s) {
+	for(int i = 0; s[i] != '\0'; i++) s[i] = '\0';
 }
 
 void strcpyTemp(char *s, char *lowerCase) {
@@ -55,9 +60,7 @@ int isString(char *s1, char *s2) {
 int getToken(char *s){
 	char c;
 	int shunt = LEX_WAITING;
-
-	(void)s;
-	//clearString(s);
+	clearString(s);
 
 	do {
 		c = getc(s_sourceFile);
@@ -86,7 +89,7 @@ int getToken(char *s){
 				else if(c == '+') return T_ADD;
 				else if(c == '-') return T_SUB;
 				else if(c == '*') return T_TIMES;
-				else if(c == '/') return T_DIV;
+				else if(c == '/') shunt = LEX_BLOCKDIV;
 
 				else if(c == '=') return T_EQ;
 				else if(c == ',') return T_COMMA;
@@ -101,6 +104,23 @@ int getToken(char *s){
 
 					addCharToString(s, c);
 				}
+				break;
+
+			/* Is it comment or div */
+			case LEX_BLOCKDIV:
+				if(c == '/') shunt = LEX_BLOCK;
+				else ungetc(c, s_sourceFile);
+				break;
+
+			/* We are in a comment */
+			case LEX_BLOCK:
+				if(c == '/') shunt = LEX_BLOCKE;
+				break;
+
+			/* End of block comment */
+			case LEX_BLOCKE:
+				if(c == '/') shunt = LEX_WAITING;
+				else shunt = LEX_BLOCK;
 				break;
 
 			/* String like !"Hello world"	*/
@@ -236,7 +256,7 @@ int getToken(char *s){
 			case LEX_KEYWORD:
 				if(isalnum(c) || c == '_') addCharToString(s, c);
 				else {
-					ungetc(c, source);
+					ungetc(c, s_sourceFile);
 
 					/* Lower case keyword */
 					char lowerCase[9];
