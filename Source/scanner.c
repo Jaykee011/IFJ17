@@ -9,13 +9,14 @@
 #ifndef SCANNERC
 #define SCANNERC
 
+#include "tester.h"
 #include "scanner.h"
 
 FILE * s_sourceFile;
 int asciiVal = 0;
 int asciiCount = 0;
 
-void setFile(FILE *f) {
+void setFile(FILE *f){
 	s_sourceFile = f;
 }
 

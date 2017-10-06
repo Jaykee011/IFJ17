@@ -85,4 +85,7 @@
 #define T_EOL             198 // \n
 #define T_EOF             199
 
+#define FINE            0
+#define FAIL            1
+
 #endif
