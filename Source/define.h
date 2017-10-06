@@ -31,20 +31,20 @@
 #define T_STRING          106
 
 //  OPERATORS
-#define LB              108 // (
-#define RB              109 // )
-#define COMMA           110 // ,
-#define SEMICOLON       111 // ;
-#define ADD             112 // +
-#define SUBSTR          113 // -
-#define TIMES           114 // *
-#define DIV             115 // /
-#define GT              116 // >
-#define LT              117 // <
-#define GTE             118 // >=
-#define LTE             119 // <=
-#define EQ              120 // =
-#define NEQ             121 // <>
+#define T_LB              108 // (
+#define T_RB              109 // )
+#define T_COMMA           110 // ,
+#define T_SEMICOLON       111 // ;
+#define T_ADD             112 // +
+#define T_SUBSTR          113 // -
+#define T_TIMES           114 // *
+#define T_DIV             115 // /
+#define T_GT              116 // >
+#define T_LT              117 // <
+#define T_GTE             118 // >=
+#define T_LTE             119 // <=
+#define T_EQ              120 // =
+#define T_NEQ             121 // <>
 
 //
 //  OTHER KEYWORDS
