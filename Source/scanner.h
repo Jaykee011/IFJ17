@@ -3,7 +3,7 @@
  *	File			scanner.h
  *	Description		Header file for scanner.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		13:25, 03-10-2017
+ *	Last update		10:00, 06-10-2017
  */
 
 #ifndef SCANNERH
@@ -18,11 +18,14 @@
 #define LEX_GREATER		6
 #define LEX_SMALLER		7
 #define LEX_STRING		8
-#define LEX_EFLOATC		9
-#define LEX_EFLOATF		9
-#define LEX_EFLOAT		10
-#define LEX_FLOATF		11
+#define LEX_STRINGE		9
+#define LEX_EFLOATC		10
+#define LEX_EFLOATF		11
+#define LEX_EFLOAT		12
+#define LEX_FLOATF		13
 
+#include <stdio.h>
+#include <ctype.h>
 #include "define.h"
 /*#include "string.h"*/
 

@@ -3,7 +3,7 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		13:34, 03-10-2017
+ *	Last update		10:08, 06-10-2017
  */
 
 #ifndef SCANNERC
@@ -13,15 +13,33 @@
 #include "scanner.h"
 
 FILE * s_sourceFile;
+int asciiVal = 0;
+int asciiCount = 0;
 
 void setFile(FILE *f){
 	s_sourceFile = f;
 }
 
-int scannerFailed() {
-	fprintf(stderr, "LEX_ERROR");
-	return FAIL;
+/* TODO: Remove after string.c */
+void addCharToString(char *s, char c) {
+	int i;
+	for(i = 0; s[i] != '\n'; i++);
+	s[i] = c;
 }
+
+void strcpy(s, lowerCase) {
+	for(int i = 0; s[i] != '\0' && i < sizeof(lowerCase)-1; i++)
+		lowerCase[i] = s[i];
+	lowerCase[i] = '\0';
+}
+
+void strlwr(char *s) {
+	for(int i = 0; s[i] != '\0'; i++)
+		s[i] = tolower(s[i]);
+}
+
+int isString(char *s1, char *s2) return strcmp(s1, s2);
+/* END */
 
 int getToken(char *s){
 	char c;
@@ -32,7 +50,7 @@ int getToken(char *s){
 
 	do {
 		c = getc(s_sourceFile);
-		if(c == EOF && shunt != LEX_WAITING) return scannerFailed();
+		if(c == EOF && shunt != LEX_WAITING) return LEX_ERROR;
 
 		switch(shunt) {
 			/* Normal reading */
@@ -48,29 +66,29 @@ int getToken(char *s){
 				else if(c == "'") shunt = LEX_COMMENT;
 
 				/* Basic alone symbols */
-				else if(c == '(') return LB;
-				else if(c == ')') return RB;
-				else if(c == ',') return COMMA;
-				else if(c == ';') return SEMICOLON;
+				else if(c == '(') return T_LB;
+				else if(c == ')') return T_RB;
+				else if(c == ',') return T_COMMA;
+				else if(c == ';') return T_SEMICOLON;
 
 				/* Operations */
-				else if(c == '+') return ADD;
-				else if(c == '-') return SUBSTR;
-				else if(c == '*') return TIMES;
-				else if(c == '/') return DIV;
+				else if(c == '+') return T_ADD;
+				else if(c == '-') return T_SUBSTR;
+				else if(c == '*') return T_TIMES;
+				else if(c == '/') return T_DIV;
 
-				else if(c == '=') return EQ;
-				//else if(c == ',') shunt = LEX_COMMA;
-				else if(c == EOF) return C_EOF;
+				else if(c == '=') return T_EQ;
+				else if(c == ',') return T_COMMA;
+				else if(c == EOF) return T_C_EOF;
 
 				/* Otherwise */
 				else {
 					/* Numbers and keywords (save the token) */
 					if(isdigit(c)) shunt = LEX_DIGIT;
 					else if(isalpha(c) || c == '_') shunt = LEX_KEYWORD;
-					else return scannerFailed();
+					else return LEX_ERROR;
 
-					//addCharToString(s, c);
+					addCharToString(s, c);
 				}
 				break;
 
@@ -78,25 +96,64 @@ int getToken(char *s){
 			case LEX_NOT:
 				if(isspace(c)) continue;
 				if(c == '"') shunt = LEX_STRING;
-				else return scannerFailed();
+				else return LEX_ERROR;
 				break;
 
 			/* We have a string! */
 			case LEX_STRING:
+				/* End of string? */
 				if(c == '"') return L_STRING;
-				//addCharToString(s, c);
+
+				/* If escape sequence or add char */
+				if(c == '\\') shunt = LEX_STRINGE;
+				else addCharToString(s, c);
+				break;
+
+			case LEX_STRINGE:
+				if(isdigit(c)) {
+					/* ASCII value of a char */
+					asciiVal = 10*asciiVal + (c-'0');
+					asciiCount++;
+
+					/* We have its value */
+					if(asciiCount == 3) {
+						/* Is valid? */
+						if(asciiVal < 1 || asciiVal > 255) return LEX_ERROR;
+
+						addCharToString(s, asciiVal);
+						asciiCount = 0;
+						asciiVal = 0;
+
+						shunt = LEX_STRING;
+					}
+				}
+				else
+				{
+					/* Looked as an ascii value, but was not */
+					if(asciiVal) return LEX_ERROR;
+
+					shunt = LEX_STRING;
+					/* Checking valid */
+					swicth(c) {
+						case '"': addCharToString(s, '\"'); break;
+						case 'n': addCharToString(s, '\n'); break;
+						case 't': addCharToString(s, '\t'); break;
+						case '\\':addCharToString(s, '\\'); break;
+						default: return LEX_ERROR;
+					}
+				}
 				break;
 
 			/* > or >= */
 			case LEX_GREATER:
-				if(c == '=') return GTE;
-				return GT;
+				if(c == '=') return T_GTE;
+				return T_GT;
 
 			/* < or <= or <> */
 			case LEX_SMALLER:
-				if(c == '=') return LTE;
-				else if(c == '>') return NEQ;
-				return LT;
+				if(c == '=') return T_LTE;
+				else if(c == '>') return T_NEQ;
+				return T_LT;
 
 			/* Comment like 'comm */
 			case LEX_COMMENT:
@@ -112,14 +169,14 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_INT;
 				}
-				//addCharToString(s, c);
+				addCharToString(s, c);
 				break;
 
 			/* Float at least 1 digit */
 			case LEX_FLOATF:
 				if(isdigit(c)) {}
-				else return scannerFailed();
-				//addCharToString(s, c);
+				else return LEX_ERROR;
+				addCharToString(s, c);
 				shunt = LEX_FLOAT;
 				break;
 
@@ -131,26 +188,26 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_FLOAT;
 				}
-				//addCharToString(s, c);
+				addCharToString(s, c);
 				break;
 
 			/* 12e+10 */
 			case LEX_EFLOATC:
 				if(c == '+' || c == '-') {
 					shunt = LEX_EFLOATF;
-					//addCharToString(s, c);
+					addCharToString(s, c);
 				}
 				else if(isdigit(c)) {
 					shunt = LEX_EFLOAT;
-					//addCharToString(s, c);
+					addCharToString(s, c);
 				}
-				else return scannerFailed();
+				else return LEX_ERROR;
 				break;
 
 			/* 12e+1 */
 			case LEX_EFLOAT:
-				if(!sdigit(c)) return scannerFailed();
-				//addCharToString(s, c);
+				if(!sdigit(c)) return LEX_ERROR;
+				addCharToString(s, c);
 				shunt = LEX_EFLOAT;
 				break;
 
@@ -161,7 +218,7 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_FLOAT;
 				}
-				//addCharToString(s, c);
+				addCharToString(s, c);
 				break;
 
 			/* ID or keyword */
@@ -169,8 +226,51 @@ int getToken(char *s){
 				if(isalnum(c) || c == '_') addCharToString(s, c);
 				else {
 					ungetc(c, source);
-					/* TODO: defined characters, valtypes */
-					return ID;
+
+					/* Lower case keyword */
+					char lowerCase[9];
+					strcpy(s, lowerCase);
+					strlwr(lowerCase);
+					/* Valtypes */
+					if(!isString(lowerCase, "integer")) return T_INTEGER;
+					if(!isString(lowerCase, "double"))	return T_DOUBLE;
+					if(!isString(lowerCase, "string"))	return T_STRING;
+
+					/* Other keywords */
+					if(!isString(lowerCase, "as"))		return T_AS;
+					if(!isString(lowerCase, "asc"))		return T_ASC;
+					if(!isString(lowerCase, "declare"))	return T_DECLARE;
+					if(!isString(lowerCase, "dim"))		return T_DIM;
+					if(!isString(lowerCase, "do"))		return T_DO;
+					if(!isString(lowerCase, "else"))	return T_ELSE;
+					if(!isString(lowerCase, "end"))		return T_END;
+					if(!isString(lowerCase, "chr"))		return T_CHR;
+					if(!isString(lowerCase, "function"))return T_FUNCTION;
+					if(!isString(lowerCase, "if"))		return T_IF;
+					if(!isString(lowerCase, "input"))	return T_INPUT;
+					if(!isString(lowerCase, "length"))	return T_LENGTH;
+					if(!isString(lowerCase, "loop"))	return T_LOOP;
+					if(!isString(lowerCase, "print"))	return T_PRINT;
+					if(!isString(lowerCase, "return"))	return T_RETURN;
+					if(!isString(lowerCase, "scope"))	return T_SCOPE;
+					if(!isString(lowerCase, "subStr"))	return T_SUBSTR;
+					if(!isString(lowerCase, "then"))	return T_THEN;
+					if(!isString(lowerCase, "while"))	return T_WHILE;
+					if(!isString(lowerCase, "and"))		return T_AND;
+					if(!isString(lowerCase, "boolean"))	return T_BOOLEAN;
+					if(!isString(lowerCase, "continue"))return T_CONTINUE;
+					if(!isString(lowerCase, "elseif"))	return T_ELSEIF;
+					if(!isString(lowerCase, "exit"))	return T_EXIT;
+					if(!isString(lowerCase, "false"))	return T_FALSE;
+					if(!isString(lowerCase, "for"))		return T_FOR;
+					if(!isString(lowerCase, "next"))	return T_NEXT;
+					if(!isString(lowerCase, "not"))		return T_NOT;
+					if(!isString(lowerCase, "or"))		return T_OR;
+					if(!isString(lowerCase, "shared"))	return T_SHARED;
+					if(!isString(lowerCase, "static"))	return T_STATIC;
+					if(!isString(lowerCase, "true"))	return T_TRUE;
+
+					return T_ID;
 				}
 				break;
 		}
