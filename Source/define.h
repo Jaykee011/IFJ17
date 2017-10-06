@@ -18,72 +18,72 @@
 // 
 //  TOKENS
 //
-#define ID              100 // IDENTIFIER
+#define T_ID            100 // IDENTIFIER
 
 //  LITERALS
-#define L_INT           101
+#define L_INT          	101
 #define L_FLOAT         102
 #define L_STRING        103
 
 //  TYPE KEYWORDS
-#define INTEGER         104
-#define DOUBLE          105
-#define STRING          106
+#define T_INTEGER         104
+#define T_DOUBLE          105
+#define T_STRING          106
 
 //  OPERATORS
-#define LB              108 // (
-#define RB              109 // )
-#define COMMA           110 // ,
-#define SEMICOLON       111 // ;
-#define ADD             112 // +
-#define SUBSTR          113 // -
-#define TIMES           114 // *
-#define DIV             115 // /
-#define GT              116 // >
-#define LT              117 // <
-#define GTE             118 // >=
-#define LTE             119 // <=
-#define EQ              120 // =
-#define NEQ             121 // <>
+#define T_LB              108 // (
+#define T_RB              109 // )
+#define T_COMMA           110 // ,
+#define T_SEMICOLON       111 // ;
+#define T_ADD             112 // +
+#define T_SUBSTR          113 // -
+#define T_TIMES           114 // *
+#define T_DIV             115 // /
+#define T_GT              116 // >
+#define T_LT              117 // <
+#define T_GTE             118 // >=
+#define T_LTE             119 // <=
+#define T_EQ              120 // =
+#define T_NEQ             121 // <>
 
 //
 //  OTHER KEYWORDS
 //
-#define AND             150
-#define AS              151
-#define ASC             152
-#define BOOLEAN         153
-#define CHR             154
-#define CONTINUE        155
-#define DECLARE         156
-#define DIM             157
-#define DO              158
-#define ELSE            159
-#define ELSEIF          160
-#define END             161
-#define EXIT            161
-#define FALSE           162
-#define FOR             163
-#define FUNCTION        164
-#define IF              165
-#define INPUT           166
-#define LENGTH          167
-#define LOOP            168
-#define OR              169
-#define NEXT            170
-#define NOT             171
-#define PRINT           172
-#define RETURN          173
-#define SHARED          174
-#define SCOPE           175
-#define STATIC          176
-#define SUBSTR          177
-#define THEN            178
-#define TRUE            179
-#define WHILE           180
+#define T_AND             150
+#define T_AS              151
+#define T_ASC             152
+#define T_BOOLEAN         153
+#define T_CHR             154
+#define T_CONTINUE        155
+#define T_DECLARE         156
+#define T_DIM             157
+#define T_DO              158
+#define T_ELSE            159
+#define T_ELSEIF          160
+#define T_END             161
+#define T_EXIT            161
+#define T_FALSE           162
+#define T_FOR             163
+#define T_FUNCTION        164
+#define T_IF              165
+#define T_INPUT           166
+#define T_LENGTH          167
+#define T_LOOP            168
+#define T_OR              169
+#define T_NEXT            170
+#define T_NOT             171
+#define T_PRINT           172
+#define T_RETURN          173
+#define T_SHARED          174
+#define T_SCOPE           175
+#define T_STATIC          176
+#define T_SUBSTR          177
+#define T_THEN            178
+#define T_TRUE            179
+#define T_WHILE           180
 
-#define EOL             198 // \n
-#define EOF             199
+#define T_EOL             198 // \n
+#define T_EOF             199
 
 #define FINE            0
 #define FAIL            1
