@@ -19,7 +19,7 @@ int DoubleToStr(char **String, double d){ // double na string
 	return sprintf(*String, "%g", d);
 }
 
-int length(char *s){ // funkce pro vrácení délky řetězce --- TO-DO 
+int length(char *s){ // funkce pro vrácení délky řetězce
 	return strlen(s);
 }
 
