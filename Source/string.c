@@ -4,7 +4,7 @@
 *	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
 */
 
-// #include <string.h> // pro testy knihovna pro praci s retezci
+#include <string.h>
 #include <malloc.h> // knihovna pro praci s dinamycky alokovanou pameti
 #include "string.h" // hlavickovy soubor
 

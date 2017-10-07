@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-// #include <string.h> // pro testy
+#include <string.h>
 #include "ial.h"
 #include "string.h"
 
