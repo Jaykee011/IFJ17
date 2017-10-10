@@ -34,6 +34,7 @@ void stringFree(String *s){ // uvolni pamet
 }
 
 int stringClear(String *s){ // vymaze obsah -> nastavi vychozi hodnoty
+	if(s == NULL) return INTERN_ERR;
 
 	if(s->data != NULL) free(s->data);
 	s->data = malloc(STR_LEN_INC * sizeof(char));
@@ -67,7 +68,7 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-int stringCopyToString(String *s1, String *s2){ // prekopiruje retezec s1 do s2
+/*int stringCopyToString(String *s1, String *s2){ // prekopiruje retezec s1 do s2
 	if (s1 != NULL && s2 != NULL){ // test, zda-li neni na vstupu NULL
 		int tempSize = s1->size; // uchovani velikosti kopirovaneho retezce
 		if (tempSize >= s2->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
@@ -83,15 +84,15 @@ int stringCopyToString(String *s1, String *s2){ // prekopiruje retezec s1 do s2
 		}
 	}
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
-}
+}*/
 
-void makeStringLowerCase(String* s){ // prevede na male znaky
+/*void makeStringLowerCase(String* s){ // prevede na male znaky
 	if(s != NULL){ // test, zda-li neni na vstupu null
 		for(int i = 0; i < stringGetSize(s); i++){ // musime zmenit vsechny znaky
 			(s->data)[i] = tolower((s->data)[i]); // ulozime tentyz znak z vystupu tolower
 		}
 	}
-}
+}*/
 
 void makeCharLowerCase(char* s){ // prevede na male znaky
 	for(int i = 0; s[i] != '\0'; i++){ // musime zmenit vsechny znaky
@@ -99,7 +100,7 @@ void makeCharLowerCase(char* s){ // prevede na male znaky
 	}
 }
 
-int stringCmpString(String *s1, String *s2){ // porovna velikosti dvou retezcu
+/*int stringCmpString(String *s1, String *s2){ // porovna velikosti dvou retezcu
 	if (s1 != NULL && s2 != NULL){ // test, zda-li neni na vstupu NULL
 		if(s1->data == NULL && s2->data == NULL) return FINE;
 		return strcmp(s1->data, s2->data);
@@ -107,9 +108,9 @@ int stringCmpString(String *s1, String *s2){ // porovna velikosti dvou retezcu
 	else if(s1 == NULL && s2 == NULL) return FINE;
 
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
-}
+}*/
 
-int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
+/*int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 		if(s1->data == NULL && !strlen(s2)) return FINE;
 		return strcmp(s1->data, s2);
@@ -117,7 +118,7 @@ int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s ko
 	else if(!strlen(s2)) return FINE;
 
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
-}
+}*/
 
 char *stringGetString(String *s){ // vraci textovou cast retezce
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
