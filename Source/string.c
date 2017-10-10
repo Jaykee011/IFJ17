@@ -57,12 +57,11 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 				return INTERN_ERR;
 			s1->capacity = s1->size + STR_LEN_INC; // zvetsime o 8 bytu
 		}
-		else{ // pokud prostor dostacuje
-			s1->data[s1->size] = c; // vlozime novy znak
-			s1->size = s1->size + 1; // zvetsime velikost o 1 (1 znak)
-			s1->data[s1->size] = '\0'; // a pridame ukoncujici znak
-			return FINE;
-		}
+
+		s1->data[s1->size] = c; // vlozime novy znak
+		s1->size = s1->size + 1; // zvetsime velikost o 1 (1 znak)
+		s1->data[s1->size] = '\0'; // a pridame ukoncujici znak
+		return FINE;
 	}
 																											$(stringAddData INTERN_ERR);
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
