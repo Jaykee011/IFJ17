@@ -31,14 +31,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "define.h"
-/*#include "string.h"*/
+#include "string.h"
+#include "macros.h"
 
 void setFile(FILE *f);
 int scannerFailed();
-/*int getToken(String *s);*/
-int getToken(char *s);
-
-/* TODO: remove */
-void clearString(char *s);
+int getToken(String *s);
 
 #endif

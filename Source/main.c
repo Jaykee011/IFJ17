@@ -1,5 +1,6 @@
 #include "define.h"
 #include "scanner.h"
+#include "string.h"
 
 int main(int argc, char** argv) {
 	if(argc != 2) {
@@ -12,17 +13,18 @@ int main(int argc, char** argv) {
 	FILE *f = fopen(argv[1], "r");
 	setFile(f);
 	
-	char str[100];
-	clearString(str);
+	String *str = NULL;
+	stringInit(&str);
 	int result = 5;
 
 	while(result != T_EOF) {
 
-		clearString(str);
+		stringClear(str);
 		result = getToken(str);
-		printf("%d (%s)\n", result, str);
+		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}
+	stringFree(str);
 	fclose(f);
 
 	return 0;
