@@ -13,3 +13,8 @@ OBJ=main.o scanner.o string.o
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 
+clean:
+	rm IFJ17
+	rm main.o
+	rm scanner.o
+	rm string.o
