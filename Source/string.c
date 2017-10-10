@@ -28,12 +28,8 @@ int stringInit(String** s){ // inicializuje retezec
 
 void stringFree(String *s){ // uvolni pamet
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
-		free(s->data);
-
-		// osetreni pro pripad pokracovani v praci po free
-		s->data = NULL; 
-		s->size = 0;
-		s->capacity = 0;
+		if(s->data != NULL) free(s->data);
+		free(s);
 	}
 }
 
@@ -89,42 +85,37 @@ int stringCopyToString(String *s1, String *s2){ // prekopiruje retezec s1 do s2
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-int makeStringLowerCase(String* s){ // prevede na male znaky
+void makeStringLowerCase(String* s){ // prevede na male znaky
 	if(s != NULL){ // test, zda-li neni na vstupu null
 		for(int i = 0; i < stringGetSize(s); i++){ // musime zmenit vsechny znaky
 			(s->data)[i] = tolower((s->data)[i]); // ulozime tentyz znak z vystupu tolower
 		}
 	}
-	return INTERN_ERR;
+}
+
+void makeCharLowerCase(char* s){ // prevede na male znaky
+	for(int i = 0; s[i] != '\0'; i++){ // musime zmenit vsechny znaky
+		s[i] = tolower(s[i]); // ulozime tentyz znak z vystupu tolower
+	}
 }
 
 int stringCmpString(String *s1, String *s2){ // porovna velikosti dvou retezcu
 	if (s1 != NULL && s2 != NULL){ // test, zda-li neni na vstupu NULL
+		if(s1->data == NULL && s2->data == NULL) return FINE;
 		return strcmp(s1->data, s2->data);
 	}
+	else if(s1 == NULL && s2 == NULL) return FINE;
+
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
-}
-
-int stringCmpChar(String *s1, char *s2) {
-	if(s1 != NULL){ // test, zda-li neni na vstupu null
-		int i;
-		for(i = 0; i < stringGetSize(s1) && s2[i] != '\0'; i++) {
-			if((s1->data)[i] > s2[i]) return (s1->data)[i] - s2[i];
-			else if(s2[i] > (s1->data)[i]) return s2[i] - (s1->data)[i];
-		}
-
-
-		if((s1->data)[i] > s2[i]) return (s1->data)[i] - s2[i];
-		else if(s2[i] > (s1->data)[i]) return s2[i] - (s1->data)[i];
-		return FINE;
-	}
-	return INTERN_ERR;
 }
 
 int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
+		if(s1->data == NULL && !strlen(s2)) return FINE;
 		return strcmp(s1->data, s2);
 	}
+	else if(!strlen(s2)) return FINE;
+
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
