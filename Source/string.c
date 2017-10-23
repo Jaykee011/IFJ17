@@ -5,9 +5,7 @@
 */
 
 // #include <string.h> // pro testy knihovna pro praci s retezci
-#include <malloc.h> // knihovna pro praci s dinamycky alokovanou pameti
 #include "string.h" // hlavickovy soubor
-
 #include "define.h" // define pro testování ERR
 
 #define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet

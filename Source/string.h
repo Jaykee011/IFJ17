@@ -7,6 +7,8 @@
 #ifndef STRINGH 	// obaleni pro vicenasobny preklad
 #define STRINGH 	// definujeme hlavickovy soubor pro praci s nekonecnym stringem
 
+#include "includes.h"
+
 typedef struct {
 	char* data;		// retezec znaku  
 	int size;		// velikost retezce

@@ -28,8 +28,7 @@
 #define LEX_BLOCK		16
 #define LEX_BLOCKE		17
 
-#include <stdio.h>
-#include <ctype.h>
+#include "includes.h"
 #include "define.h"
 /*#include "string.h"*/
 

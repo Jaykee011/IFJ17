@@ -9,7 +9,6 @@
 #ifndef SCANNERC
 #define SCANNERC
 
-#include "tester.h"
 #include "scanner.h"
 
 FILE * s_sourceFile;
