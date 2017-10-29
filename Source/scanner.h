@@ -28,6 +28,10 @@
 #define LEX_BLOCK		16
 #define LEX_BLOCKE		17
 
+#include "includes.h"
+#include "define.h"
+/*#include "string.h"*/
+
 void setFile(FILE *f);
 int scannerFailed();
 /*int getToken(String *s);*/
