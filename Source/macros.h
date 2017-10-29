@@ -3,7 +3,7 @@
  *	File			macros.h
  *	Description		Help for debugging, etc.
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		23:45, 09-10-2017
+ *	Last update		03:37, 10-10-2017
  */
 
 #ifndef MACROS

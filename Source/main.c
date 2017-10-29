@@ -1,29 +1,35 @@
 #include "includes.h"
 
 int main(int argc, char** argv) {
-	if(argc != 2) {
-		printf("./IFJ17 input.file\n");
+	if(argc != 3) {
+		printf("./IFJ17 input output\n");
 		return 1;
 	}
 
-	printf("Reading from file: %s\n\n", argv[1]);
+	printf("Input file: %s\nOuput file: %s\n", argv[1], argv[2]);
 
-	FILE *f = fopen(argv[1], "r");
-	setFile(f);
+	if(openInput(argv[1]) || openOutput(argv[2])) {
+		error(1);
+	}
 	
-	char str[100];
-	clearString(str);
-	int result = getToken(str);
+	String *str = NULL;
+	stringInit(&str);
+	int result = 5;
 
 	while(result != T_EOF) {
-		printf("%d\n", result);
 
-		clearString(str);
+		stringClear(str);
 		result = getToken(str);
+		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}
-	printf("%d\n", result);
-	fclose(f);
 
-	return 0;
+	instruction("DEFVAR GF@TEST");
+	instruction("MOVE GF@TEST int@42");
+	instruction("WRITE string@Hodnota\\032promenne\\032test");
+	instruction("WRITE GF@TEST");
+	instruction("WRITE string@\\012");
+
+	error(FINE);
+	return FINE;
 }

@@ -13,15 +13,22 @@ typedef struct {
 	int capacity;	// velikost alokovane casti (pouzita pamet)
 } String;
 
-int stringInit(String* s);
+typedef struct stringPointer {
+	String *p;					// Pointer to string
+	struct stringPointer *next;	// Pointer to next string
+} SPointer;
+
+int stringInit(String** s);
 void stringFree(String *s);
-void stringClear(String *s);
+int stringClear(String *s);
 int stringAddData(String *s1, char c);
-int stringCopyToString(String *s1, String *s2);
-int stringCmpString(String *s1, String *s2);
-int stringCmpConstString(String *s1, char *s2);
+void makeCharLowerCase(char* s);
 char *stringGetString(String *s);
 int stringGetSize(String *s);
 void stringToChar(char **c, String *s);
+
+int sClearAdd(String *s);	// Add new pointer to a string
+void sClearRem(String *s);	// Removes a pointer
+void sClear();				// Free all memory
 
 #endif // #ifndef STRINGH
