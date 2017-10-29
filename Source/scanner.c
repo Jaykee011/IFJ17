@@ -3,7 +3,7 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		11:45, 06-10-2017
+ *	Last update		03:37, 10-10-2017
  */
 
 #ifndef SCANNERC
@@ -15,56 +15,20 @@ FILE * s_sourceFile;
 int asciiVal = 0;
 int asciiCount = 0;
 
-void setFile(FILE *f){
+void setFile(FILE *f) {
 	s_sourceFile = f;
 }
 
-/* TODO: Remove after string.c */
-void addCharToString(char *s, char c) {
-	int i;
-	for(i = 0; s[i] != '\0'; i++);
-	s[i] = c;
-	s[i+1] = '\0';
-}
-
-void clearString(char *s) {
-	for(int i = 0; s[i] != '\0'; i++) s[i] = '\0';
-}
-
-void strcpyTemp(char *s, char *lowerCase) {
-	int i;
-	for(i = 0; s[i] != '\0' && i < sizeof(lowerCase)-1; i++)
-		lowerCase[i] = s[i];
-	lowerCase[i] = '\0';
-}
-
-void strlwr(char *s) {
-	for(int i = 0; s[i] != '\0'; i++)
-		s[i] = tolower(s[i]);
-}
-
-int isString(char *s1, char *s2) {
-	int i;
-	for(i = 0; s1[i] != '\0' && s2[i] != '\0'; i++) {
-		if(s1[i] > s2[i]) return s1[i] - s2[i];
-		else if(s2[i] > s1[i]) return s2[i] - s1[i];
-	}
-
-
-	if(s1[i] > s2[i]) return s1[i] - s2[i];
-	else if(s2[i] > s1[i]) return s2[i] - s1[i];
-	return 0;
-}
-/* END */
-
-int getToken(char *s){
+int getToken(String *s){
+																											$(function getToken);
 	char c;
 	int shunt = LEX_WAITING;
-	clearString(s);
-
+	stringClear(s);
 	do {
 		c = getc(s_sourceFile);
-		if(c == EOF && shunt != LEX_WAITING) return LEX_ERR;
+																											$(new Char:);
+																											$$("%c\n", c);
+		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
 
 		switch(shunt) {
 			/* Normal reading */
@@ -102,7 +66,7 @@ int getToken(char *s){
 					else if(isalpha(c) || c == '_') shunt = LEX_KEYWORD;
 					else return LEX_ERR;
 
-					addCharToString(s, c);
+					stringAddData(s, c);
 				}
 				break;
 
@@ -137,7 +101,7 @@ int getToken(char *s){
 
 				/* If escape sequence or add char */
 				if(c == '\\') shunt = LEX_STRINGE;
-				else addCharToString(s, c);
+				else stringAddData(s, c);
 				break;
 
 			case LEX_STRINGE:
@@ -151,7 +115,7 @@ int getToken(char *s){
 						/* Is valid? */
 						if(asciiVal < 1 || asciiVal > 255) return LEX_ERR;
 
-						addCharToString(s, asciiVal);
+						stringAddData(s, asciiVal);
 						asciiCount = 0;
 						asciiVal = 0;
 
@@ -166,10 +130,10 @@ int getToken(char *s){
 					shunt = LEX_STRING;
 					/* Checking valid */
 					switch(c) {
-						case '"': addCharToString(s, '\"'); break;
-						case 'n': addCharToString(s, '\n'); break;
-						case 't': addCharToString(s, '\t'); break;
-						case '\\':addCharToString(s, '\\'); break;
+						case '"': stringAddData(s, '\"'); break;
+						case 'n': stringAddData(s, '\n'); break;
+						case 't': stringAddData(s, '\t'); break;
+						case '\\':stringAddData(s, '\\'); break;
 						default: return LEX_ERR;
 					}
 				}
@@ -200,14 +164,14 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_INT;
 				}
-				addCharToString(s, c);
+				stringAddData(s, c);
 				break;
 
 			/* Float at least 1 digit */
 			case LEX_FLOATF:
 				if(isdigit(c)) {}
 				else return LEX_ERR;
-				addCharToString(s, c);
+				stringAddData(s, c);
 				shunt = LEX_FLOAT;
 				break;
 
@@ -219,18 +183,18 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_FLOAT;
 				}
-				addCharToString(s, c);
+				stringAddData(s, c);
 				break;
 
 			/* 12e+10 */
 			case LEX_EFLOATC:
 				if(c == '+' || c == '-') {
 					shunt = LEX_EFLOATF;
-					addCharToString(s, c);
+					stringAddData(s, c);
 				}
 				else if(isdigit(c)) {
 					shunt = LEX_EFLOAT;
-					addCharToString(s, c);
+					stringAddData(s, c);
 				}
 				else return LEX_ERR;
 				break;
@@ -238,7 +202,7 @@ int getToken(char *s){
 			/* 12e+1 */
 			case LEX_EFLOATF:
 				if(!isdigit(c)) return LEX_ERR;
-				addCharToString(s, c);
+				stringAddData(s, c);
 				shunt = LEX_EFLOAT;
 				break;
 
@@ -249,63 +213,67 @@ int getToken(char *s){
 					ungetc(c, s_sourceFile);
 					return L_FLOAT;
 				}
-				addCharToString(s, c);
+				stringAddData(s, c);
 				break;
 
 			/* ID or keyword */
 			case LEX_KEYWORD:
-				if(isalnum(c) || c == '_') addCharToString(s, c);
+
+				if(isalnum(c) || c == '_') stringAddData(s, c);
 				else {
 					ungetc(c, s_sourceFile);
 
 					/* Lower case keyword */
-					char lowerCase[9];
-					strcpyTemp(s, lowerCase);
-					strlwr(lowerCase);
+					char *lowerCase = NULL;
+					stringToChar(&lowerCase, s);
+					makeCharLowerCase(lowerCase);
+
 					/* Valtypes */
-					if(!isString(lowerCase, "integer")) return T_INTEGER;
-					if(!isString(lowerCase, "double"))	return T_DOUBLE;
-					if(!isString(lowerCase, "string"))	return T_STRING;
+					if(!strcmp(lowerCase, "integer"))	{free(lowerCase); return T_INTEGER;}
+					if(!strcmp(lowerCase, "double"))	{free(lowerCase); return T_DOUBLE;}
+					if(!strcmp(lowerCase, "string"))	{free(lowerCase); return T_STRING;}
 
 					/* Other keywords */
-					if(!isString(lowerCase, "as"))		return T_AS;
-					if(!isString(lowerCase, "asc"))		return T_ASC;
-					if(!isString(lowerCase, "declare"))	return T_DECLARE;
-					if(!isString(lowerCase, "dim"))		return T_DIM;
-					if(!isString(lowerCase, "do"))		return T_DO;
-					if(!isString(lowerCase, "else"))	return T_ELSE;
-					if(!isString(lowerCase, "end"))		return T_END;
-					if(!isString(lowerCase, "chr"))		return T_CHR;
-					if(!isString(lowerCase, "function"))return T_FUNCTION;
-					if(!isString(lowerCase, "if"))		return T_IF;
-					if(!isString(lowerCase, "input"))	return T_INPUT;
-					if(!isString(lowerCase, "length"))	return T_LENGTH;
-					if(!isString(lowerCase, "loop"))	return T_LOOP;
-					if(!isString(lowerCase, "print"))	return T_PRINT;
-					if(!isString(lowerCase, "return"))	return T_RETURN;
-					if(!isString(lowerCase, "scope"))	return T_SCOPE;
-					if(!isString(lowerCase, "subStr"))	return T_SUBSTR;
-					if(!isString(lowerCase, "then"))	return T_THEN;
-					if(!isString(lowerCase, "while"))	return T_WHILE;
-					if(!isString(lowerCase, "and"))		return T_AND;
-					if(!isString(lowerCase, "boolean"))	return T_BOOLEAN;
-					if(!isString(lowerCase, "continue"))return T_CONTINUE;
-					if(!isString(lowerCase, "elseif"))	return T_ELSEIF;
-					if(!isString(lowerCase, "exit"))	return T_EXIT;
-					if(!isString(lowerCase, "false"))	return T_FALSE;
-					if(!isString(lowerCase, "for"))		return T_FOR;
-					if(!isString(lowerCase, "next"))	return T_NEXT;
-					if(!isString(lowerCase, "not"))		return T_NOT;
-					if(!isString(lowerCase, "or"))		return T_OR;
-					if(!isString(lowerCase, "shared"))	return T_SHARED;
-					if(!isString(lowerCase, "static"))	return T_STATIC;
-					if(!isString(lowerCase, "true"))	return T_TRUE;
+					if(!strcmp(lowerCase, "as"))		{free(lowerCase); return T_AS;}
+					if(!strcmp(lowerCase, "asc"))		{free(lowerCase); return T_ASC;}
+					if(!strcmp(lowerCase, "declare"))	{free(lowerCase); return T_DECLARE;}
+					if(!strcmp(lowerCase, "dim"))		{free(lowerCase); return T_DIM;}
+					if(!strcmp(lowerCase, "do"))		{free(lowerCase); return T_DO;}
+					if(!strcmp(lowerCase, "else"))		{free(lowerCase); return T_ELSE;}
+					if(!strcmp(lowerCase, "end"))		{free(lowerCase); return T_END;}
+					if(!strcmp(lowerCase, "chr"))		{free(lowerCase); return T_CHR;}
+					if(!strcmp(lowerCase, "function"))	{free(lowerCase); return T_FUNCTION;}
+					if(!strcmp(lowerCase, "if"))		{free(lowerCase); return T_IF;}
+					if(!strcmp(lowerCase, "input"))		{free(lowerCase); return T_INPUT;}
+					if(!strcmp(lowerCase, "length"))	{free(lowerCase); return T_LENGTH;}
+					if(!strcmp(lowerCase, "loop"))		{free(lowerCase); return T_LOOP;}
+					if(!strcmp(lowerCase, "print"))		{free(lowerCase); return T_PRINT;}
+					if(!strcmp(lowerCase, "return"))	{free(lowerCase); return T_RETURN;}
+					if(!strcmp(lowerCase, "scope"))		{free(lowerCase); return T_SCOPE;}
+					if(!strcmp(lowerCase, "subStr"))	{free(lowerCase); return T_SUBSTR;}
+					if(!strcmp(lowerCase, "then"))		{free(lowerCase); return T_THEN;}
+					if(!strcmp(lowerCase, "while"))		{free(lowerCase); return T_WHILE;}
+					if(!strcmp(lowerCase, "and"))		{free(lowerCase); return T_AND;}
+					if(!strcmp(lowerCase, "boolean"))	{free(lowerCase); return T_BOOLEAN;}
+					if(!strcmp(lowerCase, "continue"))	{free(lowerCase); return T_CONTINUE;}
+					if(!strcmp(lowerCase, "elseif"))	{free(lowerCase); return T_ELSEIF;}
+					if(!strcmp(lowerCase, "exit"))		{free(lowerCase); return T_EXIT;}
+					if(!strcmp(lowerCase, "false"))		{free(lowerCase); return T_FALSE;}
+					if(!strcmp(lowerCase, "for"))		{free(lowerCase); return T_FOR;}
+					if(!strcmp(lowerCase, "next"))		{free(lowerCase); return T_NEXT;}
+					if(!strcmp(lowerCase, "not"))		{free(lowerCase); return T_NOT;}
+					if(!strcmp(lowerCase, "or"))		{free(lowerCase); return T_OR;}
+					if(!strcmp(lowerCase, "shared"))	{free(lowerCase); return T_SHARED;}
+					if(!strcmp(lowerCase, "static"))	{free(lowerCase); return T_STATIC;}
+					if(!strcmp(lowerCase, "true"))		{free(lowerCase); return T_TRUE;}
+
+					free(lowerCase);
 
 					return T_ID;
 				}
 				break;
 		}
-	} while (true);
+	} while ((2+2*2+2*2) == (3*3+3/3));
 }
 
 #endif

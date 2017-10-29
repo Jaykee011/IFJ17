@@ -11,18 +11,18 @@ int main(int argc, char** argv) {
 	FILE *f = fopen(argv[1], "r");
 	setFile(f);
 	
-	char str[100];
-	clearString(str);
-	int result = getToken(str);
+	String *str = NULL;
+	stringInit(&str);
+	int result = 5;
 
 	while(result != T_EOF) {
-		printf("%d\n", result);
 
-		clearString(str);
+		stringClear(str);
 		result = getToken(str);
+		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}
-	printf("%d\n", result);
+	stringFree(str);
 	fclose(f);
 
 	return 0;

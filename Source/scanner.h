@@ -3,7 +3,7 @@
  *	File			scanner.h
  *	Description		Header file for scanner.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		11:45, 06-10-2017
+ *	Last update		03:37, 10-10-2017
  */
 
 #ifndef SCANNERH
@@ -28,16 +28,16 @@
 #define LEX_BLOCK		16
 #define LEX_BLOCKE		17
 
-#include "includes.h"
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <malloc.h>
 #include "define.h"
-/*#include "string.h"*/
+#include "string.h"
+#include "macros.h"
 
 void setFile(FILE *f);
 int scannerFailed();
-/*int getToken(String *s);*/
-int getToken(char *s);
-
-/* TODO: remove */
-void clearString(char *s);
+int getToken(String *s);
 
 #endif
