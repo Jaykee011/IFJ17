@@ -8,13 +8,16 @@
 
 #define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
 
+SPointer *sClearList = NULL;
+
 int stringInit(String** s){ // inicializuje retezec
 	if (*s == NULL){ // test, zda-li neni na vstupu NULL
-																											$(stringInit initialization);
+
 		*s = malloc(sizeof(String)); // Alokujeme dostatek pameti
 		if(*s == NULL) return INTERN_ERR; // chyba v alokaci
-																											$(stringInit structure allocated);
+
 		(*s)->data = NULL;
+		sClearAdd(*s);
 		return stringClear(*s);
 	}
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
@@ -37,14 +40,13 @@ int stringClear(String *s){ // vymaze obsah -> nastavi vychozi hodnoty
 	s->data[0] = '\0'; // pro pripad vypisu prazdneho retezce
 	s->size = 0;
 	s->capacity = STR_LEN_INC;
-																											$(stringClear done);
+
 	return FINE;
 }
 
 int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 
-																											$$("stringAddData: +%c | %s\n", c, s1->data);
 		if (s1->size + 1 >= s1->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
 			s1->data = realloc(s1->data, (s1->size + STR_LEN_INC) * sizeof(char));
 			if (s1->data == NULL) // test, zda-li alokace probehla v poradku
@@ -57,7 +59,6 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 		s1->data[s1->size] = '\0'; // a pridame ukoncujici znak
 		return FINE;
 	}
-																											$(stringAddData INTERN_ERR);
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
@@ -93,4 +94,61 @@ void stringToChar(char **c, String *s){ // prekopirovani "naseho" stringu do c c
 			(*c)[s->size] = '\0'; // vlozime ukoncovaci znak na konec
 		}
 	}
+}
+
+int sClearAdd(String *s) { // Add new pointer to a string
+	if(sClearList == NULL) {
+		sClearList = malloc(sizeof(SPointer));
+		sClearList->p = NULL;
+		sClearList->next = NULL;
+	}
+	if(sClearList == NULL) return INTERN_ERR;
+
+	SPointer *p;
+	for(p = sClearList; p->next != NULL; p = p->next) {
+		if(p->p == s) return FINE;
+	}
+
+	p->p = s;
+	p->next = malloc(sizeof(SPointer));
+	if(p->next == NULL) return INTERN_ERR;
+	p->next->p = NULL;
+	p->next->next = NULL;
+
+	return FINE;
+}
+
+void sClearRem(String *s) { // Removes a pointer
+	if(sClearList == NULL) return; // No allocated
+
+	SPointer *p = sClearList;
+	if(p->p == s) { // First in list
+		sClearList = p->next;
+		stringFree(p->p);
+		free(p);
+	} else {
+
+		for(; p->next != NULL; p = p->next) {
+			if(p->next->p == s) {
+				SPointer *tmp = p->next;
+				p->next = tmp->next;
+				stringFree(tmp->p);
+				free(tmp);
+				break;
+			}
+		}
+	}
+}
+
+void sClear() { // Free all memory
+	if(sClearList == NULL) return;
+
+	SPointer *tmp;
+	for(SPointer *p = sClearList; p != NULL; p = tmp) {
+		tmp = p->next;
+		stringFree(p->p);
+		free(p);
+	}
+
+	sClearList = NULL;
 }

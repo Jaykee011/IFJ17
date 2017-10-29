@@ -11,23 +11,28 @@
 
 #include "includes.h"
 
-FILE * s_sourceFile;
+FILE *s_inputFile;
 int asciiVal = 0;
 int asciiCount = 0;
 
-void setFile(FILE *f) {
-	s_sourceFile = f;
+int openInput(char *s) {
+	s_inputFile = fopen(s, "r");
+	if(!s_inputFile) return FAIL;
+
+	return FINE;
+}
+
+void closeInput() {
+	fclose(s_inputFile);
 }
 
 int getToken(String *s){
-																											$(function getToken);
 	char c;
 	int shunt = LEX_WAITING;
 	stringClear(s);
 	do {
-		c = getc(s_sourceFile);
-																											$(new Char:);
-																											$$("%c\n", c);
+		c = getc(s_inputFile);
+
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
 
 		switch(shunt) {
@@ -53,6 +58,7 @@ int getToken(String *s){
 				else if(c == '+') return T_ADD;
 				else if(c == '-') return T_SUB;
 				else if(c == '*') return T_TIMES;
+				else if(c == '\\') return T_IDIV;
 				else if(c == '/') shunt = LEX_BLOCKDIV;
 
 				else if(c == '=') return T_EQ;
@@ -72,13 +78,13 @@ int getToken(String *s){
 
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
-				if(c == '/') shunt = LEX_BLOCK;
-				else ungetc(c, s_sourceFile);
+				if(c == '\'') shunt = LEX_BLOCK;
+				else ungetc(c, s_inputFile);
 				break;
 
 			/* We are in a comment */
 			case LEX_BLOCK:
-				if(c == '/') shunt = LEX_BLOCKE;
+				if(c == '\'') shunt = LEX_BLOCKE;
 				break;
 
 			/* End of block comment */
@@ -161,7 +167,7 @@ int getToken(String *s){
 				else if(c == '.') shunt = LEX_FLOATF;
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_INT;
 				}
 				stringAddData(s, c);
@@ -180,7 +186,7 @@ int getToken(String *s){
 				if(isdigit(c)) {}
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -210,7 +216,7 @@ int getToken(String *s){
 			case LEX_EFLOAT:
 				if(isdigit(c)) {}
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -221,7 +227,7 @@ int getToken(String *s){
 
 				if(isalnum(c) || c == '_') stringAddData(s, c);
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 
 					/* Lower case keyword */
 					char *lowerCase = NULL;
@@ -266,7 +272,7 @@ int getToken(String *s){
 					if(!strcmp(lowerCase, "shared"))	{free(lowerCase); return T_SHARED;}
 					if(!strcmp(lowerCase, "static"))	{free(lowerCase); return T_STATIC;}
 					if(!strcmp(lowerCase, "true"))		{free(lowerCase); return T_TRUE;}
-
+																											$$("DEBUG: identifier %s\n", stringGetString(s));
 					free(lowerCase);
 
 					return T_ID;
@@ -274,6 +280,11 @@ int getToken(String *s){
 				break;
 		}
 	} while ((2+2*2+2*2) == (3*3+3/3));
+}
+
+void pushbackAttr(int l) {
+	fseek(s_inputFile, -l, SEEK_CUR);
+																											$$("DEBUG: pushbackAttr(%d);\n", l);
 }
 
 #endif

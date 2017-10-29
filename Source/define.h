@@ -45,6 +45,7 @@
 #define T_LTE             119 // <=
 #define T_EQ              120 // =
 #define T_NEQ             121 // <>
+#define T_IDIV			  122 /* \ */
 
 //
 //  OTHER KEYWORDS
