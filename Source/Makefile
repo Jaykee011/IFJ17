@@ -8,8 +8,13 @@
 CFLAGS=-std=c99 -Wall -pedantic -g
 NAME=IFJ17
 CC=gcc
-OBJ=main.o scanner.o
+OBJ=main.o scanner.o string.o
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 
+clean:
+	rm IFJ17
+	rm main.o
+	rm scanner.o
+	rm string.o
