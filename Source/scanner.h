@@ -36,7 +36,8 @@
 #include "string.h"
 #include "macros.h"
 
-void setFile(FILE *f);		// Set file to read
+int openInput(char *s);		// Set file to read
+void closeInput();			// Close input file
 int getToken(String *s);	// Returns error/token type and saves the value
 void pushbackAttr(int l);	// We need to push back
 

@@ -11,12 +11,19 @@
 
 #include "includes.h"
 
-FILE * s_sourceFile;
+FILE *s_inputFile;
 int asciiVal = 0;
 int asciiCount = 0;
 
-void setFile(FILE *f) {
-	s_sourceFile = f;
+int openInput(char *s) {
+	s_inputFile = fopen(s, "r");
+	if(!s_inputFile) return FAIL;
+
+	return FINE;
+}
+
+void closeInput() {
+	fclose(s_inputFile);
 }
 
 int getToken(String *s){
@@ -24,7 +31,7 @@ int getToken(String *s){
 	int shunt = LEX_WAITING;
 	stringClear(s);
 	do {
-		c = getc(s_sourceFile);
+		c = getc(s_inputFile);
 
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
 
@@ -72,7 +79,7 @@ int getToken(String *s){
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
-				else ungetc(c, s_sourceFile);
+				else ungetc(c, s_inputFile);
 				break;
 
 			/* We are in a comment */
@@ -160,7 +167,7 @@ int getToken(String *s){
 				else if(c == '.') shunt = LEX_FLOATF;
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_INT;
 				}
 				stringAddData(s, c);
@@ -179,7 +186,7 @@ int getToken(String *s){
 				if(isdigit(c)) {}
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -209,7 +216,7 @@ int getToken(String *s){
 			case LEX_EFLOAT:
 				if(isdigit(c)) {}
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -220,7 +227,7 @@ int getToken(String *s){
 
 				if(isalnum(c) || c == '_') stringAddData(s, c);
 				else {
-					ungetc(c, s_sourceFile);
+					ungetc(c, s_inputFile);
 
 					/* Lower case keyword */
 					char *lowerCase = NULL;
@@ -276,7 +283,7 @@ int getToken(String *s){
 }
 
 void pushbackAttr(int l) {
-	fseek(s_sourceFile, -l, SEEK_CUR);
+	fseek(s_inputFile, -l, SEEK_CUR);
 																											$$("DEBUG: pushbackAttr(%d);\n", l);
 }
 

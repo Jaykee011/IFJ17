@@ -44,6 +44,7 @@ String String
  * type = int, float, string[, bool]
  * label = navesti
  */
+
 sprintf(s, "MOVE %s %s", var, var);
 sprintf(s, "MOVE %s %d", var, symb);
 sprintf(s, "MOVE %s %g", var, symb);

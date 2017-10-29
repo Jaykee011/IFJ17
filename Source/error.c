@@ -12,7 +12,9 @@
 #include "includes.h"
 
 void error(int e) {
-	sClear();
+	sClear();		// Clear all dynamic strings
+	closeOutput();	// Close output file
+	closeInput();	// Close input file
 	//clearTrees
 	exit(e);
 }
