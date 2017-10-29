@@ -72,13 +72,13 @@ int getToken(String *s){
 
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
-				if(c == '/') shunt = LEX_BLOCK;
+				if(c == '\'') shunt = LEX_BLOCK;
 				else ungetc(c, s_sourceFile);
 				break;
 
 			/* We are in a comment */
 			case LEX_BLOCK:
-				if(c == '/') shunt = LEX_BLOCKE;
+				if(c == '\'') shunt = LEX_BLOCKE;
 				break;
 
 			/* End of block comment */

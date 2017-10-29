@@ -12,7 +12,7 @@
 #include "includes.h"
 
 void error(int e) {
-	//clearAllStrings
+	sClear();
 	//clearTrees
 	exit(e);
 }

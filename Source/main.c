@@ -22,8 +22,8 @@ int main(int argc, char** argv) {
 		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}
-	stringFree(str);
 	fclose(f);
 
-	return 0;
+	error(FINE);
+	return FINE;
 }
