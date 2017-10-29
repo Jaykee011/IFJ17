@@ -15,7 +15,7 @@
 /* Definice */
 #ifdef DEBUG_ON
 #define $(...); puts("DEBUG: " #__VA_ARGS__);
-#define $$(...); printf(__VA_ARGS__);
+#define $$(...); printf("DEBUG: " __VA_ARGS__);
 #else
 #define $(...);
 #define $$(...);
