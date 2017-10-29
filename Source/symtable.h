@@ -8,16 +8,15 @@
 #define SYMTABLEH 
 
 #include "includes.h"
-#include "string.h"
 
 typedef struct {
     int i;
     double d;
-    String s;
+    char *s;
 } val;
 
 typedef struct parameters{
-    String name;
+    char *name;
     int type; // see description in struct load
     param next;
 } *param;
@@ -47,5 +46,6 @@ nodePtr nodeInsert(nodePtr*, loadPtr, char*);
 void nodeDelete(nodePtr*, char*);
 void treeDispose (nodePtr*);
 nodePtr nodeSearch(nodePtr, char*);
+char *generateKey(char *symbolName, int metaType);
 
 #endif

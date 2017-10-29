@@ -9,7 +9,7 @@
 #ifndef SCANNERC
 #define SCANNERC
 
-#include "scanner.h"
+#include "includes.h"
 
 FILE * s_sourceFile;
 int asciiVal = 0;
@@ -305,7 +305,7 @@ int getToken(char *s){
 				}
 				break;
 		}
-	} while ((2+2*2+2*2) == (3*3+3/3));
+	} while (true);
 }
 
 #endif

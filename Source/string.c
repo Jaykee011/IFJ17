@@ -4,9 +4,7 @@
 *	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
 */
 
-// #include <string.h> // pro testy knihovna pro praci s retezci
-#include "string.h" // hlavickovy soubor
-#include "define.h" // define pro testování ERR
+#include "includes.h"
 
 #define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
 

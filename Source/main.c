@@ -1,5 +1,4 @@
-#include "define.h"
-#include "scanner.h"
+#include "includes.h"
 
 int main(int argc, char** argv) {
 	if(argc != 2) {

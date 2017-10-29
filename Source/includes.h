@@ -6,6 +6,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <ctype.h>
-#include <malloc.h> 
+#include <malloc.h>
+#include <string.h>
+#include "define.h"
+#include "symtable.h"
+#include "string.h"
+#include "scanner.h"
+// #include "parser.h"
+// #include "compiler.h"
 
 #endif
