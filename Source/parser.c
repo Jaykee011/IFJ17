@@ -23,7 +23,6 @@ int precTable[15][15] = {
 	/*  $ */{ L,	L,	E,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	E }
 };
 
-
 int stackInit(tStack *stack) { // stack inicialization
 
 	if (!stack)
@@ -103,6 +102,17 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case T_ID:
 		converted->token = PRID;
 		return FINE;
+	
+	/*case '1':
+		converted->token = PRID;
+		return FINE;
+	case '2':
+		converted->token = PRID;
+		return FINE;
+	case '3':
+		converted->token = PRID;
+		return FINE;*/
+	
 	case LB:
 		converted->token = PRLB;
 		return FINE;
@@ -112,15 +122,30 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case T_ADD:
 		converted->token = PRPLUS;
 		return FINE;
+
+	/*case '+':
+		converted->token = PRPLUS;
+		return FINE;*/
+
 	case T_SUB:
 		converted->token = PRMINUS;
 		return FINE;
 	case T_TIMES:
 		converted->token = PRTIMES;
 		return FINE;
+
+	/*case '*':
+		converted->token = PRTIMES;
+		return FINE;*/
+
 	case T_DIV:
 		converted->token = PRDIV;
 		return FINE;
+
+	/*case '/':
+		converted->token = PRDIV;
+		return FINE;*/
+
 	case T_IDIV:
 		converted->token = PRIDIV;
 		return FINE;
@@ -149,15 +174,16 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 }
 
 int precedence_analysis(){
-	
+	// char str[14] = "1+1*2/3"; @Tests
 	tStack stack;	
 	stackInit(&stack);
-	tokenparam firstToken;
+	tokenparam firstToken, b;
 	firstToken.token = PREND;
 	push(&stack, firstToken);
 	char a = PREND;
 	do {
-		tokenparam b = precedenceTokenConversion(getToken(), &b);
+		// for(int i=0;i<=14;i++){ @Tests
+		precedenceTokenConversion(getToken(), &b);
 		switch (precTable[a][b.token]){
 			case PREQUAL:
 				push(&stack, b);
@@ -170,7 +196,11 @@ int precedence_analysis(){
 				replaceY(&stack, a);
 			case E:
 				return INTERN_ERR;
+		// }
 		}
-	} while (((b.token) != PREND) || (a = topTerm(&stack) != PREND))
-	printf("úspěch syntaktické analýzy");
+	} while (((b.token) != PREND) || (a = topTerm(&stack) != PREND));
+}
+int main(){
+	precedence_analysis();
+	printf("úspěch syntaktické analýzy\n");
 }
