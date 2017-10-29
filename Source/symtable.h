@@ -26,7 +26,7 @@ struct parameters{
 typedef struct {
     param parameters; // linear list of function parametes
     //nodePtr functTable;  // function local symbol table
-    bool hasReturn;
+    bool hasReturn = false;
     bool declared;
 } functInfo;
 
