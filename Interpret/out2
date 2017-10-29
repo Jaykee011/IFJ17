@@ -1,0 +1,6 @@
+.IFJcode17
+DEFVAR GF@TEST
+MOVE GF@TEST int@42
+WRITE string@Hodnota\032promenne\032test
+WRITE GF@TEST
+WRITE string@\012

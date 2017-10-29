@@ -272,7 +272,7 @@ int getToken(String *s){
 					if(!strcmp(lowerCase, "shared"))	{free(lowerCase); return T_SHARED;}
 					if(!strcmp(lowerCase, "static"))	{free(lowerCase); return T_STATIC;}
 					if(!strcmp(lowerCase, "true"))		{free(lowerCase); return T_TRUE;}
-																											$$("DEBUG: identifier %s\n", stringGetString(s));
+																											$$("identifier %s\n", stringGetString(s));
 					free(lowerCase);
 
 					return T_ID;
@@ -284,7 +284,7 @@ int getToken(String *s){
 
 void pushbackAttr(int l) {
 	fseek(s_inputFile, -l, SEEK_CUR);
-																											$$("DEBUG: pushbackAttr(%d);\n", l);
+																											$$("pushbackAttr(%d);\n", l);
 }
 
 #endif
