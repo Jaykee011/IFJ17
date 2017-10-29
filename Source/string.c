@@ -12,10 +12,10 @@ SPointer *sClearList = NULL;
 
 int stringInit(String** s){ // inicializuje retezec
 	if (*s == NULL){ // test, zda-li neni na vstupu NULL
-																											$(stringInit initialization);
+
 		*s = malloc(sizeof(String)); // Alokujeme dostatek pameti
 		if(*s == NULL) return INTERN_ERR; // chyba v alokaci
-																											$(stringInit structure allocated);
+
 		(*s)->data = NULL;
 		sClearAdd(*s);
 		return stringClear(*s);
@@ -40,14 +40,13 @@ int stringClear(String *s){ // vymaze obsah -> nastavi vychozi hodnoty
 	s->data[0] = '\0'; // pro pripad vypisu prazdneho retezce
 	s->size = 0;
 	s->capacity = STR_LEN_INC;
-																											$(stringClear done);
+
 	return FINE;
 }
 
 int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 
-																											$$("stringAddData: +%c | %s\n", c, s1->data);
 		if (s1->size + 1 >= s1->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
 			s1->data = realloc(s1->data, (s1->size + STR_LEN_INC) * sizeof(char));
 			if (s1->data == NULL) // test, zda-li alokace probehla v poradku
@@ -60,7 +59,6 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 		s1->data[s1->size] = '\0'; // a pridame ukoncujici znak
 		return FINE;
 	}
-																											$(stringAddData INTERN_ERR);
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 

@@ -20,14 +20,12 @@ void setFile(FILE *f) {
 }
 
 int getToken(String *s){
-																											$(function getToken);
 	char c;
 	int shunt = LEX_WAITING;
 	stringClear(s);
 	do {
 		c = getc(s_sourceFile);
-																											$(new Char:);
-																											$$("%c\n", c);
+
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
 
 		switch(shunt) {
@@ -53,6 +51,7 @@ int getToken(String *s){
 				else if(c == '+') return T_ADD;
 				else if(c == '-') return T_SUB;
 				else if(c == '*') return T_TIMES;
+				else if(c == '\\') return T_IDIV;
 				else if(c == '/') shunt = LEX_BLOCKDIV;
 
 				else if(c == '=') return T_EQ;
@@ -266,7 +265,7 @@ int getToken(String *s){
 					if(!strcmp(lowerCase, "shared"))	{free(lowerCase); return T_SHARED;}
 					if(!strcmp(lowerCase, "static"))	{free(lowerCase); return T_STATIC;}
 					if(!strcmp(lowerCase, "true"))		{free(lowerCase); return T_TRUE;}
-
+																											$$("DEBUG: identifier %s\n", stringGetString(s));
 					free(lowerCase);
 
 					return T_ID;
@@ -274,6 +273,11 @@ int getToken(String *s){
 				break;
 		}
 	} while ((2+2*2+2*2) == (3*3+3/3));
+}
+
+void pushbackAttr(int l) {
+	fseek(s_sourceFile, -l, SEEK_CUR);
+																											$$("DEBUG: pushbackAttr(%d);\n", l);
 }
 
 #endif

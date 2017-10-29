@@ -36,8 +36,8 @@
 #include "string.h"
 #include "macros.h"
 
-void setFile(FILE *f);
-int scannerFailed();
-int getToken(String *s);
+void setFile(FILE *f);		// Set file to read
+int getToken(String *s);	// Returns error/token type and saves the value
+void pushbackAttr(int l);	// We need to push back
 
 #endif
