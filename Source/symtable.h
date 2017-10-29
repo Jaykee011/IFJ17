@@ -7,8 +7,6 @@
 #ifndef SYMTABLEH 	// obaleni pro vicenasobny preklad
 #define SYMTABLEH 
 
-#include "includes.h"
-
 typedef struct {
     int i;
     double d;

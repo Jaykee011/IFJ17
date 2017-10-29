@@ -9,7 +9,9 @@
 #include <malloc.h>
 #include <string.h>
 #include "define.h"
-#include "symtable.h"
+#include "macros.h"
+#include "error.h"
+//#include "symtable.h"
 #include "string.h"
 #include "scanner.h"
 // #include "parser.h"
