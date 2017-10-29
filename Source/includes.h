@@ -13,7 +13,7 @@
 //#include "symtable.h"
 #include "string.h"
 #include "scanner.h"
-// #include "parser.h"
+#include "parser.h"
 // #include "compiler.h"
 
 #endif
