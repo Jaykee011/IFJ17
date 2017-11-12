@@ -1,4 +1,9 @@
-//Authors: xzaple36 (Jakub Zapletal), xzilva02 (Michal Zilvar)
+/*
+ * IFJ 2017 project
+ *	File			parser.c
+ *	Description		Source file for syntax analysis
+ *	Author			Radek Wildmann (xwildm00), Jakub Zapletal (xzaple36)
+ */
 #include "includes.h"
 
 //precedence table
@@ -266,3 +271,8 @@ int precedence_analysis(){
 	precedence_analysis();
 	printf("úspěch syntaktické analýzy\n");
 }*/
+
+
+void parse(){
+
+}

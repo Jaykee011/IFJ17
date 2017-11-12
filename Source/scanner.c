@@ -283,8 +283,7 @@ int getToken(String *s){
 }
 
 void pushbackAttr(int l) {
-	fseek(s_inputFile, -l, SEEK_CUR);
-																											$$("pushbackAttr(%d);\n", l);
+	fseek(s_inputFile, -l, SEEK_CUR);																								$$("pushbackAttr(%d);\n", l);
 }
 
 #endif

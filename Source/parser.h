@@ -1,4 +1,9 @@
-//Authors xzaple36 (Jakub Zapletal), xzilva02 (Michal Zilvar)
+/*
+ * IFJ 2017 project
+ *	File			parser.h
+ *	Description		Source file for syntax analysis
+ *	Author			Radek Wildmann (xwildm00), Jakub Zapletal (xzaple36)
+ */
 #ifndef PRECEDENCEH 	// obaleni pro vicenasobny preklad
 #define PRECEDENCEH
 
