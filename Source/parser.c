@@ -53,11 +53,12 @@ void replaceY(tStack *stack, char a){ // <y za A
 	int i;
 	tokenparam NONTtoken;
 	NONTtoken.token = NONT;
-	for (i = 0; buffer[i].token != LB; i++){
+	for (i = 0; top(stack) != LB; i++){
 		pop(stack, &buffer[i]);
 	}
+	pop(stack, &buffer[i]);
 	push(stack, NONTtoken);
-	i = i - 1; // dekrementation after for cycle
+	// i = i - 1; // dekrementation after for cycle
 }
 
 void changeA(tStack *stack, char a){ // a za a<
@@ -86,7 +87,7 @@ char topTerm(tStack *stack) { // returns terminal closes to the top of the stack
 	if (stack->top == -1)
 		return INTERN_ERR;
 	for (int i = stack->top; i >= 0; i--)
-		if (stack->arr[i].token != 15 || stack->arr[i].token != 16 || stack->arr[i].token != 17)
+		if (stack->arr[i].token != 15 && stack->arr[i].token != 16 && stack->arr[i].token != 17)
 		{
 			return stack->arr[i].token;
 		}
@@ -113,12 +114,22 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 		converted->token = PRID;
 		return FINE;*/
 	
-	case LB:
+	case T_LB:
 		converted->token = PRLB;
 		return FINE;
-	case RB:
+
+	/*case '(':
+		converted->token = PRLB;
+		return FINE;*/
+
+	case T_RB:
 		converted->token = PRRB;
 		return FINE;
+
+	/*case ')':
+		converted->token = PRRB;
+		return FINE;*/
+
 	case T_ADD:
 		converted->token = PRPLUS;
 		return FINE;
@@ -130,6 +141,11 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case T_SUB:
 		converted->token = PRMINUS;
 		return FINE;
+
+	/*case '-':
+		converted->token = PRMINUS;
+		return FINE;*/
+
 	case T_TIMES:
 		converted->token = PRTIMES;
 		return FINE;
@@ -149,58 +165,104 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case T_IDIV:
 		converted->token = PRIDIV;
 		return FINE;
+
+	/*case '\\':
+		converted->token = PRDIV;
+		return FINE;*/
+
 	case T_LT:
 		converted->token = PRLT;
 		return FINE;
+
+	/*case '<':
+		converted->token = PRLT;
+		return FINE;*/
+
 	case T_GT:
 		converted->token = PRGT;
 		return FINE;
+
+	/*case '>':
+		converted->token = PRGT;
+		return FINE;*/
+
 	case T_GTE:
 		converted->token = PREGT;
 		return FINE;
+
+	/*case '´':
+		converted->token = PREGT;
+		return FINE;*/
+
 	case T_LTE:
 		converted->token = PRELT;
 		return FINE;
+
+	/*case '¨':
+		converted->token = PRELT;
+		return FINE;*/
+
 	case T_EQ:
 		converted->token = PREQUAL;
 		return FINE;
+
+	/*case '=':
+		converted->token = PREQUAL;
+		return FINE;*/
+
 	case T_NEQ:
 		converted->token = PRNEQ;
 		return FINE;
+
+	/*case '.':
+		converted->token = PRNEQ;
+		return FINE;*/
+
 	default:
 		converted->token = PREND;
 		return FINE;
 	}
 }
 
+//char str[50] = "(1+1)*2/3\\3-8=2.2¨7´8";
+
+/*int myGetToken(int i){
+	int a = str[i];
+	return a;
+}*/
+
 int precedence_analysis(){
-	// char str[14] = "1+1*2/3"; @Tests
 	tStack stack;	
 	stackInit(&stack);
 	tokenparam firstToken, b;
 	firstToken.token = PREND;
 	push(&stack, firstToken);
 	char a = PREND;
-	do {
-		// for(int i=0;i<=14;i++){ @Tests
+	//int i = 0;
+	do { 
 		precedenceTokenConversion(getToken(), &b);
 		switch (precTable[a][b.token]){
-			case PREQUAL:
+			case EQ:
 				push(&stack, b);
 				break;
-			case LB:
+			case L:
 				changeA(&stack, a);
 				push(&stack, b);
 				break;
-			case RB:
+			case R:
 				replaceY(&stack, a);
+				//i--;
+				break;
 			case E:
+			default:
 				return INTERN_ERR;
-		// }
-		}
-	} while (((b.token) != PREND) || (a = topTerm(&stack) != PREND));
+			}
+	//i++;
+	a = topTerm(&stack);
+} while (((b.token) != PREND) || (a != PREND));
+	//printf("boobs\n");
 }
-int main(){
+/*int main(){
 	precedence_analysis();
 	printf("úspěch syntaktické analýzy\n");
-}
+}*/
