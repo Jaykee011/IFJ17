@@ -6,6 +6,12 @@
  */
 #include "includes.h"
 
+int token = 0;
+String attribute;
+char id[64] = "";
+char functId[64] = "";
+int type = 0; // 1 => int; 2 => double; 3 => string; 
+
 //precedence table
 //COL	- INPUT CHAR
 //ROW	- TOP TERMINAL ON STACK
@@ -245,7 +251,7 @@ int precedence_analysis(){
 	char a = PREND;
 	//int i = 0;
 	do { 
-		precedenceTokenConversion(getToken(), &b);
+		precedenceTokenConversion(/*TODO: getToken(), FIXME:*/1, &b);
 		switch (precTable[a][b.token]){
 			case EQ:
 				push(&stack, b);
@@ -273,6 +279,430 @@ int precedence_analysis(){
 }*/
 
 
-void parse(){
+void getNCheckToken(String *s, int t){
+	// TODO: getToken(s);
+	if (token != t){
+		// TODO: handleError;
+	}
+}
 
+bool parse(){
+	//TODO: getToken(*attribute);
+	switch(token){
+		case T_DECLARE:
+		case T_FUNCTION:
+			functionsState();
+			getNCheckToken(&attribute, T_SCOPE);
+		case T_SCOPE:
+			scopeState();
+			break;
+		//TODO: default:
+			//TODO:  errorHandle
+		}
+	//TODO: getToken(*attribute);
+	
+	return (token == T_EOF);
+}
+
+void functionsState(){
+	bool loop = true;
+	while(loop){
+		switch(token){
+			case T_DECLARE:
+			case T_FUNCTION:
+				functionState();
+				break;
+			default:
+				//FIXME: 
+				loop = false;
+				break;
+		}
+	}
+}
+
+void functionState(){
+	switch(token){
+		case T_DECLARE:
+			getNCheckToken(&attribute, T_FUNCTION);
+			getNCheckToken(&attribute, T_ID);
+			//TODO: declareFunction without params;
+			getNCheckToken(&attribute, T_LB);
+			paramsState();
+			getNCheckToken(&attribute, T_AS);
+			//TODO: getToken(&attribute);
+			typeState();
+			getNCheckToken(&attribute, T_EOL);
+			break;
+		case T_FUNCTION:
+			getNCheckToken(&attribute, T_ID);
+			//TODO: defineFunction without params;
+			getNCheckToken(&attribute, T_LB);
+			paramsState();
+			getNCheckToken(&attribute, T_AS);
+			//TODO: getToken(&attribute);
+			typeState();
+			fcommandsState();
+			getNCheckToken(&attribute, T_FUNCTION);
+			getNCheckToken(&attribute, T_EOL);
+			//FIXME: 	
+			break;
+		default:
+			//FIXME:
+			break;
+	}
+}
+
+void scopeState(){
+	getNCheckToken(&attribute, T_EOL);
+	scommandsState();
+	getNCheckToken(&attribute, T_SCOPE);
+}
+
+void paramsState(){
+	//TODO: getToken(&attribute);
+	switch(token){
+		case T_ID:
+			paramState();
+			//TODO: add param
+			nparamState();
+			break;
+		case T_RB:
+			break;
+		default:
+			//TODO: errorHandle
+			break;
+	}
+}
+
+void paramState(){
+	strcpy(id,attribute.data);
+	getNCheckToken(&attribute, T_AS);
+	//TODO: getToken(&attribute);
+	typeState();
+}
+
+void nparamState(){
+	bool loop = true;
+	while (loop){
+		//TODO: getToken(&attribute);
+		switch(token){
+			case T_COMMA:
+				getNCheckToken(&attribute, T_ID);
+				paramState();
+				//TODO: add param
+				break;
+			case T_RB:
+				loop = false;
+				break;
+			//TODO: default:
+				//TODO: errorhandle
+		}
+	}
+}
+
+void fcommandsState(){
+	bool loop = true;
+	while(loop){
+		//TODO: getToken(&attribute);
+		switch (token){
+			case T_RETURN:
+				fcommandState();
+				break;
+			case T_DIM:
+				scommandState();
+				break;
+			case T_ID:
+			case T_INPUT:
+			case T_PRINT:
+			case T_IF:
+			case T_DO:
+				commandState();
+				break;
+			case T_END:
+				loop = false;
+				break;
+			//TODO: default:
+				//TODO: errorHandle
+		}
+	}
+}
+
+void fcommandState(){
+	//TODO: getToken(&attribute);
+	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		//TODO: errorHandle
+	}
+	//FIXME: 
+	pushbackAttr(attribute.size);
+	//TODO: precedenceAnalysis
+	getNCheckToken(&attribute, T_EOL);
+}
+
+void scommandsState(){
+	bool loop = true;
+	while(loop){
+		//TODO: getToken(&attribute);
+		switch (token){
+			case T_DIM:
+				scommandState();
+				break;
+			case T_ID:
+			case T_INPUT:
+			case T_PRINT:
+			case T_IF:
+			case T_DO:
+				commandState();
+				break;
+			case T_END:
+				loop = false;
+				break;
+			//TODO: default:
+				//TODO: errorHandle
+		}
+	}
+}
+
+void scommandState(){
+	vardefState();
+}
+
+void vardefState(){
+	//TODO: storeVariable
+	getNCheckToken(&attribute, T_ID);
+	getNCheckToken(&attribute, T_AS);
+	//TODO: getToken(&attribute);
+	typeState();
+	definitState();
+}
+
+void definitState(){
+	//TODO: getToken(&attribute);
+	switch(token){
+		case T_EQ:
+			initState();
+			break;
+		case T_EOL:
+			break;
+		//TODO: default:
+			//TODO: errorhandle
+	}
+}
+
+void initState(){
+	String storedAttr;
+	//TODO: getToken(&storeAttr);
+	switch(token){
+		case T_ID:
+			//TODO: getToken(&attribute);
+			if (token == T_LB){
+				fcallState();
+				break;
+			}
+			else{
+				//FIXME: 
+				pushbackAttr(attribute.size);
+			}
+		case L_INT:
+		case L_FLOAT:
+		case L_STRING:
+			//FIXME: 
+			pushbackAttr(storedAttr.size);
+			//TODO: precedenceAnalysis
+			//TODO: initialize variable
+			break;
+		//TODO: default:
+			//TODO: errorHandle
+	}
+}
+
+void fcallState(){
+	cparamsState();
+}
+
+void cparamsState(){
+	//TODO: param control
+	//TODO: getToken(&attribute);
+	switch(token){
+		case T_RB:
+			break;
+		default:
+			cparamState();
+			ncparamState();
+			break;
+	}
+}
+
+void cparamState(){
+	termState();
+}
+
+void ncparamState(){
+	bool loop = true;
+	while(loop){
+		//TODO: getToken(&attribute);
+		switch(token){
+			case T_COMMA:
+				cparamState();
+				ncparamState();
+				break;
+			case T_RB:
+				loop = false;
+				break;
+			//TODO: default:
+				//TODO: errorhandle
+		}
+	}
+}
+
+void commandsState(int finalizingToken){
+	bool loop = true;
+	while(loop){
+		//TODO: getToken(&attribute);
+		switch(token){
+			case T_ID:
+			case T_INPUT:
+			case T_PRINT:
+			case T_IF:
+			case T_DO:
+				commandState();
+				break;
+			default:
+				if (token == finalizingToken){
+					loop = false;
+					break;
+				}
+				else{
+					//TODO: errorhandle 
+				}
+		}
+	}
+}
+
+void commandState(){
+	switch(token){
+		case T_ID:
+			getNCheckToken(&attribute, T_EQ);
+			initState();
+			break;
+		case T_INPUT:
+			inputState();
+			break;
+		case T_PRINT:
+			printState();
+			break;
+		case T_IF:
+			branchState();
+			break;
+		case T_DO:
+			loopState();
+			break;
+		//TODO: default:
+			//TODO: errorHandle
+	}
+	getNCheckToken(&attribute, T_EOL);
+}
+
+void inputState(){
+	getNCheckToken(&attribute, T_ID);
+	//TODO: input gen
+}
+
+void printState(){
+	//TODO: print gen
+	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		//TODO: errorHandle
+	}
+	//FIXME: 
+	pushbackAttr(attribute.size);
+	//TODO: precedenceAnalysis
+	getNCheckToken(&attribute, T_SEMICOLON);
+	nexprState();
+}
+
+void nexprState(){
+	bool loop = true;
+	while(loop){
+		//TODO: getToken(&attribute);
+		switch(token){
+			case T_ID:
+			case L_INT:
+			case L_FLOAT:
+			case L_STRING:
+				//FIXME: 
+				pushbackAttr(attribute.size);
+				//TODO: precedenceAnalysis
+				getNCheckToken(&attribute, T_SEMICOLON);	
+				break;			
+			case T_EOL:
+				pushbackAttr(attribute.size);
+				loop = false;
+				break;
+			//TODO: default:
+				//TODO: errorHandle
+		}
+	}
+}
+
+void branchState(){
+	//TODO: if gen
+	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		//TODO: errorHandle
+	}
+	//FIXME: 
+	pushbackAttr(attribute.size);
+	//TODO: precedenceAnalysis
+	getNCheckToken(&attribute, T_THEN);
+	getNCheckToken(&attribute, T_EOL);
+	commandsState(T_ELSE);
+	getNCheckToken(&attribute, T_EOL);
+	commandsState(T_END);
+	getNCheckToken(&attribute, T_IF);
+}
+
+void loopState(){
+	//TODO: while gen
+	getNCheckToken(&attribute, T_WHILE);
+	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		//TODO: errorHandle
+	}
+	//FIXME: 
+	pushbackAttr(attribute.size);
+	//TODO: precedenceAnalysis
+	getNCheckToken(&attribute, T_EOL);
+	commandsState(T_LOOP);
+}
+
+void typeState(){
+	switch(token){
+		case T_INTEGER:
+			type = 1;
+			break;
+		case T_DOUBLE:
+			type = 2;
+			break;
+		case T_STRING:
+			type = 3;
+			break;
+		//TODO: default:
+			//TODO: errorHandle
+	}
+}
+
+void termState(){
+	switch(token){
+		case L_INT:
+			//TODO: 
+			break;
+		case L_FLOAT:
+			//TODO: 
+			break;
+		case L_STRING:
+			//TODO: 
+			break;
+		case T_ID:
+			//TODO: 
+			break;
+		//TODO: default:
+			//TODO: errorHandle
+	}
 }

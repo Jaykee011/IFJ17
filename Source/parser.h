@@ -71,4 +71,32 @@ char topTerm(tStack *stack); // returns terminal closes to the top of the stack
 int precedence_analysis(); //precedence analysis of expression
 int precedenceTokenConversion(char token, tokenparam *converted); //converts token code to code which can be used as an index in precedence table
 
+bool parse();
+void functionsState();      
+void functionState();
+void scopeState();
+void paramsState();
+void paramState();
+void nparamState();
+void fcommandsState();
+void fcommandState();
+void scommandState();
+void scommandsState();
+void commandsState(int);
+void commandState();
+void vardefState();
+void definitState();
+void initState();
+void fcallState();
+void cparamsState();
+void ncparamState();
+void cparamState();
+void inputState();
+void printState();
+void nexprState();
+void branchState();
+void loopState();
+void typeState();
+void termState();
+
 #endif
