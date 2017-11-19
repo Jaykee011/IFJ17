@@ -66,4 +66,64 @@ void closeOutput() {
 	fclose(s_outputFile);
 }
 
+/* TODO: */
+void preparedInstructions() {
+instruction("CREATEFRAME", NULL, NULL, NULL);
+instruction("PUSHFRAME", NULL, NULL, NULL);
+instruction("POPFRAME", NULL, NULL, NULL);
+instruction("RETURN", NULL, NULL, NULL);
+instruction("CLEARS", NULL, NULL, NULL);
+instruction("ADDS", NULL, NULL, NULL);
+instruction("SUBS", NULL, NULL, NULL);
+instruction("MULS", NULL, NULL, NULL);
+instruction("DIVS", NULL, NULL, NULL);
+instruction("LTS", NULL, NULL, NULL);
+instruction("GTS", NULL, NULL, NULL);
+instruction("EQS", NULL, NULL, NULL);
+instruction("BREAK", NULL, NULL, NULL);
+
+instruction("DEFVAR", var, NULL, NULL);
+instruction("CALL", label, NULL, NULL);
+instruction("PUSHS", symbol, NULL, NULL);
+instruction("POPS", var, NULL, NULL);
+
+instruction("LABEL", label, NULL, NULL);
+instruction("JUMP", label, NULL, NULL);
+
+instruction("JUMPIFEQS", label, NULL, NULL);
+instruction("JUMPIFNEQS", label, NULL, NULL);
+
+instruction("DPRINT", symb, NULL, NULL);
+instruction("WRITE", symb, NULL, NULL); // GF@%s
+
+instruction("STRLEN", var, symb, NULL);
+
+instruction("INT2FLOAT", var, symb, NULL);
+instruction("FLOAT2INT", var, symb, NULL);
+instruction("FLOAT2R2EINT", var, symb, NULL);
+instruction("FLOAT2R2OINT", var, symb, NULL);
+instruction("INT2CHAR", var, symb, NULL);
+
+instruction("READ", var, type, NULL);
+instruction("TYPE", var, symb, NULL);
+instruction("MOVE", var, symb, NULL);
+
+instruction("ADD", var, symb, symb);
+instruction("SUB", var, symb, symb);
+instruction("DIV", var, symb, symb);
+
+instruction("LT", var, symb, symb);
+instruction("GT", var, symb, symb);
+instruction("EQ", var, symb, symb);
+
+instruction("CONCAT", var, symb, symb);
+instruction("GETCHAR", var, symb, symb);
+instruction("SETCHAR", var, symb, symb);
+
+instruction("JUMPIFEQ", label, symb, symb);
+instruction("JUMPIFNEQ", label, symb, symb);
+
+instruction("STRI2INT", var, symb, symb);
+}
+
 #endif
