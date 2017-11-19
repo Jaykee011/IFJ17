@@ -1,16 +1,18 @@
-/* 	autor: Radek Wildmann
-*	login: xwildm00
-* 	
-*	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
-*/
+/*
+ * IFJ 2017 project
+ *	File			string.h
+ *	Description		Header file for strings
+ *	Author			Michal Zilvar (xzilva02)
+ *	Last update		17:08, 19-11-2017
+ */
 
-#ifndef STRINGH 	// obaleni pro vicenasobny preklad
-#define STRINGH 	// definujeme hlavickovy soubor pro praci s nekonecnym stringem
+#ifndef STRINGH 
+#define STRINGH
 
 typedef struct {
-	char* data;		// retezec znaku  
-	int size;		// velikost retezce
-	int capacity;	// velikost alokovane casti (pouzita pamet)
+	char* data;
+	int size;
+	int capacity;
 } String;
 
 int stringInit(String** s);

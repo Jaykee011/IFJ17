@@ -1,8 +1,10 @@
-/* 	autor: Radek Wildmann
-*	login: xwildm00
-* 	
-*	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
-*/
+/*
+ * IFJ 2017 project
+ *	File			string.c
+ *	Description		Operations with unlimited long strings
+ *	Author			Michal Zilvar (xzilva02)
+ *	Last update		17:08, 19-11-2017
+ */
 
 #include "includes.h"
 
@@ -45,10 +47,12 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
 
 		if (s1->size + 1 >= s1->capacity){ // pokud nam nestaci prostor, musime provest realokaci pameti
+
 			s1->data = saveRealloc(s1->data, (s1->size + STR_LEN_INC) * sizeof(char));
 			if (s1->data == NULL) // test, zda-li alokace probehla v poradku
 				return INTERN_ERR;
 			s1->capacity = s1->size + STR_LEN_INC; // zvetsime o 8 bytu
+			return 1;
 		}
 
 		s1->data[s1->size] = c; // vlozime novy znak
