@@ -31,4 +31,19 @@ void closeOutput() {
 	fclose(s_outputFile);
 }
 
+/*void instructionTest(int num, ...)
+{
+	va_list arguments;
+	char instructionList[124];
+	for(int i = 0; i < 124; i++) instructionList[i] = '\0';
+
+	va_start ( arguments, num );
+	for (int i = 0; i < num; i++) {
+		strcat(instructionList, va_arg(arguments, const char *));
+	}
+	va_end(arguments);
+
+	printf("instructionTest: %s\n", instructionList);
+}*/
+
 #endif

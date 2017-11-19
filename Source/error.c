@@ -17,7 +17,6 @@ void error(int e) {
 	pointerClear();		// Free all memory
 	closeOutput();	// Close output file
 	closeInput();	// Close input file
-	//clearTrees
 	exit(e);
 }
 
@@ -68,6 +67,14 @@ void saveFree(void *s) { // Removes a pointer
 		free(p->p);
 		free(p);
 	} else {
+		if(p->next == NULL) {
+			if(p->p == s) {
+				free(p->p);
+				free(p);
+				pClearList = NULL;
+			}
+			return;
+		}
 
 		for(; p->next != NULL; p = p->next) {
 			if(p->next->p == s) {

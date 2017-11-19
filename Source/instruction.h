@@ -12,5 +12,6 @@
 int openOutput(char *s);	// Set file to output
 void instruction(char *s);	// Add instruction
 void closeOutput();			// Close output file
+//void instructionTest(int num, ...);
 
 #endif

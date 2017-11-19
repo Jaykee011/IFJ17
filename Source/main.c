@@ -35,6 +35,12 @@ int main(int argc, char** argv) {
 	instruction("WRITE GF@TEST2");
 	instruction("WRITE string@\\012");
 
+	instructionTest(5, "Ahoj", " ", "koťe", " :D\n", "ASFU\n");
+
+	/*char *var = "allahu";
+	char *symb = "akbar";
+	instructionTest(3, "INT2FLOAT", var, symb);*/
+
 	error(FINE);
 	return FINE;
 }
