@@ -26,12 +26,14 @@ void closeInput() {
 	fclose(s_inputFile);
 }
 
-int getToken(String *s){
+int getToken(String *s, int *cursor){
 	char c;
 	int shunt = LEX_WAITING;
 	stringClear(s);
+	(*cursor) = 0;
 	do {
 		c = getc(s_inputFile);
+		(*cursor)++;
 
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
 
@@ -79,7 +81,10 @@ int getToken(String *s){
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
-				else ungetc(c, s_inputFile);
+				else {
+					ungetc(c, s_inputFile);
+					(*cursor)--;
+				}
 				break;
 
 			/* We are in a comment */
@@ -168,6 +173,7 @@ int getToken(String *s){
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
 					ungetc(c, s_inputFile);
+					(*cursor)--;
 					return L_INT;
 				}
 				stringAddData(s, c);
@@ -187,6 +193,7 @@ int getToken(String *s){
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
 					ungetc(c, s_inputFile);
+					(*cursor)--;
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -217,6 +224,7 @@ int getToken(String *s){
 				if(isdigit(c)) {}
 				else {
 					ungetc(c, s_inputFile);
+					(*cursor)--;
 					return L_FLOAT;
 				}
 				stringAddData(s, c);
@@ -228,6 +236,7 @@ int getToken(String *s){
 				if(isalnum(c) || c == '_') stringAddData(s, c);
 				else {
 					ungetc(c, s_inputFile);
+					(*cursor)--;
 
 					/* Lower case keyword */
 					char *lowerCase = NULL;
@@ -283,7 +292,7 @@ int getToken(String *s){
 }
 
 void pushbackAttr(int l) {
-	fseek(s_inputFile, -l, SEEK_CUR);																								$$("pushbackAttr(%d);\n", l);
+	fseek(s_inputFile, -l, SEEK_CUR);																		$$("pushbackAttr(%d);\n", l);
 }
 
 #endif
