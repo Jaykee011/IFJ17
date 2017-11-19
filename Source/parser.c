@@ -119,120 +119,58 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case L_STRING:
 		converted->token = PRID;
 		return FINE;
-	/*
-	case '1':
-		converted->token = PRID;
-		return FINE;
-	case '2':
-		converted->token = PRID;
-		return FINE;
-	case '3':
-		converted->token = PRID;
-		return FINE;*/
 	
 	case T_LB:
 		converted->token = PRLB;
 		return FINE;
 
-	/*case '(':
-		converted->token = PRLB;
-		return FINE;*/
-
 	case T_RB:
 		converted->token = PRRB;
 		return FINE;
-
-	/*case ')':
-		converted->token = PRRB;
-		return FINE;*/
 
 	case T_ADD:
 		converted->token = PRPLUS;
 		return FINE;
 
-	/*case '+':
-		converted->token = PRPLUS;
-		return FINE;*/
-
 	case T_SUB:
 		converted->token = PRMINUS;
 		return FINE;
-
-	/*case '-':
-		converted->token = PRMINUS;
-		return FINE;*/
 
 	case T_TIMES:
 		converted->token = PRTIMES;
 		return FINE;
 
-	/*case '*':
-		converted->token = PRTIMES;
-		return FINE;*/
-
 	case T_DIV:
 		converted->token = PRDIV;
 		return FINE;
-
-	/*case '/':
-		converted->token = PRDIV;
-		return FINE;*/
 
 	case T_IDIV:
 		converted->token = PRIDIV;
 		return FINE;
 
-	/*case '\\':
-		converted->token = PRDIV;
-		return FINE;*/
-
 	case T_LT:
 		converted->token = PRLT;
 		return FINE;
-
-	/*case '<':
-		converted->token = PRLT;
-		return FINE;*/
 
 	case T_GT:
 		converted->token = PRGT;
 		return FINE;
 
-	/*case '>':
-		converted->token = PRGT;
-		return FINE;*/
-
 	case T_GTE:
 		converted->token = PREGT;
 		return FINE;
-
-	/*case '´':
-		converted->token = PREGT;
-		return FINE;*/
 
 	case T_LTE:
 		converted->token = PRELT;
 		return FINE;
 
-	/*case '¨':
-		converted->token = PRELT;
-		return FINE;*/
-
 	case T_EQ:
 		converted->token = PREQUAL;
 		return FINE;
 
-	/*case '=':
-		converted->token = PREQUAL;
-		return FINE;*/
-
 	case T_NEQ:
 		converted->token = PRNEQ;
 		return FINE;
-
-	/*case '.':
-		converted->token = PRNEQ;
-		return FINE;*/
 
 	default:
 		converted->token = PREND;
@@ -240,9 +178,7 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	}
 }
 
-//char str[50] = "(1+1)*2/3\\3";
-
-void testTokens(){
+void testTokens(){ // imput token string control
 	bool temp = 0; // compare token exists
 	bool temp1 = 0; // previous non-ID
 	int temp3 = 0; // left brackt counter
@@ -270,7 +206,7 @@ void testTokens(){
 					temp1 = 1;
 				}
 				else if (temp1 == 1){
-					printf("Dvě non-ID za sebou\n");
+					//printf("Dvě non-ID za sebou\n");
 					exit(SYN_ERR); 
 				}
 				break;
@@ -285,7 +221,7 @@ void testTokens(){
 					temp1 = 0;
 				}
 				else{
-					printf("Více porovnání, než může být\n");
+					//printf("Více porovnání, než může být\n");
 					exit(SYN_ERR); 
 				}
 				break;
@@ -326,7 +262,7 @@ void precedence_analysis(){
 		i++;
 		a = topTerm(&stack);
 	} while (((b.token) != PREND) || (a != PREND));
-	printf("boobs\n");
+	//printf("boobs\n");
 }
 
 void getNCheckToken(String *s, int t){
@@ -780,10 +716,10 @@ void termState(){
 			printf("ERR\n"); exit(-1);
 	}
 }
-int main() {
+/*int main() {
 	openInput("../Tests/linput1");
 	//printf("weadcsad\n");
 	//parse();
 	precedence_analysis();
 	printf("úspěch syntaktické analýzy\n");
-}
+}*/
