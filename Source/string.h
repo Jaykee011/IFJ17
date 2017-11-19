@@ -9,6 +9,8 @@
 #ifndef STRINGH 
 #define STRINGH
 
+#define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
+
 typedef struct {
 	char* data;
 	int size;

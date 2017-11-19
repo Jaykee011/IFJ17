@@ -8,8 +8,6 @@
 
 #include "includes.h"
 
-#define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
-
 int stringInit(String** s){ // inicializuje retezec
 	if (*s == NULL){ // test, zda-li neni na vstupu NULL
 
