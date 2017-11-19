@@ -147,3 +147,50 @@ void concatToString(String *s, char *c) {
 	for(int i = 0; c[i] != '\0'; i++)
 		stringAddData(s, c[i]);
 }
+
+/* Transform integer to String */
+String *intToString(int n) {
+
+	// 10 chars for 32 bit, enough k
+	char temp[sizeof(int)*4];
+	sprintf(temp, "%d", n);
+
+	// Create String and save the int
+	String *s;
+	if(stringInit(&s)) return NULL;
+
+	concatToString(s, temp);
+	return s;
+}
+
+/* Transform double to String */
+String *doubleToString(double n) {
+
+	// 10 chars for 32 bit, enough k
+	char temp[sizeof(double)*4];
+	sprintf(temp, "%g", n);
+
+	// Create String and save the int
+	String *s = NULL;
+
+	if(stringInit(&s)) return NULL;
+
+	concatToString(s, temp);
+	return s;
+}
+
+/* Transform String to int */
+int stringToInt(String *s) {
+
+	int n;
+	sscanf(stringGetString(s), "%d", &n);
+	return n;
+}
+
+/* Transform String to double */
+double stringToDouble(String *s) {
+
+	double n;
+	sscanf(stringGetString(s), "%lf", &n);
+	return n;
+}

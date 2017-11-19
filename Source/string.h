@@ -3,7 +3,7 @@
  *	File			string.h
  *	Description		Header file for strings
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		17:08, 19-11-2017
+ *	Last update		18:58, 19-11-2017
  */
 
 #ifndef STRINGH 
@@ -28,5 +28,10 @@ char *stringGetString(String *s);
 int stringGetSize(String *s);
 void stringToChar(char **c, String *s);
 void concatToString(String *s, char *c);
+
+String *intToString(int n);
+String *doubleToString(double n);
+int stringToInt(String *s);
+double stringToDouble(String *s);
 
 #endif

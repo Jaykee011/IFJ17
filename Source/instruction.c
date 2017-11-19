@@ -67,7 +67,7 @@ void closeOutput() {
 }
 
 /* TODO: */
-void preparedInstructions() {
+/*void preparedInstructions() {
 instruction("CREATEFRAME", NULL, NULL, NULL);
 instruction("PUSHFRAME", NULL, NULL, NULL);
 instruction("POPFRAME", NULL, NULL, NULL);
@@ -124,6 +124,6 @@ instruction("JUMPIFEQ", label, symb, symb);
 instruction("JUMPIFNEQ", label, symb, symb);
 
 instruction("STRI2INT", var, symb, symb);
-}
+}*/
 
 #endif
