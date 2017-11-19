@@ -35,7 +35,7 @@ int getToken(String *s, int *cursor){
 		c = getc(s_inputFile);
 		(*cursor)++;
 
-		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
+		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return T_EOF;
 
 		switch(shunt) {
 			/* Normal reading */
