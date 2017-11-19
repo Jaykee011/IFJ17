@@ -15,11 +15,12 @@ int main(int argc, char** argv) {
 	String *str = NULL;
 	stringInit(&str);
 	int result = 5;
+	int pushBack = 0;
 
 	while(result != T_EOF) {
 
 		stringClear(str);
-		result = getToken(str);
+		result = getToken(str, &pushBack);
 		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}

@@ -16,6 +16,7 @@ typedef struct {
 int stringInit(String** s);
 void stringFree(String *s);
 int stringClear(String *s);
+int stringCpy(String *s, char* c);
 int stringAddData(String *s1, char c);
 void makeStringLowerCase(String *s);
 int stringCmpConstString(String *s1, char *s2);

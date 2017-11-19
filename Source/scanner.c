@@ -35,7 +35,7 @@ int getToken(String *s, int *cursor){
 		c = getc(s_inputFile);
 		(*cursor)++;
 
-		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return LEX_ERR;
+		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return T_EOF;
 
 		switch(shunt) {
 			/* Normal reading */
@@ -85,10 +85,7 @@ int getToken(String *s, int *cursor){
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
-				else {
-					ungetc(c, s_inputFile);
-					(*cursor)--;
-				}
+				else return T_DIV;
 				break;
 
 			/* We are in a comment */

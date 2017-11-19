@@ -59,6 +59,19 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
+int stringCpy(String *s, char* c) {
+	if(s == NULL)
+		if(stringInit(&s))
+			return INTERN_ERR;
+
+	for(int i = 0; c[i] != '\0'; i++) {
+		if(stringAddData(s, c[i]))
+			return INTERN_ERR;
+	}
+
+	return FINE;
+}
+
 void makeStringLowerCase(String *s){ // prevede na male znaky
 	if(s != NULL) {
 		for(int i = 0; i < s->size; i++)
