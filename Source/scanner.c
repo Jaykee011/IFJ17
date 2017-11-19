@@ -85,7 +85,11 @@ int getToken(String *s, int *cursor){
 			/* Is it comment or div */
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
-				else return T_DIV;
+				else {
+					ungetc(c, s_inputFile);
+					(*cursor)--;
+					return T_DIV;
+				}
 				break;
 
 			/* We are in a comment */
