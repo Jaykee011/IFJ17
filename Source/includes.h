@@ -11,12 +11,12 @@
 #include <string.h>
 #include "define.h"
 #include "macros.h"
+#include "string.h"
 #include "error.h"
 #include "instruction.h"
-//#include "symtable.h"
-#include "string.h"
+#include "symtable.h"
 #include "scanner.h"
 #include "parser.h"
-// #include "compiler.h"
+//#include "compiler.h"
 
 #endif

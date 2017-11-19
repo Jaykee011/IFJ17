@@ -7,7 +7,18 @@
 #ifndef SYMTABLEH   // obaleni pro vicenasobny preklad
 #define SYMTABLEH 
 
-#include "includes.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <malloc.h>
+#include <string.h>
+#include "define.h"
+#include "macros.h"
+#include "string.h"
+#include "error.h"
 
 typedef struct parameters *param;
 
@@ -19,7 +30,7 @@ typedef struct defParam {
 typedef struct value {
     int i;
     double d;
-    String s;
+    String *s;
 } val;
 
 struct parameters{

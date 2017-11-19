@@ -8,12 +8,7 @@
 #define PRECEDENCEH
 
 
-#include "define.h"
-#include "string.h"
-#include "scanner.h"
-// #include "semantic.h"
-// #include "interpreter.h"
-// #include "instruction_list.h"
+#include "includes.h"
 
 #define	SERR		-2 //Stack error
 
@@ -52,7 +47,7 @@
 
 typedef struct TokenParam {
     char token;
-	val value;
+	struct value data;
 } tokenparam;
 
 //stack struct

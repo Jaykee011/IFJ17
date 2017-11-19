@@ -129,6 +129,7 @@ int insert_variable(nodePtr *Strom, char *name) {
 		// pokud se jedna o inicializaci, musi uz byt definovana
 		Content_of_Insert2->defined = 1;
 		Content_of_Insert2->metaType = 1;
+		stringInit(&(Content_of_Insert2->value.s));
 		nodeInsert(Strom, Content_of_Insert2, name);
 	}
 	return 0;
@@ -159,7 +160,7 @@ int insert_value(nodePtr Strom, char *name, int type, void* pointer) {
 	}
 	else if(type == 3) {
 		//(struct String*)pointer;
-		uzel->symbol->value.s.data = ((char*)pointer);
+		uzel->symbol->value.s = ((String*)pointer);
 	}
 	else 
 		return FAIL;
