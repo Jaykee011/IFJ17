@@ -41,8 +41,12 @@ int getToken(String *s, int *cursor){
 			/* Normal reading */
 			case LEX_WAITING:
 
+				/* EOL */
+				if(c == '\n') return T_EOL;
+				else if(c == '\r') return T_EOL;
+
 				/* Blank before a token, continue reading */
-				if(isspace(c)) shunt = LEX_WAITING;
+				else if(isspace(c)) shunt = LEX_WAITING;
 
 				/* Complicated symbols */
 				else if(c == '!') shunt = LEX_NOT;
