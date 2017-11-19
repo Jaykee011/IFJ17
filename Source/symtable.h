@@ -56,17 +56,14 @@ void nodeDelete(nodePtr*, char*);
 void treeDispose (nodePtr*);
 nodePtr nodeSearch(nodePtr, char*);
 void generateKey(char *symbolName, int metaType);
-int insert_variable(char *name, int type);
-int insert_value(char *name, int type, void* pointer);
-int insert_function(bool declared, char *name);
-int insert_type_into_f(char *name, int type);
-int set_hasReturn(char *name);
-int insert_param(char *name, parStruct *par);
-
-
-int insert_variable_int(char *name, int hodnota);
-int insert_variable_double(char *name, double hodnota);
-int insert_variable_string(char *name, char* hodnota);
+int insert_variable(nodePtr *, char *name);
+void insert_variable_type(nodePtr, char *, int);
+int insert_value(nodePtr, char *name, int type, void* pointer);
+int insert_function(nodePtr *, bool declared, char *name);
+int insert_type_into_f(nodePtr, char *name, int type);
+int set_hasReturn(nodePtr, char *name);
+int insert_param(nodePtr, char *name, parStruct *par);
+val getValue(nodePtr, char *);
 
 
 #endif

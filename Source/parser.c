@@ -14,6 +14,8 @@ int type = 0; // 1 => int; 2 => double; 3 => string;
 tokenparam precedenceBuffer[100];
 int tokenSize;
 
+extern nodePtr symtable;
+
 //precedence table
 //COL	- INPUT CHAR
 //ROW	- TOP TERMINAL ON STACK
@@ -114,9 +116,19 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	switch (token)
 	{
 	case T_ID:
+		converted->value = getValue(symtable, attribute.data);
+		converted->token = PRID;
+		return FINE;
 	case L_INT:
+		converted->value.i = stringToInt(&attribute);
+		converted->token = PRID;
+		return FINE;
 	case L_FLOAT:
+		converted->value.d = stringToDouble(&attribute);
+		converted->token = PRID;
+		return FINE;
 	case L_STRING:
+		converted->value.s = attribute;
 		converted->token = PRID;
 		return FINE;
 	
@@ -262,11 +274,24 @@ void precedence_analysis(){
 		i++;
 		a = topTerm(&stack);
 	} while (((b.token) != PREND) || (a != PREND));
-	printf("boobs\n");
+}
+
+void getNEOLToken(String *s, int *size){
+	while(1){
+		token = getToken(s,size);
+		if (token == T_EOL){
+			continue;
+		}
+		break;
+	}
 }
 
 void getNCheckToken(String *s, int t){
-	token = getToken(s,&tokenSize);
+	if (t == T_EOL)
+		token = getToken(s,&tokenSize);
+	else
+		getNEOLToken(s, &tokenSize);
+
 	if (token != t){
 		// FIXME: handleError;
 		printf("ERR\n"); exit(-1);
@@ -274,7 +299,7 @@ void getNCheckToken(String *s, int t){
 }
 
 bool parse(){
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
 		case T_FUNCTION:
@@ -287,7 +312,7 @@ bool parse(){
 			// FIXME: handleError;
 			printf("ERR\n"); exit(-1);
 		}
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	
 	return (token == T_EOF);
 }
@@ -317,7 +342,7 @@ void functionState(){
 			getNCheckToken(&attribute, T_LB);
 			paramsState();
 			getNCheckToken(&attribute, T_AS);
-			token = getToken(&attribute, &tokenSize);
+			getNEOLToken(&attribute, &tokenSize);
 			typeState();
 			//FIXME: getNCheckToken(&attribute, T_EOL);
 			break;
@@ -327,7 +352,7 @@ void functionState(){
 			getNCheckToken(&attribute, T_LB);
 			paramsState();
 			getNCheckToken(&attribute, T_AS);
-			token = getToken(&attribute, &tokenSize);
+			getNEOLToken(&attribute, &tokenSize);
 			typeState();
 			fcommandsState();
 			getNCheckToken(&attribute, T_FUNCTION);
@@ -347,7 +372,7 @@ void scopeState(){
 }
 
 void paramsState(){
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	switch(token){
 		case T_ID:
 			paramState();
@@ -366,14 +391,14 @@ void paramsState(){
 void paramState(){
 	strcpy(id,attribute.data);
 	getNCheckToken(&attribute, T_AS);
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	typeState();
 }
 
 void nparamState(){
 	bool loop = true;
 	while (loop){
-		token = getToken(&attribute, &tokenSize);
+		getNEOLToken(&attribute, &tokenSize);
 		switch(token){
 			case T_COMMA:
 				getNCheckToken(&attribute, T_ID);
@@ -393,7 +418,7 @@ void nparamState(){
 void fcommandsState(){
 	bool loop = true;
 	while(loop){
-		token = getToken(&attribute, &tokenSize);
+		getNEOLToken(&attribute, &tokenSize);
 		switch (token){
 			case T_RETURN:
 				fcommandState();
@@ -419,7 +444,7 @@ void fcommandsState(){
 }
 
 void fcommandState(){
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		// FIXME: handleError; 		printf("ERR\n"); exit(-1);
 	}
@@ -432,7 +457,7 @@ void fcommandState(){
 void scommandsState(){
 	bool loop = true;
 	while(loop){
-		token = getToken(&attribute, &tokenSize);
+		getNEOLToken(&attribute, &tokenSize);
 		switch (token){
 			case T_DIM:
 				scommandState();
@@ -460,11 +485,14 @@ void scommandState(){
 
 void vardefState(){
 	//TODO: storeVariable
-	getNCheckToken(&attribute, T_ID);
+	String variableName;
+	getNCheckToken(&variableName, T_ID);
+	insert_variable(&symtable, variableName.data);
 	getNCheckToken(&attribute, T_AS);
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	typeState();
-	//FIXME: definitState();
+	insert_variable_type(symtable, variableName.data, type);
+	definitState();
 }
 
 void definitState(){
@@ -483,10 +511,11 @@ void definitState(){
 
 void initState(){
 	String storedAttr;
-	getToken(&storedAttr,&tokenSize);
+	int storedSize;
+	getNEOLToken(&storedAttr, &storedSize);
 	switch(token){
 		case T_ID:
-			token = getToken(&attribute, &tokenSize);
+			getNEOLToken(&attribute, &tokenSize);
 			if (token == T_LB){
 				fcallState();
 				break;
@@ -499,7 +528,7 @@ void initState(){
 		case L_FLOAT:
 		case L_STRING:
 			//FIXME: 
-			pushbackAttr(storedAttr.size);
+			pushbackAttr(storedSize);
 			//TODO: precedenceAnalysis
 			//TODO: initialize variable
 			break;
@@ -515,7 +544,7 @@ void fcallState(){
 
 void cparamsState(){
 	//TODO: param control
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	switch(token){
 		case T_RB:
 			break;
@@ -533,7 +562,7 @@ void cparamState(){
 void ncparamState(){
 	bool loop = true;
 	while(loop){
-		token = getToken(&attribute, &tokenSize);
+		getNEOLToken(&attribute, &tokenSize);
 		switch(token){
 			case T_COMMA:
 				cparamState();
@@ -552,7 +581,7 @@ void ncparamState(){
 void commandsState(int finalizingToken){
 	bool loop = true;
 	while(loop){
-		token = getToken(&attribute, &tokenSize);
+		getNEOLToken(&attribute, &tokenSize);
 		switch(token){
 			case T_ID:
 			case T_INPUT:
@@ -606,7 +635,7 @@ void inputState(){
 
 void printState(){
 	//TODO: print gen
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
@@ -649,7 +678,7 @@ void nexprState(){
 
 void branchState(){
 	//TODO: if gen
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
@@ -668,7 +697,7 @@ void branchState(){
 void loopState(){
 	//TODO: while gen
 	getNCheckToken(&attribute, T_WHILE);
-	token = getToken(&attribute, &tokenSize);
+	getNEOLToken(&attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
@@ -716,10 +745,10 @@ void termState(){
 			printf("ERR\n"); exit(-1);
 	}
 }
-int main() {
-	openInput("../Tests/linput1");
-	//printf("weadcsad\n");
-	//parse();
-	precedence_analysis();
-	printf("úspěch syntaktické analýzy\n");
-}
+// int main() {
+// 	openInput("../Tests/linput1");
+// 	//printf("weadcsad\n");
+// 	//parse();
+// 	precedence_analysis();
+// 	printf("úspěch syntaktické analýzy\n");
+// }

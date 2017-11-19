@@ -50,9 +50,9 @@
 //Maximum size of precedence analysis stack
 #define STACK_SIZE	100
 
-
 typedef struct TokenParam {
     char token;
+	val value;
 } tokenparam;
 
 //stack struct
