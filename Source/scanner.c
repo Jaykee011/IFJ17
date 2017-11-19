@@ -243,51 +243,47 @@ int getToken(String *s, int *cursor){
 					(*cursor)--;
 
 					/* Lower case keyword */
-					char *lowerCase = NULL;
-					stringToChar(&lowerCase, s);
-					makeCharLowerCase(lowerCase);
+					makeStringLowerCase(s);
 
 					/* Valtypes */
-					if(!strcmp(lowerCase, "integer"))	{free(lowerCase); return T_INTEGER;}
-					if(!strcmp(lowerCase, "double"))	{free(lowerCase); return T_DOUBLE;}
-					if(!strcmp(lowerCase, "string"))	{free(lowerCase); return T_STRING;}
+					if(!strcmp(stringCmpConstString, "integer"))	return T_INTEGER;
+					if(!strcmp(stringCmpConstString, "double"))		return T_DOUBLE;
+					if(!strcmp(stringCmpConstString, "string"))		return T_STRING;
 
 					/* Other keywords */
-					if(!strcmp(lowerCase, "as"))		{free(lowerCase); return T_AS;}
-					if(!strcmp(lowerCase, "asc"))		{free(lowerCase); return T_ASC;}
-					if(!strcmp(lowerCase, "declare"))	{free(lowerCase); return T_DECLARE;}
-					if(!strcmp(lowerCase, "dim"))		{free(lowerCase); return T_DIM;}
-					if(!strcmp(lowerCase, "do"))		{free(lowerCase); return T_DO;}
-					if(!strcmp(lowerCase, "else"))		{free(lowerCase); return T_ELSE;}
-					if(!strcmp(lowerCase, "end"))		{free(lowerCase); return T_END;}
-					if(!strcmp(lowerCase, "chr"))		{free(lowerCase); return T_CHR;}
-					if(!strcmp(lowerCase, "function"))	{free(lowerCase); return T_FUNCTION;}
-					if(!strcmp(lowerCase, "if"))		{free(lowerCase); return T_IF;}
-					if(!strcmp(lowerCase, "input"))		{free(lowerCase); return T_INPUT;}
-					if(!strcmp(lowerCase, "length"))	{free(lowerCase); return T_LENGTH;}
-					if(!strcmp(lowerCase, "loop"))		{free(lowerCase); return T_LOOP;}
-					if(!strcmp(lowerCase, "print"))		{free(lowerCase); return T_PRINT;}
-					if(!strcmp(lowerCase, "return"))	{free(lowerCase); return T_RETURN;}
-					if(!strcmp(lowerCase, "scope"))		{free(lowerCase); return T_SCOPE;}
-					if(!strcmp(lowerCase, "subStr"))	{free(lowerCase); return T_SUBSTR;}
-					if(!strcmp(lowerCase, "then"))		{free(lowerCase); return T_THEN;}
-					if(!strcmp(lowerCase, "while"))		{free(lowerCase); return T_WHILE;}
-					if(!strcmp(lowerCase, "and"))		{free(lowerCase); return T_AND;}
-					if(!strcmp(lowerCase, "boolean"))	{free(lowerCase); return T_BOOLEAN;}
-					if(!strcmp(lowerCase, "continue"))	{free(lowerCase); return T_CONTINUE;}
-					if(!strcmp(lowerCase, "elseif"))	{free(lowerCase); return T_ELSEIF;}
-					if(!strcmp(lowerCase, "exit"))		{free(lowerCase); return T_EXIT;}
-					if(!strcmp(lowerCase, "false"))		{free(lowerCase); return T_FALSE;}
-					if(!strcmp(lowerCase, "for"))		{free(lowerCase); return T_FOR;}
-					if(!strcmp(lowerCase, "next"))		{free(lowerCase); return T_NEXT;}
-					if(!strcmp(lowerCase, "not"))		{free(lowerCase); return T_NOT;}
-					if(!strcmp(lowerCase, "or"))		{free(lowerCase); return T_OR;}
-					if(!strcmp(lowerCase, "shared"))	{free(lowerCase); return T_SHARED;}
-					if(!strcmp(lowerCase, "static"))	{free(lowerCase); return T_STATIC;}
-					if(!strcmp(lowerCase, "true"))		{free(lowerCase); return T_TRUE;}
+					if(!strcmp(stringCmpConstString, "as"))			return T_AS;
+					if(!strcmp(stringCmpConstString, "asc"))		return T_ASC;
+					if(!strcmp(stringCmpConstString, "declare"))	return T_DECLARE;
+					if(!strcmp(stringCmpConstString, "dim"))		return T_DIM;
+					if(!strcmp(stringCmpConstString, "do"))			return T_DO;
+					if(!strcmp(stringCmpConstString, "else"))		return T_ELSE;
+					if(!strcmp(stringCmpConstString, "end"))		return T_END;
+					if(!strcmp(stringCmpConstString, "chr"))		return T_CHR;
+					if(!strcmp(stringCmpConstString, "function"))	return T_FUNCTION;
+					if(!strcmp(stringCmpConstString, "if"))			return T_IF;
+					if(!strcmp(stringCmpConstString, "input"))		return T_INPUT;
+					if(!strcmp(stringCmpConstString, "length"))		return T_LENGTH;
+					if(!strcmp(stringCmpConstString, "loop"))		return T_LOOP;
+					if(!strcmp(stringCmpConstString, "print"))		return T_PRINT;
+					if(!strcmp(stringCmpConstString, "return"))		return T_RETURN;
+					if(!strcmp(stringCmpConstString, "scope"))		return T_SCOPE;
+					if(!strcmp(stringCmpConstString, "subStr"))		return T_SUBSTR;
+					if(!strcmp(stringCmpConstString, "then"))		return T_THEN;
+					if(!strcmp(stringCmpConstString, "while"))		return T_WHILE;
+					if(!strcmp(stringCmpConstString, "and"))		return T_AND;
+					if(!strcmp(stringCmpConstString, "boolean"))	return T_BOOLEAN;
+					if(!strcmp(stringCmpConstString, "continue"))	return T_CONTINUE;
+					if(!strcmp(stringCmpConstString, "elseif"))		return T_ELSEIF;
+					if(!strcmp(stringCmpConstString, "exit"))		return T_EXIT;
+					if(!strcmp(stringCmpConstString, "false"))		return T_FALSE;
+					if(!strcmp(stringCmpConstString, "for"))		return T_FOR;
+					if(!strcmp(stringCmpConstString, "next"))		return T_NEXT;
+					if(!strcmp(stringCmpConstString, "not"))		return T_NOT;
+					if(!strcmp(stringCmpConstString, "or"))			return T_OR;
+					if(!strcmp(stringCmpConstString, "shared"))		return T_SHARED;
+					if(!strcmp(stringCmpConstString, "static"))		return T_STATIC;
+					if(!strcmp(stringCmpConstString, "true"))		return T_TRUE;
 																											$$("identifier %s\n", stringGetString(s));
-					free(lowerCase);
-
 					return T_ID;
 				}
 				break;

@@ -59,10 +59,19 @@ int stringAddData(String *s1, char c){ // prida na konec retezce 1 znak
 	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
-void makeCharLowerCase(char* s){ // prevede na male znaky
-	for(int i = 0; s[i] != '\0'; i++){ // musime zmenit vsechny znaky
-		s[i] = tolower(s[i]); // ulozime tentyz znak z vystupu tolower
+void makeStringLowerCase(String *s){ // prevede na male znaky
+	if(s != NULL) {
+		for(int i = 0; i < s->size; i++)
+			(s->data)[i] = tolower((s->data)[i]);
 	}
+}
+
+int stringCmpConstString(String *s1, char *s2){ // porovna velikost retezce s konstantnim retezcem
+	if (s1 != NULL){ // test, zda-li neni na vstupu NULL
+		return strcmp(s1->data, s2);
+	}
+	
+	return INTERN_ERR; // pro pripad, ze se neprovede ani jeden if
 }
 
 char *stringGetString(String *s){ // vraci textovou cast retezce
