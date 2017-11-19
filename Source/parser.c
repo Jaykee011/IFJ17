@@ -179,9 +179,9 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 }
 
 void testTokens(){ // imput token string control
-	bool temp = 0; // compare token exists
-	bool temp1 = 0; // previous non-ID
-	int temp3 = 0; // left brackt counter
+	bool compareTokenExists = 0; // compare token exists
+	bool previousNonId = 0; // previous non-ID
+	int leftBracktCounter = 0; // left brackt counter
 	for(int i = 0;(token = getToken(&attribute,&tokenSize)) != T_EOL; i++){
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
@@ -189,24 +189,24 @@ void testTokens(){ // imput token string control
 			case L_INT:
 			case L_FLOAT:
 			case L_STRING:
-				temp1 =	0;
+				previousNonId =	0;
 				break;					
 			case T_LB: // (
-				temp3++;
+				leftBracktCounter++;
 				break;
 			case T_RB: // )
-				temp3--;
+				leftBracktCounter--;
 				break;				
 			case T_ADD: // +
 			case T_SUB: // -
 			case T_TIMES: // *
 			case T_DIV: // /
 			case T_IDIV: 
-				if (temp1 == 0){ // no previous non-ID
-					temp1 = 1;
+				if (previousNonId == 0){ // no previous non-ID
+					previousNonId = 1;
 				}
-				else if (temp1 == 1){
-					//printf("Dvě non-ID za sebou\n");
+				else if (previousNonId == 1){
+					printf("Dvě non-ID za sebou\n");
 					exit(SYN_ERR); 
 				}
 				break;
@@ -216,12 +216,12 @@ void testTokens(){ // imput token string control
 			case T_LTE:
 			case T_EQ:
 			case T_NEQ:	
-				if(temp == 0){
-					temp = 1;
-					temp1 = 0;
+				if(compareTokenExists == 0){
+					compareTokenExists = 1;
+					previousNonId = 0;
 				}
 				else{
-					//printf("Více porovnání, než může být\n");
+					printf("Více porovnání, než může být\n");
 					exit(SYN_ERR); 
 				}
 				break;
@@ -262,7 +262,7 @@ void precedence_analysis(){
 		i++;
 		a = topTerm(&stack);
 	} while (((b.token) != PREND) || (a != PREND));
-	//printf("boobs\n");
+	printf("boobs\n");
 }
 
 void getNCheckToken(String *s, int t){
@@ -716,10 +716,10 @@ void termState(){
 			printf("ERR\n"); exit(-1);
 	}
 }
-/*int main() {
+int main() {
 	openInput("../Tests/linput1");
 	//printf("weadcsad\n");
 	//parse();
 	precedence_analysis();
 	printf("úspěch syntaktické analýzy\n");
-}*/
+}
