@@ -20,9 +20,7 @@ int main(int argc, char** argv) {
 	if(openInput(argv[1]) || openOutput(argv[2])) {
 		error(1);
 	}
-
-
-
+	
 	parse();
 
 	printf("HOTOVO\n");

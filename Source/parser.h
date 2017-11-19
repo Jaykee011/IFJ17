@@ -63,7 +63,7 @@ void replaceY(tStack *stack, char a); // <y za A
 void changeA(tStack *stack, char a); // a za a<
 int top(tStack *stack);
 char topTerm(tStack *stack); // returns terminal closes to the top of the stack
-void precedence_analysis(); //precedence analysis of expression
+struct value precedence_analysis(); //precedence analysis of expression
 int precedenceTokenConversion(char token, tokenparam *converted); //converts token code to code which can be used as an index in precedence table
 void testToken();
 

@@ -8,6 +8,7 @@
 
 int token = 0;
 String *attribute = NULL;
+String *variableName = NULL;
 char id[64] = "";
 char functId[64] = "";
 int type = 0; // 1 => int; 2 => double; 3 => string;
@@ -38,6 +39,33 @@ int precTable[15][15] = {
 	/*  $ */{ L,	L,	E,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	E }
 };
 
+struct value evalExpr(void *lValue, void *mValue, void *rValue){
+	
+	struct value result;
+	result.i = 0;
+	result.d = 0.0;
+	result.s = NULL;
+	stringInit(&(result.s));
+
+	if (mValue == NULL){
+		//TODO: comment
+		return ((tokenparam *)lValue)->data;
+	}
+	else{
+		//TODO: zavorka
+		switch(((tokenparam *)mValue)->token){
+			case PRPLUS:
+				//FIXME: posefit datove typy
+				result.i = (((tokenparam *)lValue)->data.i + ((tokenparam *)rValue)->data.i) ;
+				return result;
+				break;
+			default:
+				//TODO: errorHandle
+				break;
+		}
+	}
+}
+
 int stackInit(tStack *stack) { // stack inicialization
 
 	if (!stack)
@@ -52,6 +80,7 @@ int push(tStack *stack, tokenparam token) { // pushes new terminal to stack
 		return INTERN_ERR;
 	stack->top++;
 	stack->arr[stack->top].token = token.token;
+	stack->arr[stack->top].data = token.data;
 	return FINE;
 }
 int pop(tStack *stack, tokenparam *token) { // pops top token
@@ -71,9 +100,15 @@ void replaceY(tStack *stack, char a){ // <y za A
 	for (i = 0; top(stack) != LB; i++){
 		pop(stack, &buffer[i]);
 	}
+	struct value result;
+	if (i == 1)
+		result = evalExpr(&buffer[0],NULL, NULL); //TODO: comment
+	else
+		result = evalExpr(&buffer[0],&buffer[1], &buffer[2]); //TODO: comment
+
+	NONTtoken.data = result;
 	pop(stack, &buffer[i]);
-	push(stack, NONTtoken);
-	// i = i - 1; // dekrementation after for cycle
+	push(stack, NONTtoken);//TODO: dat hodnotu z evalexpr
 }
 
 void changeA(tStack *stack, char a){ // a za a<
@@ -116,15 +151,12 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	switch (token)
 	{
 	case T_ID:
-		converted->data = getValue(symtable, attribute->data);
 		converted->token = PRID;
 		return FINE;
 	case L_INT:
-		//converted->data.i = stringToInt(attribute);
 		converted->token = PRID;
 		return FINE;
 	case L_FLOAT:
-		//converted->data.d = stringToDouble(attribute);
 		converted->token = PRID;
 		return FINE;
 	case L_STRING:
@@ -198,9 +230,20 @@ void testTokens(){ // imput token string control
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
 			case T_ID:
+				precedenceBuffer[i].data = getValue(symtable, attribute->data);
+				previousNonId =	0;
+				break;		
 			case L_INT:
+				precedenceBuffer[i].data.i = stringToInt(attribute);
+				previousNonId =	0;
+				break;		
 			case L_FLOAT:
+				precedenceBuffer[i].data.d = stringToDouble(attribute);
+				previousNonId =	0;
+				break;		
 			case L_STRING:
+				stringInit(&precedenceBuffer[i].data.s);
+				concatToString(precedenceBuffer[i].data.s, attribute->data);
 				previousNonId =	0;
 				break;					
 			case T_LB: // (
@@ -244,7 +287,7 @@ void testTokens(){ // imput token string control
 	}
 }
 
-void precedence_analysis(){
+struct value precedence_analysis(){
 	testTokens();
 	tStack stack;	
 	stackInit(&stack);
@@ -255,6 +298,7 @@ void precedence_analysis(){
 	int i = 0;
 	do {
 		precedenceTokenConversion(precedenceBuffer[i].token, &b); 
+		b.data = precedenceBuffer[i].data;
 		switch (precTable[a][b.token]){
 			case EQ:
 				push(&stack, b);
@@ -274,6 +318,9 @@ void precedence_analysis(){
 		i++;
 		a = topTerm(&stack);
 	} while (((b.token) != PREND) || (a != PREND));
+	tokenparam result;
+	pop(&stack, &result);
+	return result.data;
 }
 
 void getNEOLToken(String *s, int *size){
@@ -300,6 +347,7 @@ void getNCheckToken(String *s, int t){
 
 bool parse(){
 	stringInit(&attribute);
+	stringInit(&variableName);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
@@ -486,8 +534,6 @@ void scommandState(){
 
 void vardefState(){
 	//TODO: storeVariable
-	String *variableName = NULL;
-	stringInit(&variableName);
 	getNCheckToken(variableName, T_ID);
 	insert_variable(&symtable, variableName->data);
 	getNCheckToken(attribute, T_AS);
@@ -532,7 +578,7 @@ void initState(){
 		case L_STRING:
 			//FIXME: 
 			pushbackAttr(storedSize);
-			//TODO: precedenceAnalysis
+			insert_value(symtable, variableName->data, type, precedence_analysis());
 			//TODO: initialize variable
 			break;
 		default:

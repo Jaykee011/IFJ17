@@ -112,7 +112,6 @@ void generateKey(char symbolName[64], int metaType) {
 
 int insert_variable(nodePtr *Strom, char *name) {
 	nodePtr uzel;
-	char tmp[1000];
 
 	loadPtr Content_of_Insert2 = saveMalloc(sizeof(struct load));
 	//val tmptmp = malloc(sizeof(struct value));
@@ -141,30 +140,30 @@ void insert_variable_type(nodePtr Strom, char *name, int type) {
 	variable->symbol->type = type;
 }
 
-int insert_value(nodePtr Strom, char *name, int type, void* pointer) {
+void insert_value(nodePtr Strom, char *name, int type, val data) {
 	nodePtr uzel;
-	char tmp[1000]; // TODO limit je 1000 znaku
-	strcpy(tmp, name);
-	generateKey(tmp,1);
-	uzel = nodeSearch(Strom, tmp);
+	uzel = nodeSearch(Strom, name);
 
 	if(uzel == NULL) {
-		fprintf(stderr, "Chyba: Promenna neexistuje\n");
-		return FAIL;
+		//FIXME: errorHandle
+		exit(FAIL);
 	}
-	if(type == 1) {
-		uzel->symbol->value.i = *((int*)pointer);
+	switch(type){
+		case 1:
+			uzel->symbol->value.i = data.i;
+			break;
+		case 2:
+			uzel->symbol->value.d = data.d;
+			break;
+		case 3:
+			stringInit(&uzel->symbol->value.s);
+			concatToString(uzel->symbol->value.s, data.s->data);
+			break;
+		default:
+			//FIXME: errorHandle
+			exit(FAIL);
+			break;
 	}
-	else if(type == 2) {
-		uzel->symbol->value.d = *((double*)pointer);
-	}
-	else if(type == 3) {
-		//(struct String*)pointer;
-		uzel->symbol->value.s = ((String*)pointer);
-	}
-	else 
-		return FAIL;
-	return 0;
 }
 
 // vlozit param do funkci

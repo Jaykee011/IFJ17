@@ -69,7 +69,7 @@ nodePtr nodeSearch(nodePtr, char*);
 void generateKey(char *symbolName, int metaType);
 int insert_variable(nodePtr *, char *name);
 void insert_variable_type(nodePtr, char *, int);
-int insert_value(nodePtr, char *name, int type, void* pointer);
+void insert_value(nodePtr, char *name, int type, val data);
 int insert_function(nodePtr *, bool declared, char *name);
 int insert_type_into_f(nodePtr, char *name, int type);
 int set_hasReturn(nodePtr, char *name);
