@@ -26,21 +26,21 @@
 #define	E   		0 //blank
 
 //Defines for precedence analysis (numbers correspond to precedence table)
-#define PRID	0
-#define	PRLB	1
-#define PRRB	2
-#define	PRPLUS	3
-#define	PRMINUS	4
-#define	PRTIMES	5
-#define	PRDIV	6
-#define	PRIDIV  7
-#define	PRLT	8
-#define	PRGT	9
-#define	PRELT	10
-#define	PREGT	11
-#define	PREQUAL	12
-#define	PRNEQ	13
-#define	PREND	14
+#define PRID	 0
+#define	PRLB	 1
+#define PRRB	 2
+#define	PRPLUS	 3
+#define	PRMINUS	 4
+#define	PRTIMES	 5
+#define	PRDIV	 6
+#define	PRIDIV   7
+#define	PRLT	 8
+#define	PRGT	 9
+#define	PRELT	 10
+#define	PREGT	 11
+#define	PREQUAL	 12
+#define	PRNEQ	 13
+#define	PREND	 14
 
 //Defines E,<,>
 #define	NONT	15
@@ -68,8 +68,10 @@ void replaceY(tStack *stack, char a); // <y za A
 void changeA(tStack *stack, char a); // a za a<
 int top(tStack *stack);
 char topTerm(tStack *stack); // returns terminal closes to the top of the stack
-int precedence_analysis(); //precedence analysis of expression
+void precedence_analysis(); //precedence analysis of expression
 int precedenceTokenConversion(char token, tokenparam *converted); //converts token code to code which can be used as an index in precedence table
+void testToken();
+
 
 bool parse();
 void functionsState();      
