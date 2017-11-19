@@ -9,7 +9,7 @@
 #ifndef STRINGH 
 #define STRINGH
 
-#define STR_LEN_INC 8 // velikost (byty) na kolik se bude alokovat pocatecni pamet
+#define STR_LEN_INC 8 // Size of the first alloc & next reallocs of the string
 
 typedef struct {
 	char* data;
@@ -27,5 +27,6 @@ int stringCmpConstString(String *s1, char *s2);
 char *stringGetString(String *s);
 int stringGetSize(String *s);
 void stringToChar(char **c, String *s);
+void concatToString(String *s, char *c);
 
-#endif // #ifndef STRINGH
+#endif
