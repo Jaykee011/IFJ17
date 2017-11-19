@@ -19,16 +19,20 @@ int main(int argc, char** argv) {
 
 	while(result != T_EOF) {
 
-		stringClear(str);
 		result = getToken(str, &pushBack);
 		printf("%d (%s)\n", result, stringGetString(str));
 		if(result == LEX_ERR) break;
 	}
+	//stringClear(str);
 
 	instruction("DEFVAR GF@TEST");
+	instruction("DEFVAR GF@TEST2");
 	instruction("MOVE GF@TEST int@42");
-	instruction("WRITE string@Hodnota\\032promenne\\032test");
+	instruction("MOVE GF@TEST2 GF@TEST");
+	instruction("WRITE string@Hodnota\\032promenne\\032TEST");
 	instruction("WRITE GF@TEST");
+	instruction("WRITE string@Hodnota\\032promenne\\032TEST2");
+	instruction("WRITE GF@TEST2");
 	instruction("WRITE string@\\012");
 
 	error(FINE);

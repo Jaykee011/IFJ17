@@ -86,7 +86,6 @@ int getToken(String *s, int *cursor){
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
 				else {
-					
 					ungetc(c, s_inputFile);
 					(*cursor)--;
 					return T_DIV;

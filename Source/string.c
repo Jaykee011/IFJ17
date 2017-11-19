@@ -22,15 +22,15 @@ int stringInit(String** s){ // inicializuje retezec
 
 void stringFree(String *s){ // uvolni pamet
 	if (s != NULL){ // test, zda-li neni na vstupu NULL
-		if(s->data != NULL) saveFree(s->data);
-		saveFree(s);
+		//if(s->data != NULL) saveFree(s->data);
+		//saveFree(s);
 	}
 }
 
 int stringClear(String *s){ // vymaze obsah -> nastavi vychozi hodnoty
 	if(s == NULL) return INTERN_ERR;
 
-	if(s->data != NULL) saveFree(s->data);
+	//if(s->data != NULL) saveFree(s->data);
 	s->data = saveMalloc(STR_LEN_INC * sizeof(char));
 	if(s->data == NULL) return INTERN_ERR;
 
