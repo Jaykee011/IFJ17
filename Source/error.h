@@ -17,7 +17,7 @@ typedef struct pointerList {
 void error(int e);
 
 void *saveMalloc(size_t size);
-void *saveFree(void *s);
+void saveFree(void *s);
 void *saveRealloc(void *s, size_t size);
 int pointerAdd(void *s);	// Add new pointer
 void pointerClear();		// Free all memory
