@@ -22,16 +22,20 @@ void error(int e) {
 
 void *saveMalloc(size_t size) {
 	void *tmp = malloc(size);
-	if(pointerAdd(tmp) != FINE) return NULL;
+	if(pointerAdd(tmp)) return NULL;
 
 	return tmp;
 }
 
 void *saveRealloc(void *s, size_t size) {
-	void *tmp = realloc(s, size);
-	if(pointerAdd(tmp) != FINE) return NULL;
 
-	return tmp;
+	char *temp = saveMalloc(size);
+	if(pointerAdd(temp)) return NULL;
+
+	strcpy(temp, s);
+	saveFree(s);
+
+	return temp;
 }
 
 int pointerAdd(void *s) { // Add new pointer
@@ -39,21 +43,28 @@ int pointerAdd(void *s) { // Add new pointer
 
 	if(pClearList == NULL) {
 		pClearList = malloc(sizeof(SPointer));
-		pClearList->p = NULL;
+		if(pClearList == NULL) return INTERN_ERR;
+
+		pClearList->p = s;
 		pClearList->next = NULL;
-	}
-	if(pClearList == NULL) return INTERN_ERR;
-
-	SPointer *p;
-	for(p = pClearList; p->next != NULL; p = p->next) {
-		if(p->p == s) return FINE;
+		return FINE;
 	}
 
-	p->p = s;
-	p->next = malloc(sizeof(SPointer));
-	if(p->next == NULL) return INTERN_ERR;
-	p->next->p = NULL;
-	p->next->next = NULL;
+	SPointer *p = pClearList;
+	SPointer *prev = NULL;
+
+	for(; p != NULL; p = p->next) {
+		if(p->p == s) {
+			$(Already inserted!);
+			return FINE;
+		}
+		prev = p;
+	}
+
+	prev->next = malloc(sizeof(SPointer));
+	if(prev->next == NULL) return INTERN_ERR;
+	prev->next->p = s;
+	prev->next->next = NULL;
 
 	return FINE;
 }
@@ -64,27 +75,22 @@ void saveFree(void *s) { // Removes a pointer
 	SPointer *p = pClearList;
 	if(p->p == s) { // First in list
 		pClearList = p->next;
+
 		free(p->p);
 		free(p);
-	} else {
-		if(p->next == NULL) {
-			if(p->p == s) {
-				free(p->p);
-				free(p);
-				pClearList = NULL;
-			}
-			return;
-		}
+		return;
+	}
 
-		for(; p->next != NULL; p = p->next) {
-			if(p->next->p == s) {
-				SPointer *tmp = p->next;
-				p->next = tmp->next;
-				free(tmp->p);
-				free(tmp);
-				break;
-			}
+	SPointer *prev = NULL;
+	for(; p != NULL; p = p->next) {
+
+		if(p->p == s) {
+			prev->next = p->next;
+			free(p->p);
+			free(p);
+			break;
 		}
+		prev = p;
 	}
 }
 

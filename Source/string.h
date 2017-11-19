@@ -1,16 +1,20 @@
-/* 	autor: Radek Wildmann
-*	login: xwildm00
-* 	
-*	Vytvoreno jako soucast projektu do predmetu IFJ v roce 2017
-*/
+/*
+ * IFJ 2017 project
+ *	File			string.h
+ *	Description		Header file for strings
+ *	Author			Michal Zilvar (xzilva02)
+ *	Last update		17:08, 19-11-2017
+ */
 
-#ifndef STRINGH 	// obaleni pro vicenasobny preklad
-#define STRINGH 	// definujeme hlavickovy soubor pro praci s nekonecnym stringem
+#ifndef STRINGH 
+#define STRINGH
+
+#define STR_LEN_INC 8 // Size of the first alloc & next reallocs of the string
 
 typedef struct {
-	char* data;		// retezec znaku  
-	int size;		// velikost retezce
-	int capacity;	// velikost alokovane casti (pouzita pamet)
+	char* data;
+	int size;
+	int capacity;
 } String;
 
 int stringInit(String** s);
@@ -23,5 +27,6 @@ int stringCmpConstString(String *s1, char *s2);
 char *stringGetString(String *s);
 int stringGetSize(String *s);
 void stringToChar(char **c, String *s);
+void concatToString(String *s, char *c);
 
-#endif // #ifndef STRINGH
+#endif
