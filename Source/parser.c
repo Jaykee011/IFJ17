@@ -119,120 +119,58 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	case L_STRING:
 		converted->token = PRID;
 		return FINE;
-	/*
-	case '1':
-		converted->token = PRID;
-		return FINE;
-	case '2':
-		converted->token = PRID;
-		return FINE;
-	case '3':
-		converted->token = PRID;
-		return FINE;*/
 	
 	case T_LB:
 		converted->token = PRLB;
 		return FINE;
 
-	/*case '(':
-		converted->token = PRLB;
-		return FINE;*/
-
 	case T_RB:
 		converted->token = PRRB;
 		return FINE;
-
-	/*case ')':
-		converted->token = PRRB;
-		return FINE;*/
 
 	case T_ADD:
 		converted->token = PRPLUS;
 		return FINE;
 
-	/*case '+':
-		converted->token = PRPLUS;
-		return FINE;*/
-
 	case T_SUB:
 		converted->token = PRMINUS;
 		return FINE;
-
-	/*case '-':
-		converted->token = PRMINUS;
-		return FINE;*/
 
 	case T_TIMES:
 		converted->token = PRTIMES;
 		return FINE;
 
-	/*case '*':
-		converted->token = PRTIMES;
-		return FINE;*/
-
 	case T_DIV:
 		converted->token = PRDIV;
 		return FINE;
-
-	/*case '/':
-		converted->token = PRDIV;
-		return FINE;*/
 
 	case T_IDIV:
 		converted->token = PRIDIV;
 		return FINE;
 
-	/*case '\\':
-		converted->token = PRDIV;
-		return FINE;*/
-
 	case T_LT:
 		converted->token = PRLT;
 		return FINE;
-
-	/*case '<':
-		converted->token = PRLT;
-		return FINE;*/
 
 	case T_GT:
 		converted->token = PRGT;
 		return FINE;
 
-	/*case '>':
-		converted->token = PRGT;
-		return FINE;*/
-
 	case T_GTE:
 		converted->token = PREGT;
 		return FINE;
-
-	/*case '´':
-		converted->token = PREGT;
-		return FINE;*/
 
 	case T_LTE:
 		converted->token = PRELT;
 		return FINE;
 
-	/*case '¨':
-		converted->token = PRELT;
-		return FINE;*/
-
 	case T_EQ:
 		converted->token = PREQUAL;
 		return FINE;
 
-	/*case '=':
-		converted->token = PREQUAL;
-		return FINE;*/
-
 	case T_NEQ:
 		converted->token = PRNEQ;
 		return FINE;
-
-	/*case '.':
-		converted->token = PRNEQ;
-		return FINE;*/
 
 	default:
 		converted->token = PREND;
@@ -240,12 +178,10 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	}
 }
 
-//char str[50] = "(1+1)*2/3\\3";
-
-void testTokens(){
-	bool temp = 0; // compare token exists
-	bool temp1 = 0; // previous non-ID
-	int temp3 = 0; // left brackt counter
+void testTokens(){ // imput token string control
+	bool compareTokenExists = 0; // compare token exists
+	bool previousNonId = 0; // previous non-ID
+	int leftBracktCounter = 0; // left brackt counter
 	for(int i = 0;(token = getToken(&attribute,&tokenSize)) != T_EOL; i++){
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
@@ -253,23 +189,23 @@ void testTokens(){
 			case L_INT:
 			case L_FLOAT:
 			case L_STRING:
-				temp1 =	0;
+				previousNonId =	0;
 				break;					
 			case T_LB: // (
-				temp3++;
+				leftBracktCounter++;
 				break;
 			case T_RB: // )
-				temp3--;
+				leftBracktCounter--;
 				break;				
 			case T_ADD: // +
 			case T_SUB: // -
 			case T_TIMES: // *
 			case T_DIV: // /
 			case T_IDIV: 
-				if (temp1 == 0){ // no previous non-ID
-					temp1 = 1;
+				if (previousNonId == 0){ // no previous non-ID
+					previousNonId = 1;
 				}
-				else if (temp1 == 1){
+				else if (previousNonId == 1){
 					printf("Dvě non-ID za sebou\n");
 					exit(SYN_ERR); 
 				}
@@ -280,9 +216,9 @@ void testTokens(){
 			case T_LTE:
 			case T_EQ:
 			case T_NEQ:	
-				if(temp == 0){
-					temp = 1;
-					temp1 = 0;
+				if(compareTokenExists == 0){
+					compareTokenExists = 1;
+					previousNonId = 0;
 				}
 				else{
 					printf("Více porovnání, než může být\n");
