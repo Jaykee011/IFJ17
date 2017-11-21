@@ -68,7 +68,6 @@ int getToken(String *s, int *cursor){
 				else if(c == '/') shunt = LEX_BLOCKDIV;
 
 				else if(c == '=') return T_EQ;
-				else if(c == ',') return T_COMMA;
 				else if(c == EOF) return T_EOF;
 
 				/* Otherwise */
@@ -171,7 +170,8 @@ int getToken(String *s, int *cursor){
 
 			/* Comment like 'comm */
 			case LEX_COMMENT:
-				if(c == '\n') shunt = LEX_WAITING;
+				if(c == '\n') return T_EOL;
+				else if(c == '\r') return T_EOL;
 				break;
 
 			/* 123 or 12.3 */
