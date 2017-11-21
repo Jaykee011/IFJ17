@@ -1,7 +1,12 @@
+'Declare Function id lb PARAMS rb As TYPE eol
+'Function id lb PARAMS rb As TYPE eol FCOMMANDS End Function
+
+Declare functIOn test(a as integer) aS Integer
+
+functIOn test(a as integer) aS Integer
+eND FuNcTIOn
+
+
 Scope 'Hlavni telo programu
-dim a as Integer
-'if 1<2 then
-a = 1
-'else
-'end if
+dim a as Integer=test()
 End Scope

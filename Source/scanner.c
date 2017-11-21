@@ -171,7 +171,7 @@ int getToken(String *s, int *cursor){
 
 			/* Comment like 'comm */
 			case LEX_COMMENT:
-				if(c == '\n') shunt = LEX_WAITING;
+				if(c == '\n') return T_EOL;
 				break;
 
 			/* 123 or 12.3 */

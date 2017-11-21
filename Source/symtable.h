@@ -35,13 +35,14 @@ typedef struct value {
 } val;
 
 struct parameters{
-    char name[1000];
+    char name[64];
     int type; // see description in struct load
     param next;
 };
 
 typedef struct {
     param parameters; // linear list of function parametes
+    param declaredParameters;
     //nodePtr functTable;  // function local symbol table
     bool hasReturn;
     bool declared;
@@ -72,9 +73,12 @@ void generateKey(char *symbolName, int metaType);
 int insert_variable(nodePtr *, char *name);
 void insert_type(nodePtr, char *, int);
 void insert_value(nodePtr, char *name, int type, val data, int valueType);
-int insert_function(nodePtr *, bool declared, char *name);
-int set_hasReturn(nodePtr, char *name);
-int insert_param(nodePtr, char *name, parStruct *par);
+void insert_function(nodePtr *, bool , char *);
+void set_hasReturn(nodePtr, char *name);
+void insert_param(nodePtr, char *name, char *, int, bool);
+int validateDefinitionParameters(nodePtr , char *);
+void validateFunctCall(nodePtr, char *, char *);
+int validateCallParams(nodePtr , char *, param);
 val getValue(nodePtr, char *);
 
 

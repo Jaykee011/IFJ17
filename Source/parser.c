@@ -7,15 +7,15 @@
 #include "includes.h"
 
 int token = 0;
+int tokenSize;
 String *attribute = NULL;
 String *variableName = NULL;
-char id[64] = "";
-char functId[64] = "";
+String *functionName = NULL;
 int type = 0; // 1 => int; 2 => double; 3 => string;
 int expressionType = 0; // 1 => int; 2 => double; 3 => string;
 tokenparam precedenceBuffer[100];
-int tokenSize;
 
+//FIXME: nodePtr localSymtable // lokalni tabulka symbolu 
 extern nodePtr symtable;
 
 //precedence table
@@ -525,19 +525,19 @@ void getNCheckToken(String *s, int t){
 
 	if (token != t){
 		// FIXME: handleError;
-		printf("ERR\n"); exit(-1);
+		printf("%d\n", token); exit(-1);
 	}
 }
 
 bool parse(){
 	stringInit(&attribute);
 	stringInit(&variableName);
+	stringInit(&functionName);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
 		case T_FUNCTION:
 			functionsState();
-			getNCheckToken(attribute, T_SCOPE);
 		case T_SCOPE:
 			scopeState();
 			break;
@@ -559,7 +559,10 @@ void functionsState(){
 				functionState();
 				break;
 			default:
-				//FIXME: 
+				if (token != T_SCOPE){
+					//FIXME: errorhandle
+					exit(-1);
+				}
 				loop = false;
 				break;
 		}
@@ -570,27 +573,44 @@ void functionState(){
 	switch(token){
 		case T_DECLARE:
 			getNCheckToken(attribute, T_FUNCTION);
-			getNCheckToken(attribute, T_ID);
-			//TODO: declareFunction without params;
+			getNCheckToken(functionName, T_ID);
+
+			insert_function(&symtable, true, functionName->data);
+
 			getNCheckToken(attribute, T_LB);
-			paramsState();
+			paramsState(true);
 			getNCheckToken(attribute, T_AS);
 			getNEOLToken(attribute, &tokenSize);
 			typeState();
-			//FIXME: getNCheckToken(attribute, T_EOL);
+
+			insert_type(symtable, functionName->data, type);
+
+			getNCheckToken(attribute, T_EOL);
+			getNEOLToken(attribute, &tokenSize);
 			break;
 		case T_FUNCTION:
 			getNCheckToken(attribute, T_ID);
-			//TODO: defineFunction without params;
+			
+			insert_function(&symtable, false, functionName->data);
+
 			getNCheckToken(attribute, T_LB);
-			paramsState();
+			
+			paramsState(false);
+			if (validateDefinitionParameters(symtable, functionName->data)){
+				//FIXME: errorhandle
+				exit(-1);
+			}
+
 			getNCheckToken(attribute, T_AS);
 			getNEOLToken(attribute, &tokenSize);
 			typeState();
+
+			insert_type(symtable, functionName->data, type);
+
 			fcommandsState();
 			getNCheckToken(attribute, T_FUNCTION);
-			//FIXME: getNCheckToken(attribute, T_EOL);
-			//FIXME: 	
+			getNCheckToken(attribute, T_EOL);
+			getNEOLToken(attribute, &tokenSize);
 			break;
 		default:
 			//FIXME:
@@ -599,18 +619,17 @@ void functionState(){
 }
 
 void scopeState(){
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	getNCheckToken(attribute, T_EOL);
 	scommandsState();
 	getNCheckToken(attribute, T_SCOPE);
 }
 
-void paramsState(){
-	getNEOLToken(attribute, &tokenSize);
+void paramsState(bool declaration){
+	getNEOLToken(variableName, &tokenSize);
 	switch(token){
 		case T_ID:
-			paramState();
-			//TODO: add param
-			nparamState();
+			paramState(declaration);
+			nparamState(declaration);
 			break;
 		case T_RB:
 			break;
@@ -621,21 +640,22 @@ void paramsState(){
 	}
 }
 
-void paramState(){
-	strcpy(id,attribute->data);
+void paramState(bool declaration){
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
+
+	insert_param(symtable, functionName->data, variableName->data, type, declaration);
 }
 
-void nparamState(){
+void nparamState(bool declaration){
 	bool loop = true;
 	while (loop){
 		getNEOLToken(attribute, &tokenSize);
 		switch(token){
 			case T_COMMA:
-				getNCheckToken(attribute, T_ID);
-				paramState();
+				getNCheckToken(variableName, T_ID);
+				paramState(declaration);
 				//TODO: add param
 				break;
 			case T_RB:
@@ -750,6 +770,7 @@ void initState(){
 		case T_ID:
 			getNEOLToken(attribute, &tokenSize);
 			if (token == T_LB){
+				stringCpy(functionName, storedAttr->data);
 				fcallState();
 				break;
 			}
@@ -772,34 +793,60 @@ void initState(){
 }
 
 void fcallState(){
+	validateFunctCall(symtable, variableName->data, functionName->data);
+
 	cparamsState();
 }
 
+void addParamToList(param *paramList, int t){
+	param *head = paramList;
+
+	param newParam = saveMalloc(sizeof(struct parameters));
+	newParam->type = t;
+
+	if(*head == NULL) {
+		*head = newParam;
+	}	
+	else {
+		param current = *head;
+		while(current->next != NULL) {		
+			current = current->next;
+		}
+		current->next = newParam;	
+	}
+}
+
 void cparamsState(){
-	//TODO: param control
+	param callParameters = NULL;
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_RB:
 			break;
 		default:
-			cparamState();
-			ncparamState();
+			cparamState(&callParameters);
+			ncparamState(&callParameters);
 			break;
+	}
+
+	if (validateCallParams(symtable, functionName->data, callParameters)){
+		//FIXME: errorhandle
+		exit(-1);
 	}
 }
 
-void cparamState(){
+void cparamState(param *callParameters){
 	termState();
+	addParamToList(callParameters, type);
 }
 
-void ncparamState(){
+void ncparamState(param *callParameters){
 	bool loop = true;
 	while(loop){
 		getNEOLToken(attribute, &tokenSize);
 		switch(token){
 			case T_COMMA:
-				cparamState();
-				ncparamState();
+				token = getToken(attribute, &tokenSize);
+				cparamState(callParameters);
 				break;
 			case T_RB:
 				loop = false;
@@ -920,7 +967,7 @@ void branchState(){
 		printf("ERR\n"); exit(-1);
 	}
 	pushbackAttr(tokenSize);
-	val test = precedence_analysis(true);
+	precedence_analysis(true);
 	getNCheckToken(attribute, T_THEN);
 	getNCheckToken(attribute, T_EOL);
 	commandsState(T_ELSE);
@@ -963,18 +1010,19 @@ void typeState(){
 }
 
 void termState(){
+	//TODO: gen push instructions
 	switch(token){
 		case L_INT:
-			//TODO: 
+			type = INTEGER; 
 			break;
 		case L_FLOAT:
-			//TODO: 
+			type = DOUBLE;
 			break;
 		case L_STRING:
-			//TODO: 
+			type = STRING;
 			break;
 		case T_ID:
-			//TODO: 
+			type = nodeSearch(symtable, attribute->data)->symbol->type; 
 			break;
 		default:
 			// FIXME: handleError; 		

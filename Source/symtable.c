@@ -137,6 +137,14 @@ int insert_variable(nodePtr *Strom, char *name) {
 void insert_type(nodePtr Strom, char *name, int type) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
+
+	if (uzel->symbol->metaType == FUNCTION){
+		if (uzel->symbol->function.declared && uzel->symbol->defined && uzel->symbol->type != type){
+			//FIXME: errorHandle
+			exit(-1);
+		}
+	}
+
 	uzel->symbol->type = type;
 }
 
@@ -184,82 +192,173 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 
 // vlozit param do funkci
 
-int insert_function(nodePtr *Strom, bool declared, char *name) {
+void insert_function(nodePtr *Strom, bool declaration, char *name) {
 	nodePtr uzel;
-	//strcpy(tmp, name);
-	// generateKey(tmp, 2);
 	uzel = nodeSearch(*Strom, name);
 
-	loadPtr Content_of_Insert2 = saveMalloc(sizeof(struct load));
 
-	if(declared == true) {
+	if(declaration == true) {
 		// pokud chceme deklarovat
 		if(uzel != NULL) {
-			// pokud jiz uzel ve strome je - chyba
-			fprintf(stderr, "Chyba: Promenna jiz existje\n");
-			return FAIL;
+			//FIXME: 
+			exit(-1);
 		}
-		// else if(uzel->symbol->function.declared == 1) {
-		// 	fprintf(stderr, "Chyba: Funkce jiz byla deklarvana\n");
-		// 	return FAIL;
-		// }
 		else {
-			Content_of_Insert2->metaType = FUNCTION;
-			Content_of_Insert2->defined = false;
-			Content_of_Insert2->function.declared = true;
-			Content_of_Insert2->function.hasReturn = false;
+			loadPtr Content_of_Insert = saveMalloc(sizeof(struct load));
+			Content_of_Insert->metaType = FUNCTION;
+			Content_of_Insert->defined = false;
+			Content_of_Insert->function.declared = true;
+			Content_of_Insert->function.hasReturn = false;
 
-			nodeInsert(Strom, Content_of_Insert2, name);
-			return 0;			
+			nodeInsert(Strom, Content_of_Insert, name);
 		}
 	}
 	else {
-		// definice
 		if(uzel == NULL) {
-			fprintf(stderr, "Chyba: Promenna neexistuje\n");
-			return FAIL;
+			loadPtr Content_of_Insert = saveMalloc(sizeof(struct load));
+			Content_of_Insert->metaType = FUNCTION;
+			Content_of_Insert->defined = true;
+			Content_of_Insert->function.declared = false;
+			Content_of_Insert->function.hasReturn = false;
+
+			nodeInsert(Strom, Content_of_Insert, name);
 		}
 		else if(uzel->symbol->defined == 1) {
-			fprintf(stderr, "Chyba: Snaha o dvoji definici\n");
-			return FAIL;
+			exit(-1);
 		}
 		if(uzel->symbol->function.declared == 1)
 			uzel->symbol->defined = 1;
 	}
-	return 0;
 }
 
-int set_hasReturn(nodePtr Strom, char *name) {
+void set_hasReturn(nodePtr Strom, char *name) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);	
 	uzel->symbol->function.hasReturn = true;
-	return 0;
 }
 
-int insert_param(nodePtr Strom, char *name, parStruct *par) {
+void insert_param(nodePtr Strom, char *name, char *parName, int type, bool declaration) {
+	nodePtr function = nodeSearch(Strom, name);
+	
+	param newParam = saveMalloc(sizeof(struct parameters));
+	newParam->type = type;
+	strcpy(newParam->name, parName); 
+
+	if (declaration){
+		param *head = &function->symbol->function.declaredParameters;
+		if(*head == NULL) {
+			*head = newParam;
+		}	
+		else {
+			param current = *head;
+			while(current->next != NULL) {		
+				current = current->next;
+			}
+			current->next = newParam;	
+		}
+	}
+	else{
+		param *head = &function->symbol->function.parameters;
+		if(*head == NULL) {
+			*head = newParam;
+		}	
+		else {
+			param current = *head;
+			while(current->next != NULL) {		
+				current = current->next;
+			}
+			current->next = newParam;	
+		}
+	}
+}
+
+int validateDefinitionParameters(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);	
+
+	if (!uzel->symbol->function.declared)
+		return FINE;
 	
-	if(uzel->symbol->function.parameters == NULL) {
-		struct parameters *Par1 = saveMalloc(sizeof(*Par1));
-		(*Par1).type = (*par).type;
-		strcpy((*Par1).name, (*par).id);
-		uzel->symbol->function.parameters = &(*Par1);
-	}	
-	else {
-		param tmp = uzel->symbol->function.parameters;
-		printf("%s\n", tmp->name);
-		// &(*Par1) = uzel->symbol->function.parameters;
-		//printf("%s\n", (*Par1).name);
-		while(tmp->next != NULL) {		
-			tmp = tmp->next;
-		}
-		struct parameters *Par1 = saveMalloc(sizeof(*Par1));
-		(*Par1).type = (*par).type;
-		strcpy((*Par1).name, (*par).id);	
-		tmp->next = &(*Par1);		
+	param headDec = uzel->symbol->function.declaredParameters;
+	param headDef = uzel->symbol->function.parameters;
+
+	if (headDec == NULL && headDef == NULL)
+		return FINE;
+
+	if ((headDec == NULL && headDef != NULL) || (headDec != NULL && headDef == NULL))
+		return FAIL;
+
+	while (headDec != NULL && headDef != NULL){
+		if (headDec->type != headDef->type)
+			return FAIL;
+		
+		headDec = headDec->next;
+		headDef = headDef->next;
 	}
-	return 0;
+
+	if ((headDec == NULL && headDef != NULL) || (headDec != NULL && headDef == NULL))
+		return FAIL;
+
+	return FINE;
+}
+
+void validateFunctCall(nodePtr Strom, char *varName, char *functName){
+	nodePtr function = nodeSearch(Strom, functName);
+	nodePtr variable = nodeSearch(Strom, varName);
+
+	if (variable == NULL){
+		//FIXME: errorhandle
+		exit(-1);
+	}
+	
+	if (function == NULL){
+		//FIXME: errorhandle
+		exit(-2);
+	}
+
+	if (!function->symbol->defined && !function->symbol->function.declared){
+		//FIXME: errorhandle
+		exit(-3);
+	}
+
+	if (function->symbol->type != variable->symbol->type){
+		//FIXME: errorhandle
+		exit(-4);
+	}
+}
+
+int validateCallParams(nodePtr Strom, char *name, param callParams){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	param headDef;
+	
+	if (uzel->symbol->defined)
+		headDef = uzel->symbol->function.parameters;
+	else 
+		headDef = uzel->symbol->function.declaredParameters;
+		
+	param headCall = callParams;
+
+	if (headDef == NULL && headCall == NULL)
+		return FINE;
+
+	if ((headDef == NULL && headCall != NULL) || (headDef != NULL && headCall == NULL))
+		return FAIL;
+
+	while (headDef != NULL && headCall != NULL){
+		if (headDef->type != headCall->type)
+			return FAIL;
+		
+		headDef = headDef->next;
+		headCall = headCall->next;
+	}
+
+	if ((headDef == NULL && headDef != NULL) || (headDef != NULL && headDef == NULL))
+		return FAIL;
+
+	return FINE;
+
 }
 
 val getValue(nodePtr Strom, char *name){
