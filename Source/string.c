@@ -80,8 +80,8 @@ int stringAddData(String *s, char c) {
 /* Copy char to our String */
 int stringCpy(String *s, char* c) {
 
-	// Initialization check
-	if(s == NULL) if(stringInit(&s)) return INTERN_ERR;
+	// Completely clear String or Init
+	if(stringClear(s)) return INTERN_ERR;
 
 	// Copy char by char
 	for(int i = 0; c[i] != '\0'; i++) {
