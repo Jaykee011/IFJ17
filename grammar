@@ -1,83 +1,75 @@
-PROGRAM -> FUNCTIONS SCOPE eof
+PROGRAM     -> FUNCTIONS SCOPE eof
 
-FUNCTIONS -> FUNCTION FUNCTIONS
-FUNCTIONS -> EPSILON
+FUNCTIONS   -> FUNCTION FUNCTIONS
+FUNCTIONS   -> epsilon
 
-FUNCTION -> Declare Function id lb PARAMS rb As TYPE eol
-FUNCTION -> Function id lb PARAMS rb As TYPE eol BODY End Function
+FUNCTION    -> Declare Function id lb PARAMS rb As TYPE eol
+FUNCTION    -> Function id lb PARAMS rb As TYPE eol FCOMMANDS End Function
 
-PARAMS ->  PARAM NPARAM
-PARAMS ->  EPSILON 
+PARAMS      ->  PARAM NPARAM
+PARAMS      ->  epsilon 
 
-NPARAM -> comma PARAM NPARAM
-NPARAM -> EPSILON
+NPARAM      -> comma PARAM NPARAM
+NPARAM      -> epsilon
 
-PARAM -> id As TYPE
+PARAM       -> id As TYPE
 
-SCOPE -> Scope eol COMMANDS End Scope
+SCOPE       -> Scope eol SCOMMANDS End Scope
 
-BODY -> Return EXPR eol BODY
-BODY -> COMMANDS
+FCOMMANDS   -> FCOMMAND FCOMMANDS
+FCOMMANDS   -> COMMAND FCOMMANDS
+FCOMMANDS   -> SCOMMAND FCOMMANDS
+FCOMMANDS   -> epsilon
 
-COMMANDS -> COMMAND COMMANDS
-COMMANDS -> EPSILON
+FCOMMAND    -> Return EXPR eol
 
-COMMAND -> CCOMMAND
-COMMAND -> VARDEF eol
+SCOMMANDS   -> SCOMMAND SCOMMANDS
+SCOMMANDS   -> COMMAND SCOMMANDS
+SCOMMANDS   -> epsilon
 
-CCOMMANDS -> CCOMMAND
-CCOMMANDS -> EPSILON
+SCOMMAND    -> VARDEF eol
 
-CCOMMAND -> ASSIGNMENT eol
-CCOMMAND -> INPUT eol
-CCOMMAND -> PRINT eol
-CCOMMAND -> BRANCH eol
-CCOMMAND -> LOOP EOF
+COMMANDS    -> COMMAND COMMANDS
+COMMANDS    -> epsilon
 
-VARDEF -> Dim id As TYPE
-VARDEF -> Dim id As TYPE equals EXPR
+COMMAND     -> id equals INIT eol
+COMMAND     -> INPUT eol
+COMMAND     -> PRINT eol
+COMMAND     -> BRANCH eol
+COMMAND     -> LOOP eol
 
-ASSIGNMENT -> id equals EXPR
-ASSIGNMENT -> id equals FCALL
+VARDEF      -> Dim id As TYPE DEFINIT
 
-FCALL -> id lb CPARAMS rb
+DEFINIT     -> equals INIT
+DEFINIT     ->  epsilon
 
-CPARAMS -> CPARAM NCPARAM
-CPARAMS -> EPSILON
+INIT        -> EXPR
+INIT        -> FCALL
 
-NCPARAM -> , CPARAM NCPARAM
-NCPARAM -> EPSILON 
+FCALL       -> id lb CPARAMS rb
 
-CPARAM -> TERM
+CPARAMS     -> CPARAM NCPARAM
+CPARAMS     -> epsilon
 
-INPUT -> Input id
+NCPARAM     -> comma CPARAM NCPARAM
+NCPARAM     -> epsilon 
 
-PRINT -> EXPR; NEXPR
+CPARAM      -> TERM
 
-NEXPR -> EXPR; NEXPR
-NEXPR -> EPSILON
+INPUT       -> Input id
 
-BRANCH -> If EXPR Then eol CCOMMANDS Else eol CCOMMANDS End If
+PRINT       -> print EXPR semicolon NEXPR
 
-LOOP -> Do While EXPR eol CCOMMANDS Loop
+NEXPR       -> EXPR semicolon NEXPR
+NEXPR       -> epsilon
 
-TYPE -> Integer
-TYPE -> Double
-TYPE -> String
+BRANCH      -> If EXPR Then eol COMMANDS Else eol COMMANDS End If
 
-TERM -> literal
-TERM -> id
+LOOP        -> Do While EXPR eol COMMANDS Loop
 
-EXPR -> TERM
-EXPR -> EXPR plus EXPR
-EXPR -> EXPR minus EXPR
-EXPR -> EXPR times EXPR
-EXPR -> EXPR div EXPR
-EXPR -> EXPR gt EXPR
-EXPR -> EXPR lt EXPR
-EXPR -> EXPR gte EXPR
-EXPR -> EXPR lte EXPR
-EXPR -> EXPR idiv EXPR
-EXPR -> EXPR equals EXPR
-EXPR -> EXPR neq EXPR
-EXPR -> lb EXPR rb
+TYPE        -> Integer
+TYPE        -> Double
+TYPE        -> String
+
+TERM        -> literal
+TERM        -> id

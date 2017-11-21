@@ -17,6 +17,5 @@
 #include "symtable.h"
 #include "scanner.h"
 #include "parser.h"
-//#include "compiler.h"
 
 #endif

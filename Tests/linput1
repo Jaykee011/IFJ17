@@ -1,1 +1,7 @@
-9/8
+Scope 'Hlavni telo programu
+dim a as Integer
+'if 1<2 then
+a = 1
+'else
+'end if
+End Scope

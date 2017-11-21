@@ -12,6 +12,7 @@ String *variableName = NULL;
 char id[64] = "";
 char functId[64] = "";
 int type = 0; // 1 => int; 2 => double; 3 => string;
+int expressionType = 0; // 1 => int; 2 => double; 3 => string;
 tokenparam precedenceBuffer[100];
 int tokenSize;
 
@@ -45,24 +46,199 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 	result.i = 0;
 	result.d = 0.0;
 	result.s = NULL;
+	int firstType;
+	int secondType;
+	bool intOp = true;
 	stringInit(&(result.s));
 
-	if (mValue == NULL){
-		//TODO: comment
+	if (((tokenparam *)lValue)->token == PRLB && ((tokenparam *)rValue)->token == PRRB){
+		if (((tokenparam *)mValue)->data.i)
+			expressionType = INTEGER;
+		else if (((tokenparam *)mValue)->data.d)
+			expressionType = DOUBLE;
+		else{
+			expressionType = STRING;
+		}
+		return ((tokenparam *)mValue)->data;
+	}
+	else if (mValue == NULL){
+		if (((tokenparam *)lValue)->data.i)
+			expressionType = INTEGER;
+		else if (((tokenparam *)lValue)->data.d)
+			expressionType = DOUBLE;
+		else{
+			expressionType = STRING;
+		}
 		return ((tokenparam *)lValue)->data;
 	}
 	else{
-		//TODO: zavorka
+		if (((tokenparam *)lValue)->data.i)
+			firstType = INTEGER;
+		else if (((tokenparam *)lValue)->data.d)
+			firstType = DOUBLE;
+		else{
+			firstType = STRING;
+		}
+
+		if (((tokenparam *)rValue)->data.i)
+			secondType = INTEGER;
+		else if (((tokenparam *)rValue)->data.d)
+			secondType = DOUBLE;
+		else{
+			secondType = STRING;
+		}
+
+		if ((firstType == STRING && secondType != STRING) || (firstType != STRING && secondType == STRING)){
+			//FIXME: errorhandle
+			exit(-1);
+		}
+
+		if (firstType == DOUBLE || secondType == DOUBLE){
+			//FIXME: conversion
+			if (firstType == INTEGER){
+				((tokenparam *)lValue)->data.d = ((tokenparam *)lValue)->data.i;
+				firstType = DOUBLE;
+			}
+			else if (secondType == INTEGER){
+				((tokenparam *)rValue)->data.d = ((tokenparam *)rValue)->data.i;
+				secondType = DOUBLE;
+			}
+			intOp = false;
+		}
+
+		//FIXME: TOTO CELE NEMA DELAT KOMPILATOR, MUSI SE TO NAHRADIT GENEROVANIM INSTRUKCI
 		switch(((tokenparam *)mValue)->token){
 			case PRPLUS:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: generate concat
+					expressionType = STRING;
+				}
+				else if (intOp){
+					result.i = (((tokenparam *)lValue)->data.i + ((tokenparam *)rValue)->data.i) ;
+					expressionType = INTEGER;
+				}
+				else{
+					result.d = (((tokenparam *)lValue)->data.d + ((tokenparam *)rValue)->data.d) ;
+					expressionType = DOUBLE;
+				}
+				break;
+			case PRMINUS:
 				//FIXME: posefit datove typy
-				result.i = (((tokenparam *)lValue)->data.i + ((tokenparam *)rValue)->data.i) ;
-				return result;
+				if (intOp){
+					result.i = (((tokenparam *)lValue)->data.i - ((tokenparam *)rValue)->data.i) ;
+					expressionType = INTEGER;
+				}
+				else{
+					result.d = (((tokenparam *)lValue)->data.d - ((tokenparam *)rValue)->data.d) ;
+					expressionType = DOUBLE;
+				}
+				break;
+			case PRTIMES:
+				if (intOp){
+					result.i = (((tokenparam *)lValue)->data.i * ((tokenparam *)rValue)->data.i) ;
+					expressionType = INTEGER;
+				}
+				else{
+					result.d = (((tokenparam *)lValue)->data.d * ((tokenparam *)rValue)->data.d) ;
+					expressionType = DOUBLE;
+				}
+				break;
+			case PRDIV:
+				if (intOp){
+					result.d = (double)(((tokenparam *)lValue)->data.i / ((tokenparam *)rValue)->data.i) ;
+				}
+				else{
+					result.d = (((tokenparam *)lValue)->data.d / ((tokenparam *)rValue)->data.d) ;
+				}
+				expressionType = DOUBLE;
+				break;
+			case PRIDIV:
+				if (firstType == INTEGER && secondType == INTEGER){
+					result.i = (((tokenparam *)lValue)->data.i / ((tokenparam *)rValue)->data.i) ;
+				}
+				else{
+					//FIXME: errorHandle
+					exit(-1);
+				}
+				expressionType = INTEGER;
+				break;
+			case PRLT:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i < ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d < ((tokenparam *)rValue)->data.d);
+				}
+				break;
+			case PRGT:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i > ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d > ((tokenparam *)rValue)->data.d);
+				}
+				break;
+			case PRELT:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i <= ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d <= ((tokenparam *)rValue)->data.d);
+				}
+				break;
+			case PREGT:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i >= ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d >= ((tokenparam *)rValue)->data.d);
+				}
+				break;
+			case PREQUAL:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i == ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d == ((tokenparam *)rValue)->data.d);
+				}
+				break;
+			case PRNEQ:
+				if (firstType == STRING && secondType == STRING){
+					//TODO: strcmp
+					expressionType = BOOLEAN;
+				}
+				else if (intOp){ 
+					result.b = (((tokenparam *)lValue)->data.i != ((tokenparam *)rValue)->data.i);
+				}
+				else{
+					result.b = (((tokenparam *)lValue)->data.d != ((tokenparam *)rValue)->data.d);
+				}
 				break;
 			default:
 				//TODO: errorHandle
 				break;
 		}
+		return result;
 	}
 }
 
@@ -104,7 +280,7 @@ void replaceY(tStack *stack, char a){ // <y za A
 	if (i == 1)
 		result = evalExpr(&buffer[0],NULL, NULL); //TODO: comment
 	else
-		result = evalExpr(&buffer[0],&buffer[1], &buffer[2]); //TODO: comment
+		result = evalExpr(&buffer[2],&buffer[1], &buffer[0]); //TODO: comment
 
 	NONTtoken.data = result;
 	pop(stack, &buffer[i]);
@@ -222,11 +398,13 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	}
 }
 
-void testTokens(){ // imput token string control
+void testTokens(bool boolExpected){ // imput token string control
 	bool compareTokenExists = 0; // compare token exists
 	bool previousNonId = 0; // previous non-ID
 	int leftBracktCounter = 0; // left brackt counter
-	for(int i = 0;(token = getToken(attribute,&tokenSize)) != T_EOL; i++){
+	bool loop = true;
+	for(int i = 0; loop; i++){
+		token = getToken(attribute,&tokenSize);
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
 			case T_ID:
@@ -270,7 +448,11 @@ void testTokens(){ // imput token string control
 			case T_GTE:
 			case T_LTE:
 			case T_EQ:
-			case T_NEQ:	
+			case T_NEQ:
+				if (!boolExpected){
+					//TODO: errorhandle
+					exit(-1);
+				}	
 				if(compareTokenExists == 0){
 					compareTokenExists = 1;
 					previousNonId = 0;
@@ -281,14 +463,16 @@ void testTokens(){ // imput token string control
 				}
 				break;
 			default:
-				exit(SYN_ERR);
+				pushbackAttr(tokenSize);
+				loop=false;
+				//exit(SYN_ERR);
 				break;
 		}
 	}
 }
 
-struct value precedence_analysis(){
-	testTokens();
+struct value precedence_analysis(bool boolExpected){
+	testTokens(boolExpected);
 	tStack stack;	
 	stackInit(&stack);
 	tokenparam firstToken, b;
@@ -533,13 +717,12 @@ void scommandState(){
 }
 
 void vardefState(){
-	//TODO: storeVariable
 	getNCheckToken(variableName, T_ID);
 	insert_variable(&symtable, variableName->data);
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
-	insert_variable_type(symtable, variableName->data, type);
+	insert_type(symtable, variableName->data, type);
 	definitState();
 }
 
@@ -562,6 +745,7 @@ void initState(){
 	stringInit(&storedAttr);
 	int storedSize;
 	getNEOLToken(storedAttr, &storedSize);
+	val precedenceResult;
 	switch(token){
 		case T_ID:
 			getNEOLToken(attribute, &tokenSize);
@@ -578,8 +762,8 @@ void initState(){
 		case L_STRING:
 			//FIXME: 
 			pushbackAttr(storedSize);
-			insert_value(symtable, variableName->data, type, precedence_analysis());
-			//TODO: initialize variable
+			precedenceResult = precedence_analysis(false);
+			insert_value(symtable, variableName->data, type, precedenceResult, expressionType);
 			break;
 		default:
 			// FIXME: handleError; 		
@@ -655,6 +839,7 @@ void commandsState(int finalizingToken){
 void commandState(){
 	switch(token){
 		case T_ID:
+			stringCpy(variableName, attribute->data);
 			getNCheckToken(attribute, T_EQ);
 			initState();
 			break;
@@ -679,21 +864,22 @@ void commandState(){
 
 void inputState(){
 	getNCheckToken(attribute, T_ID);
+	//FIXME: udelat fci checkExistence
+	if (nodeSearch(symtable, attribute->data) == NULL){
+		//FIXME: errorHandle
+		exit(-1);
+	}
 	//TODO: input gen
 }
 
 void printState(){
 	//TODO: print gen
 	getNEOLToken(attribute, &tokenSize);
-	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
-		// FIXME: handleError; 		
-		printf("ERR\n"); exit(-1);
-	}
-	//FIXME: 
-	//pushbackAttr(tokenSize);
-	//TODO: precedenceAnalysis
+	pushbackAttr(tokenSize);
+	precedence_analysis(false);
 	getNCheckToken(attribute, T_SEMICOLON);
 	nexprState();
+	//TODO: generate print
 }
 
 void nexprState(){
@@ -705,9 +891,8 @@ void nexprState(){
 			case L_INT:
 			case L_FLOAT:
 			case L_STRING:
-				//FIXME: 
-				//pushbackAttr(tokenSize);
-				//TODO: precedenceAnalysis
+				pushbackAttr(tokenSize);
+				precedence_analysis(false);
 				getNCheckToken(attribute, T_SEMICOLON);	
 				break;			
 			case T_EOL:
@@ -716,11 +901,9 @@ void nexprState(){
 				break;
 			
 			default:
-				pushbackAttr(tokenSize);
-				loop = false;
-				break;
 				// FIXME: handleError; 		
 				printf("ERR\n"); exit(-1);
+				break;
 		}
 	}
 }
@@ -732,15 +915,16 @@ void branchState(){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
 	}
-	//FIXME: 
-	//pushbackAttr(tokenSize);
-	//TODO: precedenceAnalysis
+	
+	pushbackAttr(tokenSize);
+	precedence_analysis(false);
 	getNCheckToken(attribute, T_THEN);
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	getNCheckToken(attribute, T_EOL);
 	commandsState(T_ELSE);
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	getNCheckToken(attribute, T_EOL);
 	commandsState(T_END);
 	getNCheckToken(attribute, T_IF);
+	getNCheckToken(attribute, T_EOL);
 }
 
 void loopState(){
@@ -761,13 +945,13 @@ void loopState(){
 void typeState(){
 	switch(token){
 		case T_INTEGER:
-			type = 1;
+			type = INTEGER;
 			break;
 		case T_DOUBLE:
-			type = 2;
+			type = DOUBLE;
 			break;
 		case T_STRING:
-			type = 3;
+			type = STRING;
 			break;
 		default:
 			// FIXME: handleError; 		
@@ -794,10 +978,3 @@ void termState(){
 			printf("ERR\n"); exit(-1);
 	}
 }
-// int main() {
-// 	openInput("../Tests/linput1");
-// 	//printf("weadcsad\n");
-// 	//parse();
-// 	precedence_analysis();
-// 	printf("úspěch syntaktické analýzy\n");
-// }

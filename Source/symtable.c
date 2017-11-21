@@ -96,17 +96,17 @@ void nodeDelete(nodePtr *tree, char *K) {
 	}
 }
 
-void generateKey(char symbolName[64], int metaType) {
-	// TODO - udelat ze vseho lower case
-	// variable
-	if(metaType == 1) {
-		strcat(symbolName, "v");
-	}
-	// function
-	else if(metaType == 2) {
-		strcat(symbolName, "f");
-	}
-}
+// void generateKey(char symbolName[64], int metaType) {
+// 	// TODO - udelat ze vseho lower case
+// 	// variable
+// 	if(metaType == 1) {
+// 		strcat(symbolName, "v");
+// 	}
+// 	// function
+// 	else if(metaType == 2) {
+// 		strcat(symbolName, "f");
+// 	}
+// }
 
 
 
@@ -127,20 +127,20 @@ int insert_variable(nodePtr *Strom, char *name) {
 		//TODO: if value == NULL, pak se jedna o definici
 		// pokud se jedna o inicializaci, musi uz byt definovana
 		Content_of_Insert2->defined = 1;
-		Content_of_Insert2->metaType = 1;
+		Content_of_Insert2->metaType = VARIABLE;
 		stringInit(&(Content_of_Insert2->value.s));
 		nodeInsert(Strom, Content_of_Insert2, name);
 	}
 	return 0;
 }
 
-void insert_variable_type(nodePtr Strom, char *name, int type) {
-	nodePtr variable;
-	variable = nodeSearch(Strom, name);
-	variable->symbol->type = type;
+void insert_type(nodePtr Strom, char *name, int type) {
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+	uzel->symbol->type = type;
 }
 
-void insert_value(nodePtr Strom, char *name, int type, val data) {
+void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
 
@@ -149,13 +149,28 @@ void insert_value(nodePtr Strom, char *name, int type, val data) {
 		exit(FAIL);
 	}
 	switch(type){
-		case 1:
-			uzel->symbol->value.i = data.i;
+		case INTEGER:
+			if (valueType == INTEGER)
+				uzel->symbol->value.i = data.i;
+			else if (valueType == DOUBLE)
+				uzel->symbol->value.i = data.d;
+			else{
+				//FIXME: errorHandle
+			}
 			break;
-		case 2:
-			uzel->symbol->value.d = data.d;
+		case DOUBLE:
+			if (valueType == INTEGER)
+				uzel->symbol->value.d = data.i;
+			else if (valueType == DOUBLE)
+				uzel->symbol->value.d = data.d;
+			else{
+				//FIXME: errorHandle
+			}
 			break;
-		case 3:
+		case STRING:
+			if (valueType != STRING){
+				//FIXME: errorHandle
+			}
 			stringInit(&uzel->symbol->value.s);
 			concatToString(uzel->symbol->value.s, data.s->data);
 			break;
@@ -164,13 +179,13 @@ void insert_value(nodePtr Strom, char *name, int type, val data) {
 			exit(FAIL);
 			break;
 	}
+	uzel->symbol->initialized = true;
 }
 
 // vlozit param do funkci
 
 int insert_function(nodePtr *Strom, bool declared, char *name) {
 	nodePtr uzel;
-	char tmp[1000];
 	//strcpy(tmp, name);
 	// generateKey(tmp, 2);
 	uzel = nodeSearch(*Strom, name);
@@ -189,7 +204,7 @@ int insert_function(nodePtr *Strom, bool declared, char *name) {
 		// 	return FAIL;
 		// }
 		else {
-			Content_of_Insert2->metaType = 2;
+			Content_of_Insert2->metaType = FUNCTION;
 			Content_of_Insert2->defined = false;
 			Content_of_Insert2->function.declared = true;
 			Content_of_Insert2->function.hasReturn = false;
@@ -214,32 +229,16 @@ int insert_function(nodePtr *Strom, bool declared, char *name) {
 	return 0;
 }
 
-int insert_type_into_f(nodePtr Strom, char *name, int type) {
-	nodePtr uzel;
-	char tmp[1000];
-	strcpy(tmp, name);
-	generateKey(tmp,2);
-	uzel = nodeSearch(Strom, tmp);	
-	uzel->symbol->type = type;
-	return 0;
-}
-
 int set_hasReturn(nodePtr Strom, char *name) {
 	nodePtr uzel;
-	char tmp[1000];
-	strcpy(tmp, name);
-	generateKey(tmp,2);
-	uzel = nodeSearch(Strom, tmp);	
+	uzel = nodeSearch(Strom, name);	
 	uzel->symbol->function.hasReturn = true;
 	return 0;
 }
 
 int insert_param(nodePtr Strom, char *name, parStruct *par) {
 	nodePtr uzel;
-	char tmp[1000];
-	strcpy(tmp, name);
-	generateKey(tmp,2);
-	uzel = nodeSearch(Strom, tmp);	
+	uzel = nodeSearch(Strom, name);	
 	
 	if(uzel->symbol->function.parameters == NULL) {
 		struct parameters *Par1 = saveMalloc(sizeof(*Par1));

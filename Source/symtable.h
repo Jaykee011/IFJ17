@@ -31,6 +31,7 @@ typedef struct value {
     int i;
     double d;
     String *s;
+    bool b;
 } val;
 
 struct parameters{
@@ -48,6 +49,7 @@ typedef struct {
 
 typedef struct load {
     bool defined; // TODO: -automatiky na 1
+    bool initialized;
     int type; // 1 => int; 2 => double; 3 => string; 
     int metaType; // 1 => variable; 2 => function;
     val value;
@@ -69,7 +71,7 @@ nodePtr nodeSearch(nodePtr, char*);
 void generateKey(char *symbolName, int metaType);
 int insert_variable(nodePtr *, char *name);
 void insert_variable_type(nodePtr, char *, int);
-void insert_value(nodePtr, char *name, int type, val data);
+void insert_value(nodePtr, char *name, int type, val data, int valueType);
 int insert_function(nodePtr *, bool declared, char *name);
 int insert_type_into_f(nodePtr, char *name, int type);
 int set_hasReturn(nodePtr, char *name);
