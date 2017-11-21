@@ -105,7 +105,6 @@ int getToken(String *s, int *cursor){
 
 			/* String like !"Hello world"	*/
 			case LEX_NOT:
-				if(isspace(c)) continue;
 				if(c == '"') shunt = LEX_STRING;
 				else return LEX_ERR;
 				break;
@@ -158,12 +157,16 @@ int getToken(String *s, int *cursor){
 			/* > or >= */
 			case LEX_GREATER:
 				if(c == '=') return T_GTE;
+				ungetc(c, s_inputFile);
+				(*cursor)--;
 				return T_GT;
 
 			/* < or <= or <> */
 			case LEX_SMALLER:
 				if(c == '=') return T_LTE;
 				else if(c == '>') return T_NEQ;
+				ungetc(c, s_inputFile);
+				(*cursor)--;
 				return T_LT;
 
 			/* Comment like 'comm */

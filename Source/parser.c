@@ -875,6 +875,10 @@ void inputState(){
 void printState(){
 	//TODO: print gen
 	getNEOLToken(attribute, &tokenSize);
+	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		// FIXME: handleError; 		
+		printf("ERR\n"); exit(-1);
+	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(false);
 	getNCheckToken(attribute, T_SEMICOLON);
@@ -915,9 +919,8 @@ void branchState(){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
 	}
-	
 	pushbackAttr(tokenSize);
-	precedence_analysis(false);
+	val test = precedence_analysis(true);
 	getNCheckToken(attribute, T_THEN);
 	getNCheckToken(attribute, T_EOL);
 	commandsState(T_ELSE);
@@ -935,11 +938,11 @@ void loopState(){
 		// FIXME: handleError; 		
 		printf("ERR\n"); exit(-1);
 	}
-	//FIXME: 
-	//pushbackAttr(tokenSize);
-	//TODO: precedenceAnalysis
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	pushbackAttr(tokenSize);
+	precedence_analysis(true);
+	getNCheckToken(attribute, T_EOL);
 	commandsState(T_LOOP);
+	getNCheckToken(attribute, T_EOL);
 }
 
 void typeState(){
