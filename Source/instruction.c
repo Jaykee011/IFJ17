@@ -28,7 +28,7 @@ int openOutput(char *s) {
 void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2, char *f3) {
 	
 	// There is a possibility of infinite String in there
-	String *format;
+	String *format = NULL;
 	stringInit(&format);
 	stringClear(format);
 
