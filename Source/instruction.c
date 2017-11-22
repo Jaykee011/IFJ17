@@ -25,7 +25,7 @@ int openOutput(char *s) {
 }
 
 /* Universal function to add an instruction */
-void instruction(char *s, String *a1, String *a2, String *a3) {
+void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2, char *f3) {
 	
 	// There is a possibility of infinite String in there
 	String *format;
@@ -38,18 +38,33 @@ void instruction(char *s, String *a1, String *a2, String *a3) {
 	// Add first argument
 	if(a1 != NULL) {
 		stringAddData(format, ' ');
+
+		if(f1 != NULL) {
+			concatToString(format, f1);
+			stringAddData(format, '@');
+		}
 		concatToString(format, a1->data);
 	}
 
 	// Add second argument
 	if(a2 != NULL) {
 		stringAddData(format, ' ');
+
+		if(f2 != NULL) {
+			concatToString(format, f2);
+			stringAddData(format, '@');
+		}
 		concatToString(format, a2->data);
 	}
 
 	// Add thirth argument
 	if(a3 != NULL) {
 		stringAddData(format, ' ');
+
+		if(f3 != NULL) {
+			concatToString(format, f3);
+			stringAddData(format, '@');
+		}
 		concatToString(format, a3->data);
 	}
 
