@@ -12,6 +12,9 @@ String *attribute = NULL;
 String *variableName = NULL;
 String *functionName = NULL;
 String *inFunction = NULL;
+String *operand1 = NULL;
+String *operand2 = NULL;
+String *operand3 = NULL;
 int type = 0; // 1 => int; 2 => double; 3 => string;
 int expressionType = 0; // 1 => int; 2 => double; 3 => string;
 tokenparam precedenceBuffer[100];
@@ -537,6 +540,11 @@ bool parse(){
 	stringInit(&variableName);
 	stringInit(&functionName);
 	stringInit(&inFunction);
+	stringInit(&operand1);
+	stringInit(&operand2);
+	stringInit(&operand3);
+stringCpy(operand1, "SCOPE");
+instruction("JUMP", operand1, NULL, NULL);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
@@ -593,7 +601,7 @@ void functionState(){
 		case T_FUNCTION:
 			getNCheckToken(functionName, T_ID);
 			stringCpy(inFunction, functionName->data);
-			
+		instruction("LABEL", functionName, NULL, NULL);
 			insert_function(&symtable, false, functionName->data);
 
 			getNCheckToken(attribute, T_LB);
@@ -612,11 +620,10 @@ void functionState(){
 			currentSymtable = &nodeSearch(symtable, functionName->data)->symbol->function.functTable;
 			fcommandsState();
 			currentSymtable = &symtable;
-
-
 			getNCheckToken(attribute, T_FUNCTION);
 			getNCheckToken(attribute, T_EOL);
 			setFunctionDefined(symtable, inFunction->data);
+instruction("RETURN", NULL, NULL, NULL);
 			getNEOLToken(attribute, &tokenSize);
 			break;
 		default:
@@ -627,6 +634,8 @@ void functionState(){
 
 void scopeState(){
 	getNCheckToken(attribute, T_EOL);
+stringCpy(operand1, "SCOPE");
+instruction("LABEL", operand1, NULL, NULL);
 	scommandsState();
 	getNCheckToken(attribute, T_SCOPE);
 }
@@ -801,6 +810,7 @@ void fcallState(){
 	validateFunctCall(symtable, *currentSymtable, variableName->data, functionName->data);
 
 	cparamsState();
+instruction("CALL", functionName, NULL, NULL);
 }
 
 /*//TODO: comment*/
