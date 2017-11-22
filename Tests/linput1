@@ -4,9 +4,11 @@
 Declare functIOn test(a as integer) aS Integer
 
 functIOn test(a as integer) aS Integer
+dim a as Integer
+a = test(5)
 eND FuNcTIOn
 
 
 Scope 'Hlavni telo programu
-dim a as Integer=test()
+dim a as Integer=test(1)
 End Scope

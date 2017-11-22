@@ -11,11 +11,12 @@ int tokenSize;
 String *attribute = NULL;
 String *variableName = NULL;
 String *functionName = NULL;
+String *inFunction = NULL;
 int type = 0; // 1 => int; 2 => double; 3 => string;
 int expressionType = 0; // 1 => int; 2 => double; 3 => string;
 tokenparam precedenceBuffer[100];
 
-//FIXME: nodePtr localSymtable // lokalni tabulka symbolu 
+nodePtr *currentSymtable; // lokalni tabulka symbolu 
 extern nodePtr symtable;
 
 //precedence table
@@ -89,8 +90,7 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 		}
 
 		if ((firstType == STRING && secondType != STRING) || (firstType != STRING && secondType == STRING)){
-			//FIXME: errorhandle
-			exit(-1);
+			error(TYPE_ERR);
 		}
 
 		if (firstType == DOUBLE || secondType == DOUBLE){
@@ -157,8 +157,7 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 					result.i = (((tokenparam *)lValue)->data.i / ((tokenparam *)rValue)->data.i) ;
 				}
 				else{
-					//FIXME: errorHandle
-					exit(-1);
+					error(TYPE_ERR);
 				}
 				expressionType = INTEGER;
 				break;
@@ -235,7 +234,7 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 				}
 				break;
 			default:
-				//TODO: errorHandle
+				error(SYN_ERR);
 				break;
 		}
 		return result;
@@ -245,7 +244,7 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 int stackInit(tStack *stack) { // stack inicialization
 
 	if (!stack)
-		return INTERN_ERR;
+		error(INTERN_ERR);
 	stack->top = -1;
 	return FINE;
 }
@@ -253,7 +252,7 @@ int stackInit(tStack *stack) { // stack inicialization
 int push(tStack *stack, tokenparam token) { // pushes new terminal to stack
 	
 	if (stack->top == STACK_SIZE) // if stack is full
-		return INTERN_ERR;
+		error(INTERN_ERR);
 	stack->top++;
 	stack->arr[stack->top].token = token.token;
 	stack->arr[stack->top].data = token.data;
@@ -262,7 +261,7 @@ int push(tStack *stack, tokenparam token) { // pushes new terminal to stack
 int pop(tStack *stack, tokenparam *token) { // pops top token
 	
 	if (stack->top == -1)
-		return INTERN_ERR;
+		error(INTERN_ERR);
 	*token = stack->arr[stack->top];
 	stack->top--;
 	return FINE;
@@ -284,7 +283,7 @@ void replaceY(tStack *stack, char a){ // <y za A
 
 	NONTtoken.data = result;
 	pop(stack, &buffer[i]);
-	push(stack, NONTtoken);//TODO: dat hodnotu z evalexpr
+	push(stack, NONTtoken);
 }
 
 void changeA(tStack *stack, char a){ // a za a<
@@ -304,20 +303,20 @@ void changeA(tStack *stack, char a){ // a za a<
 
 int top(tStack *stack){
 	if (stack->top == -1)
-		return INTERN_ERR;
+		error(INTERN_ERR);
 	return stack->arr[stack->top].token;
 }
 
 char topTerm(tStack *stack) { // returns terminal closes to the top of the stack
 
 	if (stack->top == -1)
-		return INTERN_ERR;
+		error(INTERN_ERR);
 	for (int i = stack->top; i >= 0; i--)
 		if (stack->arr[i].token != 15 && stack->arr[i].token != 16 && stack->arr[i].token != 17)
 		{
 			return stack->arr[i].token;
 		}
-	return INTERN_ERR;
+	error(INTERN_ERR);
 }
 
 
@@ -405,10 +404,13 @@ void testTokens(bool boolExpected){ // imput token string control
 	bool loop = true;
 	for(int i = 0; loop; i++){
 		token = getToken(attribute,&tokenSize);
+		if (token == LEX_ERR){
+			error(LEX_ERR);
+		}
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
 			case T_ID:
-				precedenceBuffer[i].data = getValue(symtable, attribute->data);
+				precedenceBuffer[i].data = getValue(*currentSymtable, attribute->data);
 				previousNonId =	0;
 				break;		
 			case L_INT:
@@ -439,8 +441,7 @@ void testTokens(bool boolExpected){ // imput token string control
 					previousNonId = 1;
 				}
 				else if (previousNonId == 1){
-					printf("Dvě non-ID za sebou\n");
-					exit(SYN_ERR); 
+					error(SYN_ERR); 
 				}
 				break;
 			case T_LT:
@@ -450,22 +451,19 @@ void testTokens(bool boolExpected){ // imput token string control
 			case T_EQ:
 			case T_NEQ:
 				if (!boolExpected){
-					//TODO: errorhandle
-					exit(-1);
+					error(SYN_ERR);
 				}	
 				if(compareTokenExists == 0){
 					compareTokenExists = 1;
 					previousNonId = 0;
 				}
 				else{
-					printf("Více porovnání, než může být\n");
-					exit(SYN_ERR); 
+					error(SYN_ERR); 
 				}
 				break;
 			default:
 				pushbackAttr(tokenSize);
 				loop=false;
-				//exit(SYN_ERR);
 				break;
 		}
 	}
@@ -510,6 +508,8 @@ struct value precedence_analysis(bool boolExpected){
 void getNEOLToken(String *s, int *size){
 	while(1){
 		token = getToken(s,size);
+		if (token == LEX_ERR)
+			error(LEX_ERR);
 		if (token == T_EOL){
 			continue;
 		}
@@ -522,10 +522,12 @@ void getNCheckToken(String *s, int t){
 		token = getToken(s,&tokenSize);
 	else
 		getNEOLToken(s, &tokenSize);
+	
+	if (token == LEX_ERR)
+			error(LEX_ERR);
 
 	if (token != t){
-		// FIXME: handleError;
-		printf("%d\n", token); exit(-1);
+		error(SYN_ERR);
 	}
 }
 
@@ -533,6 +535,7 @@ bool parse(){
 	stringInit(&attribute);
 	stringInit(&variableName);
 	stringInit(&functionName);
+	stringInit(&inFunction);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
@@ -542,8 +545,7 @@ bool parse(){
 			scopeState();
 			break;
 		default:
-			// FIXME: handleError;
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 		}
 	getNEOLToken(attribute, &tokenSize);
 	
@@ -560,8 +562,7 @@ void functionsState(){
 				break;
 			default:
 				if (token != T_SCOPE){
-					//FIXME: errorhandle
-					exit(-1);
+					error(SYN_ERR);
 				}
 				loop = false;
 				break;
@@ -589,7 +590,8 @@ void functionState(){
 			getNEOLToken(attribute, &tokenSize);
 			break;
 		case T_FUNCTION:
-			getNCheckToken(attribute, T_ID);
+			getNCheckToken(functionName, T_ID);
+			stringCpy(inFunction, functionName->data);
 			
 			insert_function(&symtable, false, functionName->data);
 
@@ -597,8 +599,7 @@ void functionState(){
 			
 			paramsState(false);
 			if (validateDefinitionParameters(symtable, functionName->data)){
-				//FIXME: errorhandle
-				exit(-1);
+				error(TYPE_ERR);
 			}
 
 			getNCheckToken(attribute, T_AS);
@@ -607,13 +608,18 @@ void functionState(){
 
 			insert_type(symtable, functionName->data, type);
 
+			currentSymtable = &nodeSearch(symtable, functionName->data)->symbol->function.functTable;
 			fcommandsState();
+			currentSymtable = &symtable;
+
+
 			getNCheckToken(attribute, T_FUNCTION);
 			getNCheckToken(attribute, T_EOL);
+			setFunctionDefined(symtable, inFunction->data);
 			getNEOLToken(attribute, &tokenSize);
 			break;
 		default:
-			//FIXME:
+			error(SYN_ERR);
 			break;
 	}
 }
@@ -634,8 +640,7 @@ void paramsState(bool declaration){
 		case T_RB:
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 			break;
 	}
 }
@@ -656,14 +661,12 @@ void nparamState(bool declaration){
 			case T_COMMA:
 				getNCheckToken(variableName, T_ID);
 				paramState(declaration);
-				//TODO: add param
 				break;
 			case T_RB:
 				loop = false;
 				break;
 			default:
-				// FIXME: handleError; 		
-				printf("ERR\n"); exit(-1);
+				error(SYN_ERR);
 		}
 	}
 }
@@ -690,21 +693,24 @@ void fcommandsState(){
 				loop = false;
 				break;
 			default:
-				// FIXME: handleError; 		
-				printf("ERR\n"); exit(-1);
+				error(SYN_ERR);
 		}
 	}
 }
 
 void fcommandState(){
 	getNEOLToken(attribute, &tokenSize);
-	if (token == T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
-		// FIXME: handleError; 		printf("ERR\n"); exit(-1);
+	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+		error(SYN_ERR);
 	}
-	//FIXME: 
+	//TODO: gen return
 	pushbackAttr(tokenSize);
-	//TODO: precedenceAnalysis
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	precedence_analysis(false);
+	//FIXME: osetrit
+	if (expressionType != nodeSearch(symtable, inFunction->data)->symbol->type)
+		error(TYPE_ERR);
+	getNCheckToken(attribute, T_EOL);
+	set_hasReturn(symtable, inFunction->data);
 }
 
 void scommandsState(){
@@ -726,8 +732,7 @@ void scommandsState(){
 				loop = false;
 				break;
 			default:
-				// FIXME: handleError; 		
-				printf("ERR\n"); exit(-1);
+				error(SYN_ERR);
 		}
 	}
 }
@@ -738,16 +743,19 @@ void scommandState(){
 
 void vardefState(){
 	getNCheckToken(variableName, T_ID);
-	insert_variable(&symtable, variableName->data);
+	insert_variable(currentSymtable, variableName->data);
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
-	insert_type(symtable, variableName->data, type);
+	insert_type(*currentSymtable, variableName->data, type);
 	definitState();
 }
 
 void definitState(){
 	token = getToken(attribute, &tokenSize);
+	if (token == LEX_ERR){
+		error(LEX_ERR);
+	}
 	switch(token){
 		case T_EQ:
 			initState();
@@ -755,8 +763,7 @@ void definitState(){
 		case T_EOL:
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 	}
 }
 
@@ -775,29 +782,27 @@ void initState(){
 				break;
 			}
 			else{
-				//FIXME: 
 				pushbackAttr(tokenSize);
 			}
 		case L_INT:
 		case L_FLOAT:
 		case L_STRING:
-			//FIXME: 
 			pushbackAttr(storedSize);
 			precedenceResult = precedence_analysis(false);
-			insert_value(symtable, variableName->data, type, precedenceResult, expressionType);
+			insert_value(*currentSymtable, variableName->data, type, precedenceResult, expressionType);
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 	}
 }
 
 void fcallState(){
-	validateFunctCall(symtable, variableName->data, functionName->data);
+	validateFunctCall(symtable, *currentSymtable, variableName->data, functionName->data);
 
 	cparamsState();
 }
 
+/*//TODO: comment*/
 void addParamToList(param *paramList, int t){
 	param *head = paramList;
 
@@ -829,8 +834,7 @@ void cparamsState(){
 	}
 
 	if (validateCallParams(symtable, functionName->data, callParameters)){
-		//FIXME: errorhandle
-		exit(-1);
+		error(TYPE_ERR);
 	}
 }
 
@@ -846,14 +850,16 @@ void ncparamState(param *callParameters){
 		switch(token){
 			case T_COMMA:
 				token = getToken(attribute, &tokenSize);
+				if (token == LEX_ERR){
+					error(LEX_ERR);
+				}
 				cparamState(callParameters);
 				break;
 			case T_RB:
 				loop = false;
 				break;
 			default:
-				// FIXME: handleError; 		
-				printf("ERR\n"); exit(-1);
+				error(SYN_ERR);
 		}
 	}
 }
@@ -876,8 +882,7 @@ void commandsState(int finalizingToken){
 					break;
 				}
 				else{
-					// FIXME: handleError; 		
-					printf("ERR\n"); exit(-1); 
+					error(SYN_ERR);
 				}
 		}
 	}
@@ -903,18 +908,15 @@ void commandState(){
 			loopState();
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 	}
-	//FIXME: getNCheckToken(attribute, T_EOL);
+	getNCheckToken(attribute, T_EOL);
 }
 
 void inputState(){
 	getNCheckToken(attribute, T_ID);
-	//FIXME: udelat fci checkExistence
-	if (nodeSearch(symtable, attribute->data) == NULL){
-		//FIXME: errorHandle
-		exit(-1);
+	if (nodeSearch(*currentSymtable, attribute->data) == NULL){
+		error(DEF_ERR);
 	}
 	//TODO: input gen
 }
@@ -923,8 +925,7 @@ void printState(){
 	//TODO: print gen
 	getNEOLToken(attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
-		// FIXME: handleError; 		
-		printf("ERR\n"); exit(-1);
+		error(SYN_ERR);
 	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(false);
@@ -937,6 +938,9 @@ void nexprState(){
 	bool loop = true;
 	while(loop){
 		token = getToken(attribute, &tokenSize);
+		if (token == LEX_ERR){
+			error(LEX_ERR);
+		}
 		switch(token){
 			case T_ID:
 			case L_INT:
@@ -952,8 +956,7 @@ void nexprState(){
 				break;
 			
 			default:
-				// FIXME: handleError; 		
-				printf("ERR\n"); exit(-1);
+				error(SYN_ERR);
 				break;
 		}
 	}
@@ -963,8 +966,7 @@ void branchState(){
 	//TODO: if gen
 	getNEOLToken(attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
-		// FIXME: handleError; 		
-		printf("ERR\n"); exit(-1);
+		error(SYN_ERR);
 	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(true);
@@ -982,8 +984,7 @@ void loopState(){
 	getNCheckToken(attribute, T_WHILE);
 	getNEOLToken(attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
-		// FIXME: handleError; 		
-		printf("ERR\n"); exit(-1);
+		error(SYN_ERR);
 	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(true);
@@ -1004,8 +1005,7 @@ void typeState(){
 			type = STRING;
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 	}
 }
 
@@ -1022,10 +1022,9 @@ void termState(){
 			type = STRING;
 			break;
 		case T_ID:
-			type = nodeSearch(symtable, attribute->data)->symbol->type; 
+			type = nodeSearch(*currentSymtable, attribute->data)->symbol->type; 
 			break;
 		default:
-			// FIXME: handleError; 		
-			printf("ERR\n"); exit(-1);
+			error(SYN_ERR);
 	}
 }

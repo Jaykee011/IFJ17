@@ -110,10 +110,10 @@ void nodeDelete(nodePtr *tree, char *K) {
 
 
 
-int insert_variable(nodePtr *Strom, char *name) {
+void insert_variable(nodePtr *Strom, char *name) {
 	nodePtr uzel;
 
-	loadPtr Content_of_Insert2 = saveMalloc(sizeof(struct load));
+	loadPtr Content_of_Insert = saveMalloc(sizeof(struct load));
 	//val tmptmp = malloc(sizeof(struct value));
 	//strcpy(tmp, name);
 	//generateKey(tmp,1);
@@ -121,17 +121,14 @@ int insert_variable(nodePtr *Strom, char *name) {
 	uzel = nodeSearch(*Strom, name);
 	if(uzel != NULL) {
 		fprintf(stderr, "Chyba: Promenna jiz existuje\n");
-		return FAIL;
+		exit(-95);
 	}
 	else {
-		//TODO: if value == NULL, pak se jedna o definici
-		// pokud se jedna o inicializaci, musi uz byt definovana
-		Content_of_Insert2->defined = 1;
-		Content_of_Insert2->metaType = VARIABLE;
-		stringInit(&(Content_of_Insert2->value.s));
-		nodeInsert(Strom, Content_of_Insert2, name);
+		Content_of_Insert->defined = 1;
+		Content_of_Insert->metaType = VARIABLE;
+		stringInit(&(Content_of_Insert->value.s));
+		nodeInsert(Strom, Content_of_Insert, name);
 	}
-	return 0;
 }
 
 void insert_type(nodePtr Strom, char *name, int type) {
@@ -209,6 +206,7 @@ void insert_function(nodePtr *Strom, bool declaration, char *name) {
 			Content_of_Insert->defined = false;
 			Content_of_Insert->function.declared = true;
 			Content_of_Insert->function.hasReturn = false;
+			treeInit(&Content_of_Insert->function.functTable);
 
 			nodeInsert(Strom, Content_of_Insert, name);
 		}
@@ -217,23 +215,39 @@ void insert_function(nodePtr *Strom, bool declaration, char *name) {
 		if(uzel == NULL) {
 			loadPtr Content_of_Insert = saveMalloc(sizeof(struct load));
 			Content_of_Insert->metaType = FUNCTION;
-			Content_of_Insert->defined = true;
 			Content_of_Insert->function.declared = false;
 			Content_of_Insert->function.hasReturn = false;
+			treeInit(&Content_of_Insert->function.functTable);
 
 			nodeInsert(Strom, Content_of_Insert, name);
 		}
 		else if(uzel->symbol->defined == 1) {
 			exit(-1);
 		}
-		if(uzel->symbol->function.declared == 1)
-			uzel->symbol->defined = 1;
 	}
+}
+
+void setFunctionDefined(nodePtr Strom, char *name){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		//FIXME: errorHandle
+		exit(-9);
+	}
+
+	uzel->symbol->defined = true;
 }
 
 void set_hasReturn(nodePtr Strom, char *name) {
 	nodePtr uzel;
-	uzel = nodeSearch(Strom, name);	
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		//FIXME: errorhandle
+		exit(-10);
+	}
+
 	uzel->symbol->function.hasReturn = true;
 }
 
@@ -302,9 +316,9 @@ int validateDefinitionParameters(nodePtr Strom, char *name){
 	return FINE;
 }
 
-void validateFunctCall(nodePtr Strom, char *varName, char *functName){
+void validateFunctCall(nodePtr Strom, nodePtr lokalniStrom, char *varName, char *functName){
 	nodePtr function = nodeSearch(Strom, functName);
-	nodePtr variable = nodeSearch(Strom, varName);
+	nodePtr variable = nodeSearch(lokalniStrom, varName);
 
 	if (variable == NULL){
 		//FIXME: errorhandle
@@ -362,5 +376,13 @@ int validateCallParams(nodePtr Strom, char *name, param callParams){
 }
 
 val getValue(nodePtr Strom, char *name){
-	return nodeSearch(Strom, name)->symbol->value;
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		//FIXME: errorhandle
+		exit(-6);
+	}
+
+	return uzel->symbol->value;
 }
