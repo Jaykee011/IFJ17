@@ -11,7 +11,7 @@
 
 #include "includes.h"
 
-FILE *s_inputFile;
+FILE *s_inputFile = NULL;
 int asciiVal = 0;
 int asciiCount = 0;
 
@@ -23,6 +23,8 @@ int openInput(char *s) {
 }
 
 void closeInput() {
+	if(s_inputFile == NULL) return;
+	
 	fclose(s_inputFile);
 }
 

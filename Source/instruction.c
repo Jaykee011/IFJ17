@@ -11,7 +11,7 @@
 
 #include "includes.h"
 
-FILE *s_outputFile;
+FILE *s_outputFile = NULL;
 
 /* Open output file where will be the instructions */
 int openOutput(char *s) {
@@ -63,6 +63,8 @@ void instruction(char *s, char *a1, char *a2, char *a3) {
 
 /* While program exit we need to close all streams */
 void closeOutput() {
+	if(s_outputFile == NULL) return;
+	
 	fclose(s_outputFile);
 }
 
