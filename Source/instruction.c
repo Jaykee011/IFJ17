@@ -25,7 +25,7 @@ int openOutput(char *s) {
 }
 
 /* Universal function to add an instruction */
-void instruction(char *s, char *a1, char *a2, char *a3) {
+void instruction(char *s, String *a1, String *a2, String *a3) {
 	
 	// There is a possibility of infinite String in there
 	String *format;
@@ -38,19 +38,19 @@ void instruction(char *s, char *a1, char *a2, char *a3) {
 	// Add first argument
 	if(a1 != NULL) {
 		stringAddData(format, ' ');
-		concatToString(format, a1);
+		concatToString(format, a1->data);
 	}
 
 	// Add second argument
 	if(a2 != NULL) {
 		stringAddData(format, ' ');
-		concatToString(format, a2);
+		concatToString(format, a2->data);
 	}
 
 	// Add thirth argument
 	if(a3 != NULL) {
 		stringAddData(format, ' ');
-		concatToString(format, a3);
+		concatToString(format, a3->data);
 	}
 
 	// Write the formated output to the file and LF
@@ -64,7 +64,7 @@ void instruction(char *s, char *a1, char *a2, char *a3) {
 /* While program exit we need to close all streams */
 void closeOutput() {
 	if(s_outputFile == NULL) return;
-	
+
 	fclose(s_outputFile);
 }
 
