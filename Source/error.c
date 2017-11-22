@@ -16,7 +16,6 @@ SPointer *pClearList = NULL;
 /* Safety exit the program */
 void error(int e) {
 	pointerClear(); // Free all memory
-	//FIXME: output musi byt otevreny
 	closeOutput(); // Close output file
 	closeInput(); // Close input file
 	exit(e);

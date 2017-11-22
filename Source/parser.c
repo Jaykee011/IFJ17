@@ -317,6 +317,7 @@ char topTerm(tStack *stack) { // returns terminal closes to the top of the stack
 			return stack->arr[i].token;
 		}
 	error(INTERN_ERR);
+	return 0;
 }
 
 

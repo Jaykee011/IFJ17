@@ -120,8 +120,7 @@ void insert_variable(nodePtr *Strom, char *name) {
 
 	uzel = nodeSearch(*Strom, name);
 	if(uzel != NULL) {
-		fprintf(stderr, "Chyba: Promenna jiz existuje\n");
-		exit(-95);
+		error(DEF_ERR);
 	}
 	else {
 		Content_of_Insert->defined = 1;
@@ -137,8 +136,7 @@ void insert_type(nodePtr Strom, char *name, int type) {
 
 	if (uzel->symbol->metaType == FUNCTION){
 		if (uzel->symbol->function.declared && uzel->symbol->defined && uzel->symbol->type != type){
-			//FIXME: errorHandle
-			exit(-1);
+			error(TYPE_ERR);
 		}
 	}
 
@@ -150,8 +148,7 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 	uzel = nodeSearch(Strom, name);
 
 	if(uzel == NULL) {
-		//FIXME: errorHandle
-		exit(FAIL);
+		error(DEF_ERR);
 	}
 	switch(type){
 		case INTEGER:
@@ -160,7 +157,7 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 			else if (valueType == DOUBLE)
 				uzel->symbol->value.i = data.d;
 			else{
-				//FIXME: errorHandle
+				error(TYPE_ERR);
 			}
 			break;
 		case DOUBLE:
@@ -169,19 +166,18 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 			else if (valueType == DOUBLE)
 				uzel->symbol->value.d = data.d;
 			else{
-				//FIXME: errorHandle
+				error(TYPE_ERR);
 			}
 			break;
 		case STRING:
 			if (valueType != STRING){
-				//FIXME: errorHandle
+				error(TYPE_ERR);
 			}
 			stringInit(&uzel->symbol->value.s);
 			concatToString(uzel->symbol->value.s, data.s->data);
 			break;
 		default:
-			//FIXME: errorHandle
-			exit(FAIL);
+			error(INTERN_ERR);
 			break;
 	}
 	uzel->symbol->initialized = true;
@@ -197,8 +193,7 @@ void insert_function(nodePtr *Strom, bool declaration, char *name) {
 	if(declaration == true) {
 		// pokud chceme deklarovat
 		if(uzel != NULL) {
-			//FIXME: 
-			exit(-1);
+			error(DEF_ERR);
 		}
 		else {
 			loadPtr Content_of_Insert = saveMalloc(sizeof(struct load));
@@ -222,7 +217,7 @@ void insert_function(nodePtr *Strom, bool declaration, char *name) {
 			nodeInsert(Strom, Content_of_Insert, name);
 		}
 		else if(uzel->symbol->defined == 1) {
-			exit(-1);
+			error(DEF_ERR);
 		}
 	}
 }
@@ -232,8 +227,7 @@ void setFunctionDefined(nodePtr Strom, char *name){
 	uzel = nodeSearch(Strom, name);
 
 	if (uzel == NULL){
-		//FIXME: errorHandle
-		exit(-9);
+		error(DEF_ERR);
 	}
 
 	uzel->symbol->defined = true;
@@ -244,8 +238,7 @@ void set_hasReturn(nodePtr Strom, char *name) {
 	uzel = nodeSearch(Strom, name);
 
 	if (uzel == NULL){
-		//FIXME: errorhandle
-		exit(-10);
+		error(INTERN_ERR);
 	}
 
 	uzel->symbol->function.hasReturn = true;
@@ -283,6 +276,8 @@ void insert_param(nodePtr Strom, char *name, char *parName, int type, bool decla
 			}
 			current->next = newParam;	
 		}
+		insert_variable(&function->symbol->function.functTable, parName);
+		insert_type(function->symbol->function.functTable, parName, type);
 	}
 }
 
@@ -321,22 +316,22 @@ void validateFunctCall(nodePtr Strom, nodePtr lokalniStrom, char *varName, char 
 	nodePtr variable = nodeSearch(lokalniStrom, varName);
 
 	if (variable == NULL){
-		//FIXME: errorhandle
+		error(DEF_ERR);
 		exit(-1);
 	}
 	
 	if (function == NULL){
-		//FIXME: errorhandle
+		error(DEF_ERR);
 		exit(-2);
 	}
 
 	if (!function->symbol->defined && !function->symbol->function.declared){
-		//FIXME: errorhandle
+		error(DEF_ERR);
 		exit(-3);
 	}
 
 	if (function->symbol->type != variable->symbol->type){
-		//FIXME: errorhandle
+		error(TYPE_ERR);
 		exit(-4);
 	}
 }
@@ -380,8 +375,7 @@ val getValue(nodePtr Strom, char *name){
 	uzel = nodeSearch(Strom, name);
 
 	if (uzel == NULL){
-		//FIXME: errorhandle
-		exit(-6);
+		error(DEF_ERR);
 	}
 
 	return uzel->symbol->value;
