@@ -87,6 +87,7 @@ int validateCallParams(nodePtr , char *, param);
 bool getInitialized(nodePtr, char *);
 val getValue(nodePtr, char *);
 int getType(nodePtr, char *);
+void loadParameters(nodePtr, char *);
 
 
 #endif

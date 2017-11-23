@@ -337,9 +337,8 @@ void validateFunctCall(nodePtr Strom, nodePtr lokalniStrom, char *varName, char 
 		exit(-3);
 	}
 
-	if (function->symbol->type != variable->symbol->type){
+	if ((function->symbol->type == STRING && variable->symbol->type != STRING) || (function->symbol->type != STRING && variable->symbol->type == STRING)){
 		error(TYPE_ERR);
-		exit(-4);
 	}
 }
 
@@ -419,4 +418,35 @@ int getType(nodePtr Strom, char *name){
 	}
 
 	return uzel->symbol->type;
+}
+
+void loadParameters(nodePtr Strom, char *name){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		error(DEF_ERR);
+	}
+
+	param currentParameter = uzel->symbol->function.parameters;
+	
+	if (currentParameter == NULL){
+		return;
+	}
+	
+	param lastParameter = NULL;
+	String *operand = NULL;
+	stringInit(&operand);
+
+
+	do{
+		while (currentParameter->next != lastParameter){
+			currentParameter = currentParameter->next;			
+		}
+stringCpy(operand, currentParameter->name);
+instruction("POPS", operand, NULL, NULL, "LF", NULL, NULL);
+		set_initialized(uzel->symbol->function.functTable, currentParameter->name);
+		lastParameter = currentParameter;
+		currentParameter = uzel->symbol->function.parameters;
+	}while (lastParameter != uzel->symbol->function.parameters);
 }

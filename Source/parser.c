@@ -621,15 +621,33 @@ instruction("LABEL", inFunction, NULL, NULL, NULL, NULL, NULL);
 			getNCheckToken(attribute, T_AS);
 			getNEOLToken(attribute, &tokenSize);
 			typeState();
+			int funType = type;
 
-			insert_type(symtable, functionName->data, type);
+			insert_type(symtable, functionName->data, funType);
 
 			currentSymtable = &nodeSearch(symtable, functionName->data)->symbol->function.functTable;
-			fcommandsState();
+			loadParameters(symtable, functionName->data);
+			fcommandsState(T_END);
 			currentSymtable = &symtable;
 			getNCheckToken(attribute, T_FUNCTION);
 			getNCheckToken(attribute, T_EOL);
 			setFunctionDefined(symtable, inFunction->data);
+			switch(funType){
+				case INTEGER:
+stringCpy(operand1, "0");
+instruction("PUSHS", operand1, NULL, NULL, "int", NULL, NULL);	
+					break;
+				case DOUBLE:
+stringCpy(operand1, "0.0");
+instruction("PUSHS", operand1, NULL, NULL, "float", NULL, NULL);	
+					break;
+				case STRING:
+stringCpy(operand1, "");
+instruction("PUSHS", operand1, NULL, NULL, "string", NULL, NULL);	
+					break;
+				default:
+					error(INTERN_ERR);
+			}		
 instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 			getNEOLToken(attribute, &tokenSize);
 			break;
@@ -669,6 +687,9 @@ void paramsState(bool declaration){
 }
 
 void paramState(bool declaration){
+	if (!declaration){
+instruction("DEFVAR", variableName, NULL, NULL, "LF", NULL, NULL);
+	}
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
@@ -694,7 +715,7 @@ void nparamState(bool declaration){
 	}
 }
 
-void fcommandsState(){
+void fcommandsState(int finalizingToken){
 	bool loop = true;
 	while(loop){
 		getNEOLToken(attribute, &tokenSize);
@@ -710,13 +731,16 @@ void fcommandsState(){
 			case T_PRINT:
 			case T_IF:
 			case T_DO:
-				commandState();
-				break;
-			case T_END:
-				loop = false;
+				commandState(true);
 				break;
 			default:
-				error(SYN_ERR);
+				if (token == finalizingToken){
+					loop = false;
+					break;
+				}
+				else{
+					error(SYN_ERR);
+				}
 		}
 	}
 }
@@ -729,7 +753,6 @@ void fcommandState(){
 	//TODO: gen return
 	pushbackAttr(tokenSize);
 	precedence_analysis(false);
-	//FIXME: osetrit
 	if (expressionType != nodeSearch(symtable, inFunction->data)->symbol->type)
 		error(TYPE_ERR);
 	getNCheckToken(attribute, T_EOL);
@@ -750,7 +773,7 @@ void scommandsState(){
 			case T_PRINT:
 			case T_IF:
 			case T_DO:
-				commandState();
+				commandState(false);
 				break;
 			case T_END:
 				loop = false;
@@ -832,9 +855,11 @@ instruction("POPS", operand1, NULL, NULL, "LF", NULL, NULL);
 
 void fcallState(){
 	validateFunctCall(symtable, *currentSymtable, variableName->data, functionName->data);
+	// String *variable = NULL;
+	// stringInit(&variable);
+	// stringCpy(variable, variableName->data);
 
 	cparamsState();
-instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 instruction("CREATEFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 instruction("CALL", functionName, NULL, NULL, NULL, NULL, NULL);
@@ -913,7 +938,7 @@ void commandsState(int finalizingToken){
 			case T_PRINT:
 			case T_IF:
 			case T_DO:
-				commandState();
+				commandState(false);
 				break;
 			default:
 				if (token == finalizingToken){
@@ -927,7 +952,7 @@ void commandsState(int finalizingToken){
 	}
 }
 
-void commandState(){
+void commandState(bool fBody){
 	switch(token){
 		case T_ID:
 			stringCpy(variableName, attribute->data);
@@ -942,10 +967,10 @@ void commandState(){
 			printState();
 			break;
 		case T_IF:
-			branchState();
+			branchState(fBody);
 			break;
 		case T_DO:
-			loopState();
+			loopState(fBody);
 			break;
 		default:
 			error(SYN_ERR);
@@ -1021,7 +1046,7 @@ instruction("WRITE", operand1, NULL, NULL, "GF", NULL, NULL);
 	}
 }
 
-void branchState(){
+void branchState(bool fBody){
 	ifCounter++;
 	char toAppend[64];
 	snprintf(toAppend, 64, "%d", ifCounter);
@@ -1041,7 +1066,13 @@ instruction("JUMPIFNEQS", operand1, NULL, NULL, NULL, NULL, NULL);
 
 	getNCheckToken(attribute, T_THEN);
 	getNCheckToken(attribute, T_EOL);
-	commandsState(T_ELSE);
+	if (fBody){
+		fcommandsState(T_ELSE);
+	}
+	else
+	{
+		commandsState(T_ELSE);
+	}
 	getNCheckToken(attribute, T_EOL);
 
 stringCpy(operand1, "ENDIF");
@@ -1061,7 +1092,7 @@ concatToString(operand1, toAppend);
 instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
 }
 
-void loopState(){	
+void loopState(bool fBody){	
 	loopCounter++;
 	char toAppend[64];
 	snprintf(toAppend, 64, "%d", loopCounter);
@@ -1086,7 +1117,13 @@ stringCpy(operand1, "WHILEEND");
 concatToString(operand1, toAppend);
 instruction("JUMPIFNEQS", operand1, NULL, NULL, NULL, NULL, NULL);
 
-	commandsState(T_LOOP);
+	if (fBody){
+		fcommandsState(T_LOOP);
+	}
+	else
+	{
+		commandsState(T_LOOP);
+	}
 	getNCheckToken(attribute, T_EOL);
 
 
@@ -1131,6 +1168,7 @@ instruction("PUSHS", attribute, NULL, NULL, "string", NULL, NULL);
 			type = STRING;
 			break;
 		case T_ID:
+instruction("PUSHS", attribute, NULL, NULL, "LF", NULL, NULL);
 			type = nodeSearch(*currentSymtable, attribute->data)->symbol->type; 
 			break;
 		default:
