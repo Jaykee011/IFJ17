@@ -158,15 +158,18 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 		case INTEGER:
 			if (valueType == INTEGER)
 				uzel->symbol->value.i = data.i;
-			else if (valueType == DOUBLE)
+			else if (valueType == DOUBLE){
 				uzel->symbol->value.i = data.d;
+			}
 			else{
 				error(TYPE_ERR);
 			}
 			break;
 		case DOUBLE:
-			if (valueType == INTEGER)
+			if (valueType == INTEGER){
+
 				uzel->symbol->value.d = data.i;
+			}
 			else if (valueType == DOUBLE)
 				uzel->symbol->value.d = data.d;
 			else{
@@ -374,6 +377,28 @@ int validateCallParams(nodePtr Strom, char *name, param callParams){
 
 }
 
+void set_initialized(nodePtr Strom, char *name){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		error(DEF_ERR);
+	}
+
+	uzel->symbol->initialized = true;
+}
+
+bool getInitialized(nodePtr Strom, char *name){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		error(DEF_ERR);
+	}
+
+	return uzel->symbol->initialized;
+}
+
 val getValue(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -383,4 +408,15 @@ val getValue(nodePtr Strom, char *name){
 	}
 
 	return uzel->symbol->value;
+}
+
+int getType(nodePtr Strom, char *name){
+	nodePtr uzel;
+	uzel = nodeSearch(Strom, name);
+
+	if (uzel == NULL){
+		error(DEF_ERR);
+	}
+
+	return uzel->symbol->type;
 }

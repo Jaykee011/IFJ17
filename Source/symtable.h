@@ -19,6 +19,8 @@
 #include "macros.h"
 #include "string.h"
 #include "error.h"
+#include "instruction.h"
+
 
 typedef struct parameters *param;
 typedef struct node *nodePtr;
@@ -77,11 +79,14 @@ void insert_value(nodePtr, char *name, int type, val data, int valueType);
 void insert_function(nodePtr *, bool , char *);
 void setFunctionDefined(nodePtr, char *);
 void set_hasReturn(nodePtr, char *name);
+void set_initialized(nodePtr, char *name);
 void insert_param(nodePtr, char *name, char *, int, bool);
 int validateDefinitionParameters(nodePtr , char *);
 void validateFunctCall(nodePtr, nodePtr, char *, char *);
 int validateCallParams(nodePtr , char *, param);
+bool getInitialized(nodePtr, char *);
 val getValue(nodePtr, char *);
+int getType(nodePtr, char *);
 
 
 #endif
