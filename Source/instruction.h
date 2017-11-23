@@ -9,7 +9,7 @@
 #ifndef INSTRUCTIONH
 #define INSTRUCTIONH
 
-void instruction(char *s, String *a1, String *a2, String *a3); // Add instruction
+void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2, char *f3); // Add instruction
 int openOutput(char *s); // Set file to output
 void closeOutput(); // Close output file
 
