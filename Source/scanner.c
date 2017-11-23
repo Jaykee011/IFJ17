@@ -152,9 +152,9 @@ int getToken(String *s, int *cursor){
 					shunt = LEX_STRING;
 					/* Checking valid */
 					switch(c) {
-						case '"': stringAddData(s, '\"'); break;
-						case 'n': stringAddData(s, '\n'); break;
-						case 't': stringAddData(s, '\t'); break;
+						case '"': concatToString(s, "\\034"); break;
+						case 'n': concatToString(s, "\\012"); break;
+						case 't': concatToString(s, "\\011"); break;
 						case '\\':concatToString(s, "\\092"); break;
 						default: return LEX_ERR;
 					}
