@@ -8,6 +8,8 @@
 
 int token = 0;
 int tokenSize;
+int ifCounter = 0;
+int loopCounter = 0;
 String *attribute = NULL;
 String *variableName = NULL;
 String *functionName = NULL;
@@ -44,7 +46,7 @@ int precTable[15][15] = {
 	/*  $ */{ L,	L,	E,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	E }
 };
 
-struct value evalExpr(void *lValue, void *mValue, void *rValue){
+void evalExpr(void *lValue, void *mValue, void *rValue){
 	
 	struct value result;
 	result.i = 0;
@@ -56,60 +58,71 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 	stringInit(&(result.s));
 
 	if (((tokenparam *)lValue)->token == PRLB && ((tokenparam *)rValue)->token == PRRB){
-		if (((tokenparam *)mValue)->data.i)
-			expressionType = INTEGER;
-		else if (((tokenparam *)mValue)->data.d)
-			expressionType = DOUBLE;
-		else{
-			expressionType = STRING;
-		}
-		return ((tokenparam *)mValue)->data;
+		expressionType = ((tokenparam *)mValue)->type;
 	}
 	else if (mValue == NULL){
-		if (((tokenparam *)lValue)->data.i)
-			expressionType = INTEGER;
-		else if (((tokenparam *)lValue)->data.d)
-			expressionType = DOUBLE;
-		else{
-			expressionType = STRING;
+		if (((tokenparam *)lValue)->identifier){
+stringCpy(operand1, ((tokenparam *)lValue)->data->data);
+instruction("PUSHS", operand1, NULL, NULL, "LF", NULL, NULL);			
 		}
-		return ((tokenparam *)lValue)->data;
+		else{
+			switch(expressionType = ((tokenparam *)lValue)->type){
+				case INTEGER:
+stringCpy(operand1, ((tokenparam *)lValue)->data->data);
+instruction("PUSHS", operand1, NULL, NULL, "int", NULL, NULL);	
+				break;
+				case DOUBLE:
+stringCpy(operand1, ((tokenparam *)lValue)->data->data);
+instruction("PUSHS", operand1, NULL, NULL, "float", NULL, NULL);	
+				break;
+				case STRING:
+stringCpy(operand1, ((tokenparam *)lValue)->data->data);
+instruction("PUSHS", operand1, NULL, NULL, "string", NULL, NULL);	
+				break;
+				default:
+					error(INTERN_ERR);
+			}	
+		}
+		expressionType = ((tokenparam *)lValue)->type;
 	}
 	else{
-		if (((tokenparam *)lValue)->data.i)
-			firstType = INTEGER;
-		else if (((tokenparam *)lValue)->data.d)
-			firstType = DOUBLE;
-		else{
-			firstType = STRING;
-		}
-
-		if (((tokenparam *)rValue)->data.i)
-			secondType = INTEGER;
-		else if (((tokenparam *)rValue)->data.d)
-			secondType = DOUBLE;
-		else{
-			secondType = STRING;
-		}
+		firstType = ((tokenparam *)lValue)->type;
+		secondType = ((tokenparam *)rValue)->type;
 
 		if ((firstType == STRING && secondType != STRING) || (firstType != STRING && secondType == STRING)){
 			error(TYPE_ERR);
 		}
 
 		if (firstType == DOUBLE || secondType == DOUBLE){
-			//FIXME: conversion
-			if (firstType == INTEGER){
-				((tokenparam *)lValue)->data.d = ((tokenparam *)lValue)->data.i;
-				firstType = DOUBLE;
+			if (((tokenparam *)mValue)->token == PRIDIV){
+				if (firstType == DOUBLE){
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+					firstType = DOUBLE;
+				}
+				else if (secondType == DOUBLE){
+instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);
+					secondType = DOUBLE;
+				}
 			}
-			else if (secondType == INTEGER){
-				((tokenparam *)rValue)->data.d = ((tokenparam *)rValue)->data.i;
-				secondType = DOUBLE;
+			else{
+				if (firstType == INTEGER){
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+					firstType = DOUBLE;
+				}
+				else if (secondType == INTEGER){
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+					secondType = DOUBLE;
+				}
+				intOp = false;
 			}
-			intOp = false;
 		}
 
-		//FIXME: TOTO CELE NEMA DELAT KOMPILATOR, MUSI SE TO NAHRADIT GENEROVANIM INSTRUKCI
 		switch(((tokenparam *)mValue)->token){
 			case PRPLUS:
 				if (firstType == STRING && secondType == STRING){
@@ -117,130 +130,95 @@ struct value evalExpr(void *lValue, void *mValue, void *rValue){
 					expressionType = STRING;
 				}
 				else if (intOp){
-					result.i = (((tokenparam *)lValue)->data.i + ((tokenparam *)rValue)->data.i) ;
 					expressionType = INTEGER;
 				}
 				else{
-					result.d = (((tokenparam *)lValue)->data.d + ((tokenparam *)rValue)->data.d) ;
 					expressionType = DOUBLE;
 				}
+instruction("ADDS", NULL, NULL, NULL, NULL, NULL, NULL);
 				break;
 			case PRMINUS:
 				//FIXME: posefit datove typy
 				if (intOp){
-					result.i = (((tokenparam *)lValue)->data.i - ((tokenparam *)rValue)->data.i) ;
 					expressionType = INTEGER;
 				}
 				else{
-					result.d = (((tokenparam *)lValue)->data.d - ((tokenparam *)rValue)->data.d) ;
 					expressionType = DOUBLE;
 				}
+instruction("SUBS", NULL, NULL, NULL, NULL, NULL, NULL);
 				break;
 			case PRTIMES:
 				if (intOp){
-					result.i = (((tokenparam *)lValue)->data.i * ((tokenparam *)rValue)->data.i) ;
 					expressionType = INTEGER;
 				}
 				else{
-					result.d = (((tokenparam *)lValue)->data.d * ((tokenparam *)rValue)->data.d) ;
 					expressionType = DOUBLE;
 				}
+instruction("MULS", NULL, NULL, NULL, NULL, NULL, NULL);
 				break;
 			case PRDIV:
 				if (intOp){
-					result.d = (double)(((tokenparam *)lValue)->data.i / ((tokenparam *)rValue)->data.i) ;
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("DIVS", NULL, NULL, NULL, NULL, NULL, NULL);
 				}
 				else{
-					result.d = (((tokenparam *)lValue)->data.d / ((tokenparam *)rValue)->data.d) ;
+instruction("DIVS", NULL, NULL, NULL, NULL, NULL, NULL);
 				}
 				expressionType = DOUBLE;
 				break;
 			case PRIDIV:
-				if (firstType == INTEGER && secondType == INTEGER){
-					result.i = (((tokenparam *)lValue)->data.i / ((tokenparam *)rValue)->data.i) ;
-				}
-				else{
-					error(TYPE_ERR);
-				}
 				expressionType = INTEGER;
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("DIVS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);
 				break;
 			case PRLT:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("LTS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i < ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d < ((tokenparam *)rValue)->data.d);
-				}
 				break;
 			case PRGT:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("GTS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i > ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d > ((tokenparam *)rValue)->data.d);
-				}
 				break;
 			case PRELT:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("LTS", NULL, NULL, NULL, NULL, NULL, NULL);
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("EQS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("ORS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i <= ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d <= ((tokenparam *)rValue)->data.d);
-				}
 				break;
 			case PREGT:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("GTS", NULL, NULL, NULL, NULL, NULL, NULL);
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("EQS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("ORS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i >= ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d >= ((tokenparam *)rValue)->data.d);
-				}
-				break;
+					break;
 			case PREQUAL:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("EQS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i == ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d == ((tokenparam *)rValue)->data.d);
-				}
-				break;
+					break;
 			case PRNEQ:
-				if (firstType == STRING && secondType == STRING){
-					//TODO: strcmp
+instruction("LTS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("NOTS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
-				}
-				else if (intOp){ 
-					result.b = (((tokenparam *)lValue)->data.i != ((tokenparam *)rValue)->data.i);
-				}
-				else{
-					result.b = (((tokenparam *)lValue)->data.d != ((tokenparam *)rValue)->data.d);
-				}
-				break;
+					break;
 			default:
 				error(SYN_ERR);
 				break;
 		}
-		return result;
 	}
 }
 
@@ -259,6 +237,8 @@ int push(tStack *stack, tokenparam token) { // pushes new terminal to stack
 	stack->top++;
 	stack->arr[stack->top].token = token.token;
 	stack->arr[stack->top].data = token.data;
+	stack->arr[stack->top].type = token.type;
+	stack->arr[stack->top].identifier = token.identifier;
 	return FINE;
 }
 int pop(tStack *stack, tokenparam *token) { // pops top token
@@ -278,13 +258,12 @@ void replaceY(tStack *stack, char a){ // <y za A
 	for (i = 0; top(stack) != LB; i++){
 		pop(stack, &buffer[i]);
 	}
-	struct value result;
 	if (i == 1)
-		result = evalExpr(&buffer[0],NULL, NULL); //TODO: comment
+		evalExpr(&buffer[0],NULL, NULL); //TODO: comment
 	else
-		result = evalExpr(&buffer[2],&buffer[1], &buffer[0]); //TODO: comment
+		evalExpr(&buffer[2],&buffer[1], &buffer[0]); //TODO: comment
 
-	NONTtoken.data = result;
+	NONTtoken.type = expressionType;
 	pop(stack, &buffer[i]);
 	push(stack, NONTtoken);
 }
@@ -339,7 +318,8 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 		converted->token = PRID;
 		return FINE;
 	case L_STRING:
-		converted->data.s = attribute;
+		converted->data = NULL;
+		stringCpy(converted->data, attribute->data);
 		converted->token = PRID;
 		return FINE;
 	
@@ -414,20 +394,38 @@ void testTokens(bool boolExpected){ // imput token string control
 		precedenceBuffer[i].token = token;
 		switch(precedenceBuffer[i].token){
 			case T_ID:
-				precedenceBuffer[i].data = getValue(*currentSymtable, attribute->data);
+				if (!getInitialized(*currentSymtable, attribute->data)){
+					error(DEF_ERR);
+				}
+				precedenceBuffer[i].data = NULL;
+				stringInit(&precedenceBuffer[i].data);
+				stringCpy(precedenceBuffer[i].data, attribute->data);
+				precedenceBuffer[i].type = getType(*currentSymtable, attribute->data);
+				precedenceBuffer[i].identifier = true;
 				previousNonId =	0;
 				break;		
 			case L_INT:
-				precedenceBuffer[i].data.i = stringToInt(attribute);
+				precedenceBuffer[i].data = NULL;
+				stringInit(&precedenceBuffer[i].data);
+				stringCpy(precedenceBuffer[i].data, attribute->data);
+				precedenceBuffer[i].type = INTEGER;
+				precedenceBuffer[i].identifier = false;
 				previousNonId =	0;
 				break;		
 			case L_FLOAT:
-				precedenceBuffer[i].data.d = stringToDouble(attribute);
+				precedenceBuffer[i].data = NULL;
+				stringInit(&precedenceBuffer[i].data);
+				stringCpy(precedenceBuffer[i].data, attribute->data);
+				precedenceBuffer[i].type = DOUBLE;
+				precedenceBuffer[i].identifier = false;
 				previousNonId =	0;
 				break;		
 			case L_STRING:
-				stringInit(&precedenceBuffer[i].data.s);
-				concatToString(precedenceBuffer[i].data.s, attribute->data);
+				precedenceBuffer[i].data = NULL;
+				stringInit(&precedenceBuffer[i].data);
+				stringCpy(precedenceBuffer[i].data, attribute->data);
+				precedenceBuffer[i].type = STRING;
+				precedenceBuffer[i].identifier = false;
 				previousNonId =	0;
 				break;					
 			case T_LB: // (
@@ -471,9 +469,14 @@ void testTokens(bool boolExpected){ // imput token string control
 				break;
 		}
 	}
+
+	if (boolExpected && !compareTokenExists){
+		error(TYPE_ERR);
+	}
+
 }
 
-struct value precedence_analysis(bool boolExpected){
+void precedence_analysis(bool boolExpected){
 	testTokens(boolExpected);
 	tStack stack;	
 	stackInit(&stack);
@@ -485,6 +488,8 @@ struct value precedence_analysis(bool boolExpected){
 	do {
 		precedenceTokenConversion(precedenceBuffer[i].token, &b); 
 		b.data = precedenceBuffer[i].data;
+		b.type = precedenceBuffer[i].type;
+		b.identifier = precedenceBuffer[i].identifier;
 		switch (precTable[a][b.token]){
 			case EQ:
 				push(&stack, b);
@@ -506,7 +511,6 @@ struct value precedence_analysis(bool boolExpected){
 	} while (((b.token) != PREND) || (a != PREND));
 	tokenparam result;
 	pop(&stack, &result);
-	return result.data;
 }
 
 void getNEOLToken(String *s, int *size){
@@ -536,6 +540,7 @@ void getNCheckToken(String *s, int t){
 }
 
 bool parse(){
+	//TODO: funkce co vlozi preddefinovane fce do tabulky a vygeneruje jejich instrukce
 	stringInit(&attribute);
 	stringInit(&variableName);
 	stringInit(&functionName);
@@ -544,7 +549,7 @@ bool parse(){
 	stringInit(&operand2);
 	stringInit(&operand3);
 stringCpy(operand1, "SCOPE");
-instruction("JUMP", operand1, NULL, NULL);
+instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
@@ -558,6 +563,8 @@ instruction("JUMP", operand1, NULL, NULL);
 		}
 	getNEOLToken(attribute, &tokenSize);
 	
+instruction("POPFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+
 	return (token == T_EOF);
 }
 
@@ -601,14 +608,14 @@ void functionState(){
 		case T_FUNCTION:
 			getNCheckToken(functionName, T_ID);
 			stringCpy(inFunction, functionName->data);
-instruction("LABEL", inFunction, NULL, NULL);
+instruction("LABEL", inFunction, NULL, NULL, NULL, NULL, NULL);
 			insert_function(&symtable, false, functionName->data);
 
 			getNCheckToken(attribute, T_LB);
 			
 			paramsState(false);
 			if (validateDefinitionParameters(symtable, functionName->data)){
-				error(TYPE_ERR);
+				error(DEF_ERR);
 			}
 
 			getNCheckToken(attribute, T_AS);
@@ -623,7 +630,7 @@ instruction("LABEL", inFunction, NULL, NULL);
 			getNCheckToken(attribute, T_FUNCTION);
 			getNCheckToken(attribute, T_EOL);
 			setFunctionDefined(symtable, inFunction->data);
-instruction("RETURN", NULL, NULL, NULL);
+instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 			getNEOLToken(attribute, &tokenSize);
 			break;
 		default:
@@ -633,10 +640,15 @@ instruction("RETURN", NULL, NULL, NULL);
 }
 
 void scopeState(){
+	currentSymtable = &symtable;
 	getNCheckToken(attribute, T_EOL);
 stringCpy(operand1, "SCOPE");
-instruction("LABEL", operand1, NULL, NULL);
-instruction("CREATEFRAME", NULL, NULL, NULL);
+instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
+instruction("CREATEFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+//TODO: komentar akumulacni promenna pro precedencku
+stringCpy(operand1, "$AKU");
+instruction("DEFVAR", operand1, NULL, NULL, "GF", NULL, NULL);
 	scommandsState();
 	getNCheckToken(attribute, T_SCOPE);
 }
@@ -711,7 +723,7 @@ void fcommandsState(){
 
 void fcommandState(){
 	getNEOLToken(attribute, &tokenSize);
-	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+	if (token != T_LB && token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		error(SYN_ERR);
 	}
 	//TODO: gen return
@@ -721,7 +733,7 @@ void fcommandState(){
 	if (expressionType != nodeSearch(symtable, inFunction->data)->symbol->type)
 		error(TYPE_ERR);
 	getNCheckToken(attribute, T_EOL);
-instruction("RETURN", NULL, NULL, NULL);
+instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	set_hasReturn(symtable, inFunction->data);
 }
 
@@ -756,7 +768,7 @@ void scommandState(){
 void vardefState(){
 	getNCheckToken(variableName, T_ID);
 	insert_variable(currentSymtable, variableName->data);
-instruction("DEFVAR", variableName, NULL, NULL);
+instruction("DEFVAR", variableName, NULL, NULL, "LF", NULL, NULL);
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
@@ -785,7 +797,6 @@ void initState(){
 	stringInit(&storedAttr);
 	int storedSize;
 	getNEOLToken(storedAttr, &storedSize);
-	val precedenceResult;
 	switch(token){
 		case T_ID:
 			getNEOLToken(attribute, &tokenSize);
@@ -800,23 +811,34 @@ void initState(){
 		case L_INT:
 		case L_FLOAT:
 		case L_STRING:
+		case T_LB:
 			pushbackAttr(storedSize);
-			precedenceResult = precedence_analysis(false);
-			insert_value(*currentSymtable, variableName->data, type, precedenceResult, expressionType);
+			precedence_analysis(false);
+if (type == INTEGER && expressionType == DOUBLE){
+instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);
+}
+else if (type == DOUBLE && expressionType == INTEGER){
+instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);	
+} 
+			//insert_value(*currentSymtable, variableName->data, type, precedenceResult, expressionType);
 			break;
 		default:
 			error(SYN_ERR);
 	}
+stringCpy(operand1, variableName->data);
+instruction("POPS", operand1, NULL, NULL, "LF", NULL, NULL);
+	set_initialized(*currentSymtable,variableName->data);
 }
 
 void fcallState(){
 	validateFunctCall(symtable, *currentSymtable, variableName->data, functionName->data);
 
 	cparamsState();
-instruction("PUSHFRAME", NULL, NULL, NULL);
-instruction("CREATEFRAME", NULL, NULL, NULL);
-instruction("CALL", functionName, NULL, NULL);
-instruction("POPFRAME", NULL, NULL, NULL);
+instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("CREATEFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("CALL", functionName, NULL, NULL, NULL, NULL, NULL);
+instruction("POPFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
 /*//TODO: comment*/
@@ -911,6 +933,7 @@ void commandState(){
 			stringCpy(variableName, attribute->data);
 			getNCheckToken(attribute, T_EQ);
 			initState();
+			getNCheckToken(attribute, T_EOL);
 			break;
 		case T_INPUT:
 			inputState();
@@ -927,19 +950,33 @@ void commandState(){
 		default:
 			error(SYN_ERR);
 	}
-	getNCheckToken(attribute, T_EOL);
 }
 
 void inputState(){
 	getNCheckToken(attribute, T_ID);
+
+switch (getType(*currentSymtable, attribute->data)){
+	case INTEGER:
+		stringCpy(operand2, "int");
+		break;
+	case DOUBLE:
+		stringCpy(operand2, "float");
+		break;
+	case STRING:
+		stringCpy(operand2, "string");
+		break;
+	default:
+		error(INTERN_ERR);
+}
+instruction("READ", attribute, operand2, NULL, "LF", NULL, NULL);
+
 	if (nodeSearch(*currentSymtable, attribute->data) == NULL){
 		error(DEF_ERR);
 	}
-	//TODO: input gen
+	getNCheckToken(attribute, T_EOL);
 }
 
 void printState(){
-	//TODO: print gen
 	getNEOLToken(attribute, &tokenSize);
 	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		error(SYN_ERR);
@@ -947,8 +984,10 @@ void printState(){
 	pushbackAttr(tokenSize);
 	precedence_analysis(false);
 	getNCheckToken(attribute, T_SEMICOLON);
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("WRITE", operand1, NULL, NULL, "GF", NULL, NULL);
 	nexprState();
-	//TODO: generate print
 }
 
 void nexprState(){
@@ -963,12 +1002,15 @@ void nexprState(){
 			case L_INT:
 			case L_FLOAT:
 			case L_STRING:
+			case T_LB:
 				pushbackAttr(tokenSize);
 				precedence_analysis(false);
 				getNCheckToken(attribute, T_SEMICOLON);	
+stringCpy(operand1, "$AKU");
+instruction("POPS", operand1, NULL, NULL, "GF", NULL, NULL);
+instruction("WRITE", operand1, NULL, NULL, "GF", NULL, NULL);
 				break;			
 			case T_EOL:
-				pushbackAttr(tokenSize);
 				loop = false;
 				break;
 			
@@ -980,34 +1022,81 @@ void nexprState(){
 }
 
 void branchState(){
-	//TODO: if gen
+	ifCounter++;
+	char toAppend[64];
+	snprintf(toAppend, 64, "%d", ifCounter);
 	getNEOLToken(attribute, &tokenSize);
-	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+	if (token != T_LB && token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		error(SYN_ERR);
 	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(true);
+
+stringCpy(operand1, "true");
+instruction("PUSHS", operand1, NULL, NULL, "bool", NULL, NULL);
+
+stringCpy(operand1, "ELSE");
+concatToString(operand1, toAppend);
+instruction("JUMPIFNEQS", operand1, NULL, NULL, NULL, NULL, NULL);
+
 	getNCheckToken(attribute, T_THEN);
 	getNCheckToken(attribute, T_EOL);
 	commandsState(T_ELSE);
 	getNCheckToken(attribute, T_EOL);
+
+stringCpy(operand1, "ENDIF");
+concatToString(operand1, toAppend);
+instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
+
+stringCpy(operand1, "ELSE");
+concatToString(operand1, toAppend);
+instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
+
 	commandsState(T_END);
 	getNCheckToken(attribute, T_IF);
 	getNCheckToken(attribute, T_EOL);
+
+stringCpy(operand1, "ENDIF");
+concatToString(operand1, toAppend);
+instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
 }
 
-void loopState(){
-	//TODO: while gen
+void loopState(){	
+	loopCounter++;
+	char toAppend[64];
+	snprintf(toAppend, 64, "%d", loopCounter);
 	getNCheckToken(attribute, T_WHILE);
+
+stringCpy(operand1, "WHILESTART");
+concatToString(operand1, toAppend);
+instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
+
 	getNEOLToken(attribute, &tokenSize);
-	if (token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
+	if (token != T_LB && token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		error(SYN_ERR);
 	}
 	pushbackAttr(tokenSize);
 	precedence_analysis(true);
 	getNCheckToken(attribute, T_EOL);
+
+stringCpy(operand1, "true");
+instruction("PUSHS", operand1, NULL, NULL, "bool", NULL, NULL);
+
+stringCpy(operand1, "WHILEEND");
+concatToString(operand1, toAppend);
+instruction("JUMPIFNEQS", operand1, NULL, NULL, NULL, NULL, NULL);
+
 	commandsState(T_LOOP);
 	getNCheckToken(attribute, T_EOL);
+
+
+stringCpy(operand1, "WHILESTART");
+concatToString(operand1, toAppend);
+instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
+
+stringCpy(operand1, "WHILEEND");
+concatToString(operand1, toAppend);
+instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
 }
 
 void typeState(){
@@ -1030,12 +1119,15 @@ void termState(){
 	//TODO: gen push instructions
 	switch(token){
 		case L_INT:
+instruction("PUSHS", attribute, NULL, NULL, "int", NULL, NULL);
 			type = INTEGER; 
 			break;
 		case L_FLOAT:
+instruction("PUSHS", attribute, NULL, NULL, "float", NULL, NULL);
 			type = DOUBLE;
 			break;
 		case L_STRING:
+instruction("PUSHS", attribute, NULL, NULL, "string", NULL, NULL);
 			type = STRING;
 			break;
 		case T_ID:
