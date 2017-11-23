@@ -601,7 +601,7 @@ void functionState(){
 		case T_FUNCTION:
 			getNCheckToken(functionName, T_ID);
 			stringCpy(inFunction, functionName->data);
-		instruction("LABEL", functionName, NULL, NULL);
+instruction("LABEL", inFunction, NULL, NULL);
 			insert_function(&symtable, false, functionName->data);
 
 			getNCheckToken(attribute, T_LB);
@@ -636,6 +636,7 @@ void scopeState(){
 	getNCheckToken(attribute, T_EOL);
 stringCpy(operand1, "SCOPE");
 instruction("LABEL", operand1, NULL, NULL);
+instruction("CREATEFRAME", NULL, NULL, NULL);
 	scommandsState();
 	getNCheckToken(attribute, T_SCOPE);
 }
@@ -720,6 +721,7 @@ void fcommandState(){
 	if (expressionType != nodeSearch(symtable, inFunction->data)->symbol->type)
 		error(TYPE_ERR);
 	getNCheckToken(attribute, T_EOL);
+instruction("RETURN", NULL, NULL, NULL);
 	set_hasReturn(symtable, inFunction->data);
 }
 
@@ -754,6 +756,7 @@ void scommandState(){
 void vardefState(){
 	getNCheckToken(variableName, T_ID);
 	insert_variable(currentSymtable, variableName->data);
+instruction("DEFVAR", variableName, NULL, NULL);
 	getNCheckToken(attribute, T_AS);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
@@ -810,7 +813,10 @@ void fcallState(){
 	validateFunctCall(symtable, *currentSymtable, variableName->data, functionName->data);
 
 	cparamsState();
+instruction("PUSHFRAME", NULL, NULL, NULL);
+instruction("CREATEFRAME", NULL, NULL, NULL);
 instruction("CALL", functionName, NULL, NULL);
+instruction("POPFRAME", NULL, NULL, NULL);
 }
 
 /*//TODO: comment*/

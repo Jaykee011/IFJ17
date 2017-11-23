@@ -27,6 +27,6 @@ int main(int argc, char** argv) {
 
 	treeDispose(&symtable);
 
-	//error(FINE);
+	error(FINE);
 	return FINE;
 }	

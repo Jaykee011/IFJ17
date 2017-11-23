@@ -134,6 +134,10 @@ void insert_type(nodePtr Strom, char *name, int type) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
 
+	if (uzel == NULL){
+		error(DEF_ERR);
+	}
+
 	if (uzel->symbol->metaType == FUNCTION){
 		if (uzel->symbol->function.declared && uzel->symbol->defined && uzel->symbol->type != type){
 			error(TYPE_ERR);
