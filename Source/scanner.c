@@ -117,6 +117,12 @@ int getToken(String *s, int *cursor){
 
 				/* If escape sequence or add char */
 				if(c == '\\') shunt = LEX_STRINGE;
+				else if(c <= 32) {
+					char buf[4];
+					if(c < 10) sprintf(buf, "\\00%d", c);
+					else sprintf(buf, "\\0%d", c);
+					concatToString(s, buf);
+				}
 				else stringAddData(s, c);
 				break;
 
@@ -149,7 +155,7 @@ int getToken(String *s, int *cursor){
 						case '"': stringAddData(s, '\"'); break;
 						case 'n': stringAddData(s, '\n'); break;
 						case 't': stringAddData(s, '\t'); break;
-						case '\\':stringAddData(s, '\\'); break;
+						case '\\':concatToString(s, "\\092"); break;
 						default: return LEX_ERR;
 					}
 				}
