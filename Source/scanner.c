@@ -264,22 +264,22 @@ int getToken(String *s, int *cursor){
 
 					/* Other keywords */
 					if(!stringCmpConstString(s, "as"))		return T_AS;
-					if(!stringCmpConstString(s, "asc"))		return T_ASC;
+					//if(!stringCmpConstString(s, "asc"))		return T_ASC;
 					if(!stringCmpConstString(s, "declare"))	return T_DECLARE;
 					if(!stringCmpConstString(s, "dim"))		return T_DIM;
 					if(!stringCmpConstString(s, "do"))		return T_DO;
 					if(!stringCmpConstString(s, "else"))	return T_ELSE;
 					if(!stringCmpConstString(s, "end"))		return T_END;
-					if(!stringCmpConstString(s, "chr"))		return T_CHR;
+					//if(!stringCmpConstString(s, "chr"))		return T_CHR;
 					if(!stringCmpConstString(s, "function"))return T_FUNCTION;
 					if(!stringCmpConstString(s, "if"))		return T_IF;
 					if(!stringCmpConstString(s, "input"))	return T_INPUT;
-					if(!stringCmpConstString(s, "length"))	return T_LENGTH;
+					//if(!stringCmpConstString(s, "length"))	return T_LENGTH;
 					if(!stringCmpConstString(s, "loop"))	return T_LOOP;
 					if(!stringCmpConstString(s, "print"))	return T_PRINT;
 					if(!stringCmpConstString(s, "return"))	return T_RETURN;
 					if(!stringCmpConstString(s, "scope"))	return T_SCOPE;
-					if(!stringCmpConstString(s, "subStr"))	return T_SUBSTR;
+					//if(!stringCmpConstString(s, "subStr"))	return T_SUBSTR;
 					if(!stringCmpConstString(s, "then"))	return T_THEN;
 					if(!stringCmpConstString(s, "while"))	return T_WHILE;
 					if(!stringCmpConstString(s, "and"))		return T_AND;

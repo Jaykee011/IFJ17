@@ -499,7 +499,7 @@ void precedence_analysis(bool boolExpected){
 		b.data = precedenceBuffer[i].data;
 		b.type = precedenceBuffer[i].type;
 		b.identifier = precedenceBuffer[i].identifier;
-		switch (precTable[a][b.token]){
+		switch (precTable[(int)a][(int)(b.token)]){
 			case EQ:
 				push(&stack, b);
 				break;
@@ -557,9 +557,9 @@ bool parse(){
 	stringInit(&operand1);
 	stringInit(&operand2);
 	stringInit(&operand3);
-	preparePredefined(&symtable);
 stringCpy(operand1, "SCOPE");
 instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
+	preparePredefined(&symtable);
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:

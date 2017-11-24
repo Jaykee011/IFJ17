@@ -580,7 +580,7 @@ instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	/* /SubStr */
 
 	/* asc */
-	stringCpy(functionName, "asc");
+	/*stringCpy(functionName, "asc");
 	stringCpy(param1, "s");
 	stringCpy(param2, "i");
 	type = INTEGER;
@@ -621,7 +621,7 @@ instruction("LABEL", temp1, NULL, NULL, NULL, NULL, NULL);
 stringCpy(temp1, "TEMP1");
 instruction("STR2INT", temp1, param1, param2, "LF", "LF", "LF");
 instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);*/
 	/* /asc */
 
 	/* Chr */
