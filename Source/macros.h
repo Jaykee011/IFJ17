@@ -10,7 +10,7 @@
 #define MACROS
 
 /* Přepínače */
-#define DEBUG_ON
+//#define DEBUG_ON
 
 /* Definice */
 #ifdef DEBUG_ON
