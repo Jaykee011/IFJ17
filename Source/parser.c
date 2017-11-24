@@ -126,16 +126,25 @@ instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
 		switch(((tokenparam *)mValue)->token){
 			case PRPLUS:
 				if (firstType == STRING && secondType == STRING){
-					//TODO: generate concat
+stringCpy(operand2, "$TEMP1");
+instruction("DEFVAR", operand1, NULL, NULL, "LF", NULL, NULL);
+stringCpy(operand3, "$TEMP2");
+instruction("DEFVAR", operand1, NULL, NULL, "LF", NULL, NULL);
+instruction("POPS", operand3, NULL, NULL, "LF", NULL, NULL);
+instruction("POPS", operand2, NULL, NULL, "LF", NULL, NULL);
+instruction("CONCAT", operand1, operand2, operand3, "LF", "LF", "LF");
+instruction("PUSHS", operand1, NULL, NULL, "LF", NULL, NULL);
 					expressionType = STRING;
 				}
-				else if (intOp){
-					expressionType = INTEGER;
-				}
 				else{
-					expressionType = DOUBLE;
-				}
+					if (intOp){
+						expressionType = INTEGER;
+					}
+					else{
+						expressionType = DOUBLE;
+					}
 instruction("ADDS", NULL, NULL, NULL, NULL, NULL, NULL);
+				}
 				break;
 			case PRMINUS:
 				//FIXME: posefit datove typy
@@ -548,6 +557,7 @@ bool parse(){
 	stringInit(&operand1);
 	stringInit(&operand2);
 	stringInit(&operand3);
+	preparePredefined(&symtable);
 stringCpy(operand1, "SCOPE");
 instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
 	getNEOLToken(attribute, &tokenSize);
@@ -998,6 +1008,7 @@ instruction("READ", attribute, operand2, NULL, "LF", NULL, NULL);
 	if (nodeSearch(*currentSymtable, attribute->data) == NULL){
 		error(DEF_ERR);
 	}
+	set_initialized(*currentSymtable, attribute->data);
 	getNCheckToken(attribute, T_EOL);
 }
 

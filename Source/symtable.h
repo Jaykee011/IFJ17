@@ -89,5 +89,7 @@ val getValue(nodePtr, char *);
 int getType(nodePtr, char *);
 void loadParameters(nodePtr, char *);
 
+void preparePredefined(nodePtr *);
+
 
 #endif
