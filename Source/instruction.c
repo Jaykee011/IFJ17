@@ -11,17 +11,11 @@
 
 #include "includes.h"
 
-FILE *s_outputFile = NULL;
-
 /* Open output file where will be the instructions */
-int openOutput(char *s) {
-	s_outputFile = fopen(s, "w");
-	if(!s_outputFile) return FAIL;
+void openOutput() {
 
 	/* Every instruction list starts with this TAG */
-	char *x = ".IFJcode17\n";
-	fwrite(x, sizeof(char), strlen(x), s_outputFile);
-	return FINE;
+	fprintf(stdout, ".IFJcode17\n");
 }
 
 /* Universal function to add an instruction */
@@ -69,18 +63,10 @@ void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2
 	}
 
 	// Write the formated output to the file and LF
-	fwrite(stringGetString(format), sizeof(char), strlen(stringGetString(format)), s_outputFile);
-	fwrite("\n", sizeof(char), 1, s_outputFile);
+	fprintf(stdout, "%s\n", stringGetString(format));
 
 	// Free some temporary memory
 	stringFree(format);
-}
-
-/* While program exit we need to close all streams */
-void closeOutput() {
-	if(s_outputFile == NULL) return;
-
-	fclose(s_outputFile);
 }
 
 /* TODO: */

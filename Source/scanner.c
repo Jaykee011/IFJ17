@@ -3,7 +3,7 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		03:37, 10-10-2017
+ *	Last update		10:48, 28-11-2017
  */
 
 #ifndef SCANNERC
@@ -11,22 +11,8 @@
 
 #include "includes.h"
 
-FILE *s_inputFile = NULL;
 int asciiVal = 0;
 int asciiCount = 0;
-
-int openInput(char *s) {
-	s_inputFile = fopen(s, "r");
-	if(!s_inputFile) return FAIL;
-
-	return FINE;
-}
-
-void closeInput() {
-	if(s_inputFile == NULL) return;
-	
-	fclose(s_inputFile);
-}
 
 int getToken(String *s, int *cursor){
 	char c;
@@ -34,7 +20,7 @@ int getToken(String *s, int *cursor){
 	stringClear(s);
 	(*cursor) = 0;
 	do {
-		c = getc(s_inputFile);
+		c = getc(stdin);
 		(*cursor)++;
 
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return T_EOF;
@@ -87,7 +73,7 @@ int getToken(String *s, int *cursor){
 			case LEX_BLOCKDIV:
 				if(c == '\'') shunt = LEX_BLOCK;
 				else {
-					ungetc(c, s_inputFile);
+					ungetc(c, stdin);
 					(*cursor)--;
 					return T_DIV;
 				}
@@ -164,7 +150,7 @@ int getToken(String *s, int *cursor){
 			/* > or >= */
 			case LEX_GREATER:
 				if(c == '=') return T_GTE;
-				ungetc(c, s_inputFile);
+				ungetc(c, stdin);
 				(*cursor)--;
 				return T_GT;
 
@@ -172,7 +158,7 @@ int getToken(String *s, int *cursor){
 			case LEX_SMALLER:
 				if(c == '=') return T_LTE;
 				else if(c == '>') return T_NEQ;
-				ungetc(c, s_inputFile);
+				ungetc(c, stdin);
 				(*cursor)--;
 				return T_LT;
 
@@ -188,7 +174,7 @@ int getToken(String *s, int *cursor){
 				else if(c == '.') shunt = LEX_FLOATF;
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_inputFile);
+					ungetc(c, stdin);
 					(*cursor)--;
 					return L_INT;
 				}
@@ -208,7 +194,7 @@ int getToken(String *s, int *cursor){
 				if(isdigit(c)) {}
 				else if(c == 'e' || c == 'E') shunt = LEX_EFLOATC;
 				else {
-					ungetc(c, s_inputFile);
+					ungetc(c, stdin);
 					(*cursor)--;
 					return L_FLOAT;
 				}
@@ -239,7 +225,7 @@ int getToken(String *s, int *cursor){
 			case LEX_EFLOAT:
 				if(isdigit(c)) {}
 				else {
-					ungetc(c, s_inputFile);
+					ungetc(c, stdin);
 					(*cursor)--;
 					return L_FLOAT;
 				}
@@ -251,7 +237,7 @@ int getToken(String *s, int *cursor){
 
 				if(isalnum(c) || c == '_') stringAddData(s, c);
 				else {
-					ungetc(c, s_inputFile);
+					ungetc(c, stdin);
 					(*cursor)--;
 
 					/* Lower case keyword */
@@ -304,7 +290,7 @@ int getToken(String *s, int *cursor){
 }
 
 void pushbackAttr(int l) {
-	fseek(s_inputFile, -l, SEEK_CUR);																		$$("pushbackAttr(%d);\n", l);
+	fseek(stdin, -l, SEEK_CUR);																				$$("pushbackAttr(%d);\n", l);
 }
 
 #endif

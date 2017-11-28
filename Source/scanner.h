@@ -3,7 +3,7 @@
  *	File			scanner.h
  *	Description		Header file for scanner.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		03:37, 10-10-2017
+ *	Last update		10:48, 28-11-2017
  */
 
 #ifndef SCANNERH
@@ -36,8 +36,6 @@
 #include "string.h"
 #include "macros.h"
 
-int openInput(char *s);					// Set file to read
-void closeInput();						// Close input file
 int getToken(String *s, int *cursor);	// Returns error/token type and saves the value
 void pushbackAttr(int l);				// We need to push back
 
