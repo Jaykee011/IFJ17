@@ -14,8 +14,6 @@ int main(int argc, char** argv) {
 	
 	parse();
 
-	printf("HOTOVO\n");
-
 	treeDispose(&symtable);
 
 	error(FINE);
