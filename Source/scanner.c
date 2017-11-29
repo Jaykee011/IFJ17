@@ -82,6 +82,7 @@ int getToken(String *s, int *cursor){
 			/* We are in a comment */
 			case LEX_BLOCK:
 				if(c == '\'') shunt = LEX_BLOCKE;
+				else if(c == EOF) return LEX_ERR;
 				break;
 
 			/* End of block comment */
