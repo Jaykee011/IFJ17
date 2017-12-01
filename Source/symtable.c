@@ -139,8 +139,8 @@ void insert_type(nodePtr Strom, char *name, int type) {
 	}
 
 	if (uzel->symbol->metaType == FUNCTION){
-		if (uzel->symbol->function.declared && uzel->symbol->defined && uzel->symbol->type != type){
-			error(TYPE_ERR);
+		if (uzel->symbol->function.declared && uzel->symbol->type != type){
+			error(DEF_ERR);
 		}
 	}
 
@@ -283,6 +283,11 @@ void insert_param(nodePtr Strom, char *name, char *parName, int type, bool decla
 			}
 			current->next = newParam;	
 		}
+		nodePtr uzel = nodeSearch(Strom, parName);
+		if(uzel != NULL) {
+			if (uzel->symbol->metaType == FUNCTION)
+				error(DEF_ERR);
+		}
 		insert_variable(&function->symbol->function.functTable, parName);
 		insert_type(function->symbol->function.functTable, parName, type);
 	}
@@ -369,7 +374,7 @@ int validateCallParams(nodePtr Strom, char *name, param callParams){
 		headCall = headCall->next;
 	}
 
-	if ((headDef == NULL && headDef != NULL) || (headDef != NULL && headDef == NULL))
+	if ((headCall == NULL && headDef != NULL) || (headCall != NULL && headDef == NULL))
 		return FAIL;
 
 	return FINE;
@@ -478,17 +483,9 @@ void preparePredefined(nodePtr *Strom){
 	type = INTEGER;
 
 	insert_function(Strom, false, functionName->data);
-instruction("LABEL", functionName, NULL, NULL, NULL, NULL, NULL);
 	insert_param(*Strom, functionName->data, param1->data, STRING, false);
-instruction("DEFVAR", param1, NULL, NULL, "LF", NULL, NULL);
 	insert_type(*Strom, functionName->data, type);
-	loadParameters(*Strom, functionName->data);
 	setFunctionDefined(*Strom, functionName->data);
-stringCpy(param2, "$TEMP");
-instruction("DEFVAR", param2, NULL, NULL, "LF", NULL, NULL);
-instruction("STRLEN", param2, param1, NULL, "LF", "LF", NULL);
-instruction("PUSHS", param2, NULL, NULL, "LF", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	/* /Length */
 
 	/* SubStr */
@@ -499,129 +496,24 @@ instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	type = STRING;
 
 	insert_function(Strom, false, functionName->data);
-instruction("LABEL", functionName, NULL, NULL, NULL, NULL, NULL);
 	insert_param(*Strom, functionName->data, param1->data, STRING, false);
 	insert_param(*Strom, functionName->data, param2->data, INTEGER, false);
 	insert_param(*Strom, functionName->data, param3->data, INTEGER, false);
-instruction("DEFVAR", param1, NULL, NULL, "LF", NULL, NULL);
-instruction("DEFVAR", param2, NULL, NULL, "LF", NULL, NULL);
-instruction("DEFVAR", param3, NULL, NULL, "LF", NULL, NULL);
 	insert_type(*Strom, functionName->data, type);
-	loadParameters(*Strom, functionName->data);
 	setFunctionDefined(*Strom, functionName->data);
-stringCpy(temp1, "$TEMP1");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP2");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP3");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP1");
-stringCpy(temp2, "0");
-instruction("EQ", temp1, temp2, param1, "LF", "int", "LF");
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP2");
-instruction("LT", temp1, param1, temp2, "LF", "LF", "int");
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("ORS", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "true");
-instruction("PUSHS", temp1, NULL, NULL, "bool", NULL, NULL);
-stringCpy(temp1, "IF1");
-instruction("JUMPIFNEQS", temp1, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "TEMP1");
-stringCpy(temp2, "");
-instruction("PUSHS", temp2, NULL, NULL, "string", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp2, "IF1");
-instruction("LABEL", temp2, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp2, "TEMP1");
-instruction("STRLEN", temp2, param1, NULL, "LF", "LF", NULL);
-instruction("PUSHS", param3, NULL, NULL, "LF", NULL, NULL);
-instruction("PUSHS", temp2, NULL, NULL, "LF", NULL, NULL);
-instruction("PUSHS", param2, NULL, NULL, "LF", NULL, NULL);
-instruction("SUBS", NULL, NULL, NULL, NULL, NULL, NULL);
-instruction("GTS", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "$TEMP1");
-stringCpy(temp2, "0");
-instruction("LT", temp1, param3, temp2, "LF", "LF", "int");
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("ORS", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "true");
-instruction("PUSHS", temp1, NULL, NULL, "bool", NULL, NULL);
-stringCpy(temp1, "1");
-instruction("SUB", param2, param2, temp1, "LF", "LF", "int");
-stringCpy(temp1, "IF2");
-instruction("JUMPIFNEQS", temp1, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "$TEMP1");
-instruction("STRLEN", temp1, param1, NULL, "LF", "LF", NULL);
-stringCpy(temp1, "$TEMP1");
-instruction("SUB", temp1, temp1, param2, "LF", "LF", "LF");
-instruction("MOVE", param3, temp1, NULL, "LF", "LF", NULL);
-stringCpy(temp2, "IF2");
-instruction("LABEL", temp2, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp2, "");
-instruction("MOVE", temp1, temp2, NULL, "LF", "string", NULL);
-stringCpy(temp2, "LOO");
-instruction("LABEL", temp2, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "TEMP2");
-instruction("GETCHAR", temp1, param1, param2, "LF", "LF", "LF");
-stringCpy(temp2, "TEMP1");
-instruction("CONCAT", temp2, temp2, temp1, "LF", "LF", "LF");
-stringCpy(temp1, "1");
-instruction("ADD", param2, param2, temp1, "LF", "LF", "int");
-instruction("SUB", param3, param3, temp1, "LF", "LF", "int");
-instruction("PUSHS", param3, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "0");
-instruction("PUSHS", temp1, NULL, NULL, "int", NULL, NULL);
-stringCpy(temp1, "LOO");
-instruction("JUMPIFNEQS", temp1, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "TEMP1");
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	/* /SubStr */
 
 	/* asc */
-	/*stringCpy(functionName, "asc");
+	stringCpy(functionName, "asc");
 	stringCpy(param1, "s");
 	stringCpy(param2, "i");
 	type = INTEGER;
 
 	insert_function(Strom, false, functionName->data);
-instruction("LABEL", functionName, NULL, NULL, NULL, NULL, NULL);
 	insert_param(*Strom, functionName->data, param1->data, STRING, false);
 	insert_param(*Strom, functionName->data, param2->data, INTEGER, false);
-instruction("DEFVAR", param1, NULL, NULL, "LF", NULL, NULL);
-instruction("DEFVAR", param2, NULL, NULL, "LF", NULL, NULL);
 	insert_type(*Strom, functionName->data, type);
-	loadParameters(*Strom, functionName->data);
 	setFunctionDefined(*Strom, functionName->data);
-stringCpy(temp1, "$TEMP1");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP2");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP3");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp2, "TEMP1");
-instruction("STRLEN", temp2, param1, NULL, "LF", "LF", NULL);
-stringCpy(temp1, "1");
-instruction("SUB", temp2, temp2, temp1, "LF", "LF", "int");
-instruction("PUSHS", temp2, NULL, NULL, "LF", NULL, NULL);
-instruction("PUSHS", param2, NULL, NULL, "LF", NULL, NULL);
-instruction("PUSHS", temp2, NULL, NULL, "LF", NULL, NULL);
-instruction("LTS", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "true");
-instruction("PUSHS", temp1, NULL, NULL, "bool", NULL, NULL);
-instruction("ORS", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "IF3");
-instruction("JUMPIFNEQS", temp1, NULL, NULL, "bool", NULL, NULL);
-stringCpy(temp1, "0");
-instruction("PUSHS", temp1, NULL, NULL, "int", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "IF3");
-instruction("LABEL", temp1, NULL, NULL, NULL, NULL, NULL);
-stringCpy(temp1, "TEMP1");
-instruction("STR2INT", temp1, param1, param2, "LF", "LF", "LF");
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);*/
 	/* /asc */
 
 	/* Chr */
@@ -630,22 +522,9 @@ instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);*/
 	type = STRING;
 
 	insert_function(Strom, false, functionName->data);
-instruction("LABEL", functionName, NULL, NULL, NULL, NULL, NULL);
 	insert_param(*Strom, functionName->data, param1->data, INTEGER, false);
-instruction("DEFVAR", param1, NULL, NULL, "LF", NULL, NULL);
 	insert_type(*Strom, functionName->data, type);
-	loadParameters(*Strom, functionName->data);
 	setFunctionDefined(*Strom, functionName->data);
-stringCpy(temp1, "$TEMP1");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP2");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp1, "$TEMP3");
-instruction("DEFVAR", temp1, NULL, NULL, "LF", NULL, NULL);
-stringCpy(temp2, "TEMP1");
-instruction("INT2CHAR", temp1, param1, NULL, "LF", "LF", NULL);
-instruction("PUSHS", temp1, NULL, NULL, "LF", NULL, NULL);
-instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 	/* /Chr */
 
 

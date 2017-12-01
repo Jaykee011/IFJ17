@@ -23,7 +23,7 @@ int getToken(String *s, int *cursor){
 		c = getc(stdin);
 		(*cursor)++;
 
-		if(c == EOF && shunt == LEX_BLOCK) return LEX_ERR;
+		if(c == EOF && (shunt == LEX_BLOCK || shunt == LEX_BLOCKE)) return LEX_ERR;
 		if(c == EOF && shunt != LEX_WAITING && shunt != LEX_KEYWORD) return T_EOF;
 
 		switch(shunt) {

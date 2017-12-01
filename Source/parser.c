@@ -127,13 +127,13 @@ instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
 			case PRPLUS:
 				if (firstType == STRING && secondType == STRING){
 stringCpy(operand2, "$TEMP1");
-instruction("DEFVAR", operand1, NULL, NULL, "LF", NULL, NULL);
+instruction("DEFVAR", operand2, NULL, NULL, "LF", NULL, NULL);
 stringCpy(operand3, "$TEMP2");
-instruction("DEFVAR", operand1, NULL, NULL, "LF", NULL, NULL);
+instruction("DEFVAR", operand3, NULL, NULL, "LF", NULL, NULL);
 instruction("POPS", operand3, NULL, NULL, "LF", NULL, NULL);
 instruction("POPS", operand2, NULL, NULL, "LF", NULL, NULL);
-instruction("CONCAT", operand1, operand2, operand3, "LF", "LF", "LF");
-instruction("PUSHS", operand1, NULL, NULL, "LF", NULL, NULL);
+instruction("CONCAT", operand2, operand2, operand3, "LF", "LF", "LF");
+instruction("PUSHS", operand2, NULL, NULL, "LF", NULL, NULL);
 					expressionType = STRING;
 				}
 				else{
@@ -147,7 +147,6 @@ instruction("ADDS", NULL, NULL, NULL, NULL, NULL, NULL);
 				}
 				break;
 			case PRMINUS:
-				//FIXME: posefit datove typy
 				if (intOp){
 					expressionType = INTEGER;
 				}
@@ -462,14 +461,14 @@ void testTokens(bool boolExpected){ // imput token string control
 			case T_EQ:
 			case T_NEQ:
 				if (!boolExpected){
-					error(SYN_ERR);
+					error(SEM_ERR);
 				}	
 				if(compareTokenExists == 0){
 					compareTokenExists = 1;
 					previousNonId = 0;
 				}
 				else{
-					error(SYN_ERR); 
+					error(SEM_ERR); 
 				}
 				break;
 			default:
@@ -494,8 +493,9 @@ void precedence_analysis(bool boolExpected){
 	push(&stack, firstToken);
 	char a = PREND;
 	int i = 0;
+	bool whileBreak=false;
+	precedenceTokenConversion(precedenceBuffer[i].token, &b); 
 	do {
-		precedenceTokenConversion(precedenceBuffer[i].token, &b); 
 		b.data = precedenceBuffer[i].data;
 		b.type = precedenceBuffer[i].type;
 		b.identifier = precedenceBuffer[i].identifier;
@@ -513,11 +513,16 @@ void precedence_analysis(bool boolExpected){
 				break;
 			case E:
 			default:
-				exit(INTERN_ERR);
+				if ((b.token == 14) && (a == 14)){
+					whileBreak = true;
+					break;
+				}
+				exit(100);
 		}
 		i++;
 		a = topTerm(&stack);
-	} while (((b.token) != PREND) || (a != PREND));
+		precedenceTokenConversion(precedenceBuffer[i].token, &b);
+	} while ((((b.token) != 14) || (a != 14)) && !whileBreak);
 	tokenparam result;
 	pop(&stack, &result);
 }
@@ -549,7 +554,6 @@ void getNCheckToken(String *s, int t){
 }
 
 bool parse(){
-	//TODO: funkce co vlozi preddefinovane fce do tabulky a vygeneruje jejich instrukce
 	stringInit(&attribute);
 	stringInit(&variableName);
 	stringInit(&functionName);
@@ -560,6 +564,7 @@ bool parse(){
 stringCpy(operand1, "SCOPE");
 instruction("JUMP", operand1, NULL, NULL, NULL, NULL, NULL);
 	preparePredefined(&symtable);
+	writePredefined(); //zapis kodu do outu v instruction.c
 	getNEOLToken(attribute, &tokenSize);
 	switch(token){
 		case T_DECLARE:
@@ -656,7 +661,7 @@ stringCpy(operand1, "");
 instruction("PUSHS", operand1, NULL, NULL, "string", NULL, NULL);	
 					break;
 				default:
-					error(INTERN_ERR);
+					error(SEM_ERR);
 			}		
 instruction("RETURN", NULL, NULL, NULL, NULL, NULL, NULL);
 			getNEOLToken(attribute, &tokenSize);
@@ -760,7 +765,6 @@ void fcommandState(){
 	if (token != T_LB && token != T_ID && token != L_INT && token != L_STRING && token != L_FLOAT){
 		error(SYN_ERR);
 	}
-	//TODO: gen return
 	pushbackAttr(tokenSize);
 	precedence_analysis(false);
 	if (expressionType != nodeSearch(symtable, inFunction->data)->symbol->type)
@@ -832,7 +836,8 @@ void initState(){
 	getNEOLToken(storedAttr, &storedSize);
 	switch(token){
 		case T_ID:
-			getNEOLToken(attribute, &tokenSize);
+			token = getToken(attribute, &tokenSize);
+			if (token == LEX_ERR) error(LEX_ERR);
 			if (token == T_LB){
 				stringCpy(functionName, storedAttr->data);
 				fcallState();
@@ -847,6 +852,8 @@ void initState(){
 		case T_LB:
 			pushbackAttr(storedSize);
 			precedence_analysis(false);
+			if (type != expressionType)
+				error(TYPE_ERR);
 if (type == INTEGER && expressionType == DOUBLE){
 instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);
 }
@@ -1164,7 +1171,6 @@ void typeState(){
 }
 
 void termState(){
-	//TODO: gen push instructions
 	switch(token){
 		case L_INT:
 instruction("PUSHS", attribute, NULL, NULL, "int", NULL, NULL);

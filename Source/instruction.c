@@ -69,64 +69,100 @@ void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2
 	stringFree(format);
 }
 
-/* TODO: */
-// void preparedInstructions() {
-// instruction("CREATEFRAME", NULL, NULL, NULL);
-// instruction("PUSHFRAME", NULL, NULL, NULL);
-// instruction("POPFRAME", NULL, NULL, NULL);
-// instruction("RETURN", NULL, NULL, NULL);
-// instruction("CLEARS", NULL, NULL, NULL);
-// instruction("ADDS", NULL, NULL, NULL);
-// instruction("SUBS", NULL, NULL, NULL);
-// instruction("MULS", NULL, NULL, NULL);
-// instruction("DIVS", NULL, NULL, NULL);
-// instruction("LTS", NULL, NULL, NULL);
-// instruction("GTS", NULL, NULL, NULL);
-// instruction("EQS", NULL, NULL, NULL);
-// instruction("BREAK", NULL, NULL, NULL);
-
-// instruction("DEFVAR", var, NULL, NULL);
-// instruction("CALL", label, NULL, NULL);
-// instruction("PUSHS", symbol, NULL, NULL);
-// instruction("POPS", var, NULL, NULL);
-
-// instruction("LABEL", label, NULL, NULL);
-// instruction("JUMP", label, NULL, NULL);
-
-// instruction("JUMPIFEQS", label, NULL, NULL);
-// instruction("JUMPIFNEQS", label, NULL, NULL);
-
-// instruction("DPRINT", symb, NULL, NULL);
-// instruction("WRITE", symb, NULL, NULL); // GF@%s
-
-// instruction("STRLEN", var, symb, NULL);
-
-// instruction("INT2FLOAT", var, symb, NULL);
-// instruction("FLOAT2INT", var, symb, NULL);
-// instruction("FLOAT2R2EINT", var, symb, NULL);
-// instruction("FLOAT2R2OINT", var, symb, NULL);
-// instruction("INT2CHAR", var, symb, NULL);
-
-// instruction("READ", var, type, NULL);
-// instruction("TYPE", var, symb, NULL);
-// instruction("MOVE", var, symb, NULL);
-
-// instruction("ADD", var, symb, symb);
-// instruction("SUB", var, symb, symb);
-// instruction("DIV", var, symb, symb);
-
-// instruction("LT", var, symb, symb);
-// instruction("GT", var, symb, symb);
-// instruction("EQ", var, symb, symb);
-
-// instruction("CONCAT", var, symb, symb);
-// instruction("GETCHAR", var, symb, symb);
-// instruction("SETCHAR", var, symb, symb);
-
-// instruction("JUMPIFEQ", label, symb, symb);
-// instruction("JUMPIFNEQ", label, symb, symb);
-
-// instruction("STRI2INT", var, symb, symb);
-// }
+void writePredefined(){
+	fprintf(stdout, "LABEL SubStr\n");
+	fprintf(stdout, "DEFVAR LF@s\n");
+	fprintf(stdout, "DEFVAR LF@i\n");
+	fprintf(stdout, "DEFVAR LF@n\n");
+	fprintf(stdout, "POPS LF@n\n");
+	fprintf(stdout, "POPS LF@i\n");
+	fprintf(stdout, "POPS LF@s\n");
+	fprintf(stdout, "MOVE LF@s string@test\n");
+	fprintf(stdout, "MOVE LF@i int@10\n");
+	fprintf(stdout, "MOVE LF@n int@5\n");
+	fprintf(stdout, "DEFVAR LF@temp1\n");
+	fprintf(stdout, "DEFVAR LF@temp2\n");
+	fprintf(stdout, "DEFVAR LF@temp3\n");
+	fprintf(stdout, "EQ LF@temp1 LF@i int@0\n");
+	fprintf(stdout, "PUSHS LF@temp1\n");
+	fprintf(stdout, "LT LF@temp1 LF@i int@0\n");
+	fprintf(stdout, "PUSHS LF@temp1\n");
+	fprintf(stdout, "ORS\n");
+	fprintf(stdout, "STRLEN LF@temp1 LF@s\n");
+	fprintf(stdout, "EQ LF@temp2 int@0 LF@temp1\n");
+	fprintf(stdout, "PUSHS LF@temp2\n");
+	fprintf(stdout, "ORS\n");
+	fprintf(stdout, "GT LF@temp2 LF@i LF@temp1\n");
+	fprintf(stdout, "PUSHS LF@temp2\n");
+	fprintf(stdout, "ORS\n");
+	fprintf(stdout, "PUSHS bool@true\n");
+	fprintf(stdout, "JUMPIFNEQS IF1\n");
+	fprintf(stdout, "PUSHS string@\n");
+	fprintf(stdout, "RETURN\n");
+	fprintf(stdout, "LABEL IF1\n");
+	fprintf(stdout, "STRLEN LF@temp1 LF@s\n");
+	fprintf(stdout, "PUSHS LF@n\n");
+	fprintf(stdout, "PUSHS LF@temp1\n");
+	fprintf(stdout, "PUSHS LF@i\n");
+	fprintf(stdout, "SUBS\n");
+	fprintf(stdout, "GTS\n");
+	fprintf(stdout, "LT LF@temp1 LF@n int@0\n");
+	fprintf(stdout, "PUSHS LF@temp1\n");
+	fprintf(stdout, "ORS\n");
+	fprintf(stdout, "PUSHS bool@true\n");
+	fprintf(stdout, "SUB LF@i LF@i int@1\n");
+	fprintf(stdout, "JUMPIFNEQS IF2\n");
+	fprintf(stdout, "STRLEN LF@temp1 LF@s\n");
+	fprintf(stdout, "SUB LF@n LF@temp1 LF@i\n");
+	fprintf(stdout, "LABEL IF2\n");
+	fprintf(stdout, "MOVE LF@temp1 string@\n");
+	fprintf(stdout, "LABEL LOO\n");
+	fprintf(stdout, "GETCHAR LF@temp2 LF@s LF@i\n");
+	fprintf(stdout, "CONCAT LF@temp1 LF@temp1 LF@temp2\n");
+	fprintf(stdout, "ADD LF@i LF@i int@1\n");
+	fprintf(stdout, "SUB LF@n LF@n int@1\n");
+	fprintf(stdout, "PUSHS LF@n\n");
+	fprintf(stdout, "PUSHS int@0\n");
+	fprintf(stdout, "JUMPIFNEQS LOO\n");
+	fprintf(stdout, "PUSHS LF@temp1\n");
+	fprintf(stdout, "RETURN\n");
+	fprintf(stdout, "LABEL Length\n");
+	fprintf(stdout, "DEFVAR LF@s\n");
+	fprintf(stdout, "POPS LF@s\n");
+	fprintf(stdout, "DEFVAR LF@temp\n");
+	fprintf(stdout, "STRLEN LF@temp LF@s\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "RETURN\n");
+	fprintf(stdout, "LABEL Asc\n");
+	fprintf(stdout, "DEFVAR LF@s\n");
+	fprintf(stdout, "DEFVAR LF@i\n");
+	fprintf(stdout, "POPS LF@i\n");
+	fprintf(stdout, "POPS LF@s\n");
+	fprintf(stdout, "DEFVAR LF@temp\n");
+	fprintf(stdout, "STRLEN LF@temp LF@s\n");
+	fprintf(stdout, "SUB LF@temp LF@temp int@1\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "PUSHS LF@i\n");
+	fprintf(stdout, "LTS\n");
+	fprintf(stdout, "LT LF@temp LF@i int@0\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "ORS\n");
+	fprintf(stdout, "PUSHS bool@true\n");
+	fprintf(stdout, "JUMPIFNEQS IF3\n");
+	fprintf(stdout, "PUSHS int@0\n");
+	fprintf(stdout, "RETURN\n");
+	fprintf(stdout, "LABEL IF3\n");
+	fprintf(stdout, "STRI2INT LF@temp LF@s LF@i\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "RETURN\n");
+	fprintf(stdout, "LABEL Chr\n");
+	fprintf(stdout, "DEFVAR LF@i\n");
+	fprintf(stdout, "POPS LF@i\n");
+	fprintf(stdout, "DEFVAR LF@temp\n");
+	fprintf(stdout, "INT2CHAR LF@temp LF@i\n");
+	fprintf(stdout, "PUSHS LF@temp\n");
+	fprintf(stdout, "RETURN\n");
+}
 
 #endif
