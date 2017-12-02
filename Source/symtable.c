@@ -142,6 +142,29 @@ void insert_type(nodePtr Strom, char *name, int type) {
 			error(DEF_ERR);
 		}
 	}
+	else{
+		String *operand = NULL; 
+		stringInit(&operand);
+		String *operand2 = NULL; 
+		stringInit(&operand2);
+		switch(type){
+			case INTEGER:
+stringCpy(operand, name);
+stringCpy(operand2, "0");
+instruction("MOVE", operand, operand2, NULL, "LF", "int", NULL);
+				break;
+			case DOUBLE:
+stringCpy(operand, name);
+stringCpy(operand2, "0.0");
+instruction("MOVE", operand, operand2, NULL, "LF", "float", NULL);
+				break;
+			case STRING:
+stringCpy(operand, name);
+stringCpy(operand2, "");
+instruction("MOVE", operand, operand2, NULL, "LF", "string", NULL);
+				break;
+		}
+	}
 
 	uzel->symbol->type = type;
 }

@@ -838,6 +838,7 @@ instruction("DEFVAR", variableName, NULL, NULL, "LF", NULL, NULL);
 	getNEOLToken(attribute, &tokenSize);
 	typeState();
 	insert_type(*currentSymtable, variableName->data, type);
+	set_initialized(*currentSymtable,variableName->data);
 	definitState();
 }
 
@@ -895,7 +896,6 @@ instruction("INT2FLOATS", NULL, NULL, NULL, NULL, NULL, NULL);
 	}
 stringCpy(operand1, variableName->data);
 instruction("POPS", operand1, NULL, NULL, "LF", NULL, NULL);
-	set_initialized(*currentSymtable,variableName->data);
 }
 
 void fcallState(){
