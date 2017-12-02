@@ -219,7 +219,7 @@ instruction("EQS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
 					break;
 			case PRNEQ:
-instruction("LTS", NULL, NULL, NULL, NULL, NULL, NULL);
+instruction("EQS", NULL, NULL, NULL, NULL, NULL, NULL);
 instruction("NOTS", NULL, NULL, NULL, NULL, NULL, NULL);
 					expressionType = BOOLEAN;
 					break;
@@ -852,7 +852,7 @@ void initState(){
 		case T_LB:
 			pushbackAttr(storedSize);
 			precedence_analysis(false);
-			if (type != expressionType)
+			if (getType(*currentSymtable, variableName->data) != expressionType)
 				error(TYPE_ERR);
 if (type == INTEGER && expressionType == DOUBLE){
 instruction("FLOAT2R2EINTS", NULL, NULL, NULL, NULL, NULL, NULL);

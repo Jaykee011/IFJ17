@@ -70,19 +70,15 @@ void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2
 }
 
 void writePredefined(){
-	fprintf(stdout, "LABEL SubStr\n");
+	fprintf(stdout, "LABEL substr\n");
 	fprintf(stdout, "DEFVAR LF@s\n");
 	fprintf(stdout, "DEFVAR LF@i\n");
 	fprintf(stdout, "DEFVAR LF@n\n");
 	fprintf(stdout, "POPS LF@n\n");
 	fprintf(stdout, "POPS LF@i\n");
 	fprintf(stdout, "POPS LF@s\n");
-	fprintf(stdout, "MOVE LF@s string@test\n");
-	fprintf(stdout, "MOVE LF@i int@10\n");
-	fprintf(stdout, "MOVE LF@n int@5\n");
 	fprintf(stdout, "DEFVAR LF@temp1\n");
 	fprintf(stdout, "DEFVAR LF@temp2\n");
-	fprintf(stdout, "DEFVAR LF@temp3\n");
 	fprintf(stdout, "EQ LF@temp1 LF@i int@0\n");
 	fprintf(stdout, "PUSHS LF@temp1\n");
 	fprintf(stdout, "LT LF@temp1 LF@i int@0\n");
@@ -126,26 +122,25 @@ void writePredefined(){
 	fprintf(stdout, "JUMPIFNEQS LOO\n");
 	fprintf(stdout, "PUSHS LF@temp1\n");
 	fprintf(stdout, "RETURN\n");
-	fprintf(stdout, "LABEL Length\n");
+	fprintf(stdout, "LABEL length\n");
 	fprintf(stdout, "DEFVAR LF@s\n");
 	fprintf(stdout, "POPS LF@s\n");
 	fprintf(stdout, "DEFVAR LF@temp\n");
 	fprintf(stdout, "STRLEN LF@temp LF@s\n");
 	fprintf(stdout, "PUSHS LF@temp\n");
 	fprintf(stdout, "RETURN\n");
-	fprintf(stdout, "LABEL Asc\n");
+	fprintf(stdout, "LABEL asc\n");
 	fprintf(stdout, "DEFVAR LF@s\n");
 	fprintf(stdout, "DEFVAR LF@i\n");
 	fprintf(stdout, "POPS LF@i\n");
 	fprintf(stdout, "POPS LF@s\n");
 	fprintf(stdout, "DEFVAR LF@temp\n");
 	fprintf(stdout, "STRLEN LF@temp LF@s\n");
-	fprintf(stdout, "SUB LF@temp LF@temp int@1\n");
 	fprintf(stdout, "PUSHS LF@temp\n");
 	fprintf(stdout, "PUSHS LF@temp\n");
 	fprintf(stdout, "PUSHS LF@i\n");
 	fprintf(stdout, "LTS\n");
-	fprintf(stdout, "LT LF@temp LF@i int@0\n");
+	fprintf(stdout, "LT LF@temp LF@i int@1\n");
 	fprintf(stdout, "PUSHS LF@temp\n");
 	fprintf(stdout, "ORS\n");
 	fprintf(stdout, "PUSHS bool@true\n");
@@ -153,10 +148,11 @@ void writePredefined(){
 	fprintf(stdout, "PUSHS int@0\n");
 	fprintf(stdout, "RETURN\n");
 	fprintf(stdout, "LABEL IF3\n");
+	fprintf(stdout, "ADD LF@i LF@i int@1\n");
 	fprintf(stdout, "STRI2INT LF@temp LF@s LF@i\n");
 	fprintf(stdout, "PUSHS LF@temp\n");
 	fprintf(stdout, "RETURN\n");
-	fprintf(stdout, "LABEL Chr\n");
+	fprintf(stdout, "LABEL chr\n");
 	fprintf(stdout, "DEFVAR LF@i\n");
 	fprintf(stdout, "POPS LF@i\n");
 	fprintf(stdout, "DEFVAR LF@temp\n");
