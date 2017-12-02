@@ -6,10 +6,14 @@
  */
 #include "includes.h"
 
-int token = 0;
-int tokenSize;
-int ifCounter = 0;
-int loopCounter = 0;
+int token = 0; // token as defined in define.h
+int tokenSize; // length of the attribute portion of token
+int ifCounter = 0; // depth counter for nested ifs
+int loopCounter = 0; // depth counter for nested while loops
+
+//
+// helper strings for analysis or instruction generation
+//
 String *attribute = NULL;
 String *variableName = NULL;
 String *functionName = NULL;
@@ -17,8 +21,9 @@ String *inFunction = NULL;
 String *operand1 = NULL;
 String *operand2 = NULL;
 String *operand3 = NULL;
-int type = 0; // 1 => int; 2 => double; 3 => string;
-int expressionType = 0; // 1 => int; 2 => double; 3 => string;
+
+int type = 0; // 1 => int; 2 => double; 3 => string; data type of current variable or function
+int expressionType = 0; // 1 => int; 2 => double; 3 => string; data type of result of precedence analysis
 tokenparam precedenceBuffer[100];
 
 nodePtr *currentSymtable; // lokalni tabulka symbolu 
@@ -46,8 +51,10 @@ int precTable[15][15] = {
 	/*  $ */{ L,	L,	E,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	E }
 };
 
+//
+// generates appropriate instructions based on the analysed expression
+//
 void evalExpr(void *lValue, void *mValue, void *rValue){
-	
 	struct value result;
 	result.i = 0;
 	result.d = 0.0;
@@ -230,6 +237,9 @@ instruction("NOTS", NULL, NULL, NULL, NULL, NULL, NULL);
 	}
 }
 
+//
+// Precedence stack functions
+//
 int stackInit(tStack *stack) { // stack inicialization
 
 	if (!stack)
@@ -267,9 +277,9 @@ void replaceY(tStack *stack, char a){ // <y za A
 		pop(stack, &buffer[i]);
 	}
 	if (i == 1)
-		evalExpr(&buffer[0],NULL, NULL); //TODO: comment
+		evalExpr(&buffer[0],NULL, NULL);
 	else
-		evalExpr(&buffer[2],&buffer[1], &buffer[0]); //TODO: comment
+		evalExpr(&buffer[2],&buffer[1], &buffer[0]);
 
 	NONTtoken.type = expressionType;
 	pop(stack, &buffer[i]);
@@ -309,9 +319,13 @@ char topTerm(tStack *stack) { // returns terminal closes to the top of the stack
 	error(INTERN_ERR);
 	return 0;
 }
+//
+// /Precedence stack functions
+//
 
-
-
+//
+// Converts token from scanner to precedence tokens
+//
 int precedenceTokenConversion(char token, tokenparam *converted) //converts token code to code which can be used as an index in precedence table
 {
 	switch (token)
@@ -389,6 +403,9 @@ int precedenceTokenConversion(char token, tokenparam *converted) //converts toke
 	}
 }
 
+//
+// Checks syntactical validity of expression
+//
 void testTokens(bool boolExpected){ // imput token string control
 	bool compareTokenExists = 0; // compare token exists
 	bool previousNonId = 0; // previous non-ID
@@ -484,6 +501,9 @@ void testTokens(bool boolExpected){ // imput token string control
 
 }
 
+//
+// runs a precedence analysis of expression and generates appropriate instructions
+//
 void precedence_analysis(bool boolExpected){
 	testTokens(boolExpected);
 	tStack stack;	
@@ -527,6 +547,9 @@ void precedence_analysis(bool boolExpected){
 	pop(&stack, &result);
 }
 
+//
+// Gets a token from scvanner that is NOT an EOL token
+//
 void getNEOLToken(String *s, int *size){
 	while(1){
 		token = getToken(s,size);
@@ -539,6 +562,9 @@ void getNEOLToken(String *s, int *size){
 	}
 }
 
+//
+// Gets a token from scvanner and checks if it is a specific token
+//
 void getNCheckToken(String *s, int t){
 	if (t == T_EOL)
 		token = getToken(s,&tokenSize);
@@ -553,6 +579,9 @@ void getNCheckToken(String *s, int t){
 	}
 }
 
+//
+// Syntactical analysis with semantic controls and instruction generation
+//
 bool parse(){
 	stringInit(&attribute);
 	stringInit(&variableName);
@@ -679,7 +708,6 @@ stringCpy(operand1, "SCOPE");
 instruction("LABEL", operand1, NULL, NULL, NULL, NULL, NULL);
 instruction("CREATEFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 instruction("PUSHFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
-//TODO: komentar akumulacni promenna pro precedencku
 stringCpy(operand1, "$AKU");
 instruction("DEFVAR", operand1, NULL, NULL, "GF", NULL, NULL);
 	scommandsState();
@@ -883,7 +911,9 @@ instruction("CALL", functionName, NULL, NULL, NULL, NULL, NULL);
 instruction("POPFRAME", NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
-/*//TODO: comment*/
+//
+// Helper function that inserts a parameter into a list of parameters in function call
+//
 void addParamToList(param *paramList, int t){
 	param *head = paramList;
 

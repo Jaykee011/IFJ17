@@ -1,10 +1,10 @@
 /*
  * IFJ 2017 project
  *  File            symtable.h
- *  Description     header file for binary search tree
- *  Author          Martin Studeny (xstude23)
+ *  Description     header file for binary search tree and semantic functions
+ *	Author			Martin Studeny (xstude23), Jakub Zapletal(xzaple36)
  */
-#ifndef SYMTABLEH   // obaleni pro vicenasobny preklad
+#ifndef SYMTABLEH 
 #define SYMTABLEH 
 
 #include <stdio.h>
@@ -24,6 +24,7 @@
 
 typedef struct parameters *param;
 typedef struct node *nodePtr;
+
 
 typedef struct defParam {
     char id[64];
@@ -52,7 +53,7 @@ typedef struct {
 } functInfo;
 
 typedef struct load {
-    bool defined; // TODO: -automatiky na 1
+    bool defined;
     bool initialized;
     int type; // 1 => int; 2 => double; 3 => string; 
     int metaType; // 1 => variable; 2 => function;

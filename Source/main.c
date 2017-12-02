@@ -1,21 +1,16 @@
+// main file
+// Author: xzaple36 (Jakub Zapletal)
 #include "includes.h"
 
 nodePtr symtable;
 
 int main(int argc, char** argv) {
 
-	/* STROM */
-
 	treeInit(&symtable);
-
-	/* /STROM */
-	
 	openOutput();
-	
 	parse();
-
 	treeDispose(&symtable);
 
-	error(FINE);
+	error(FINE); // cleaning the memory after succesful run
 	return FINE;
 }	

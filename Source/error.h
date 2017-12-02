@@ -9,6 +9,9 @@
 #ifndef ERRORH
 #define ERRORH
 
+//
+// List of allocated pointers
+//
 typedef struct pointerList {
 	void *p;					// Pointer
 	struct pointerList *next;	// Pointer to next pointer

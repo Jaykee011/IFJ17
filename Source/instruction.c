@@ -3,7 +3,6 @@
  *	File			instruction.c
  *	Description		Handles output, instructions and output file
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		18:00, 19-11-2017
  */
 
 #ifndef INSTRUCTIONC
@@ -69,6 +68,9 @@ void instruction(char *s, String *a1, String *a2, String *a3, char *f1, char *f2
 	stringFree(format);
 }
 
+//
+// Writes all the necessary instructions for the predefined functions( substr, length, asc, chr ) to stdout
+//
 void writePredefined(){
 	fprintf(stdout, "LABEL substr\n");
 	fprintf(stdout, "DEFVAR LF@s\n");

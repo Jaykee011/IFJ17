@@ -3,7 +3,6 @@
  *	File			instruction.h
  *	Description		Header file for instruction.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		18:00, 19-11-2017
  */
 
 #ifndef INSTRUCTIONH

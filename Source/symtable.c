@@ -1,11 +1,14 @@
 /*
  * IFJ 2017 project
  *	File			symtable.c
- *	Description		Source file for binary search tree
- *	Author			Martin Studeny (xstude23)
+ *	Description		Source file for binary search tree and semantic functions
+ *	Author			Martin Studeny (xstude23), Jakub Zapletal(xzaple36)
  */
 #include "symtable.h"
 
+//
+// Binary tree functions
+//
 void treeInit(nodePtr *tree) {
     *tree = NULL;
 }
@@ -95,21 +98,14 @@ void nodeDelete(nodePtr *tree, char *K) {
 			nodeDelete(&(*tree)->rPtr, K);
 	}
 }
-
-// void generateKey(char symbolName[64], int metaType) {
-// 	// TODO - udelat ze vseho lower case
-// 	// variable
-// 	if(metaType == 1) {
-// 		strcat(symbolName, "v");
-// 	}
-// 	// function
-// 	else if(metaType == 2) {
-// 		strcat(symbolName, "f");
-// 	}
-// }
+//
+// /Binary tree functions
+//
 
 
-
+//
+// Add variable symbol into tree
+//
 void insert_variable(nodePtr *Strom, char *name) {
 	nodePtr uzel;
 
@@ -130,6 +126,9 @@ void insert_variable(nodePtr *Strom, char *name) {
 	}
 }
 
+//
+// sets symbol type
+//
 void insert_type(nodePtr Strom, char *name, int type) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -147,6 +146,9 @@ void insert_type(nodePtr Strom, char *name, int type) {
 	uzel->symbol->type = type;
 }
 
+//
+// sets symbol value
+//
 void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -190,15 +192,15 @@ void insert_value(nodePtr Strom, char *name, int type, val data, int valueType) 
 	uzel->symbol->initialized = true;
 }
 
-// vlozit param do funkci
-
+//
+// Add function symbol into tree and sets it to declared or defined, depending on given parameters
+//
 void insert_function(nodePtr *Strom, bool declaration, char *name) {
 	nodePtr uzel;
 	uzel = nodeSearch(*Strom, name);
 
 
 	if(declaration == true) {
-		// pokud chceme deklarovat
 		if(uzel != NULL) {
 			error(DEF_ERR);
 		}
@@ -229,6 +231,9 @@ void insert_function(nodePtr *Strom, bool declaration, char *name) {
 	}
 }
 
+//
+// Set function as defined
+//
 void setFunctionDefined(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -240,6 +245,9 @@ void setFunctionDefined(nodePtr Strom, char *name){
 	uzel->symbol->defined = true;
 }
 
+//
+// Set function as a function with return clause
+//
 void set_hasReturn(nodePtr Strom, char *name) {
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -251,6 +259,10 @@ void set_hasReturn(nodePtr Strom, char *name) {
 	uzel->symbol->function.hasReturn = true;
 }
 
+
+//
+// Creates a local variable in functions symtable for a parameter
+//
 void insert_param(nodePtr Strom, char *name, char *parName, int type, bool declaration) {
 	nodePtr function = nodeSearch(Strom, name);
 	
@@ -293,6 +305,10 @@ void insert_param(nodePtr Strom, char *name, char *parName, int type, bool decla
 	}
 }
 
+
+//
+// Check if parameters in definition match those in declaration
+//
 int validateDefinitionParameters(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);	
@@ -323,6 +339,10 @@ int validateDefinitionParameters(nodePtr Strom, char *name){
 	return FINE;
 }
 
+
+//
+// Check if type of variable and function match in call
+//
 void validateFunctCall(nodePtr Strom, nodePtr lokalniStrom, char *varName, char *functName){
 	nodePtr function = nodeSearch(Strom, functName);
 	nodePtr variable = nodeSearch(lokalniStrom, varName);
@@ -347,6 +367,9 @@ void validateFunctCall(nodePtr Strom, nodePtr lokalniStrom, char *varName, char 
 	}
 }
 
+//
+// Check if parameters in call match those in declaration or definition
+//
 int validateCallParams(nodePtr Strom, char *name, param callParams){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -381,6 +404,9 @@ int validateCallParams(nodePtr Strom, char *name, param callParams){
 
 }
 
+//
+// Sets variable as initialized
+//
 void set_initialized(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -392,6 +418,9 @@ void set_initialized(nodePtr Strom, char *name){
 	uzel->symbol->initialized = true;
 }
 
+//
+// returns true if variable is initialized
+//
 bool getInitialized(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -403,6 +432,9 @@ bool getInitialized(nodePtr Strom, char *name){
 	return uzel->symbol->initialized;
 }
 
+//
+// returns value of variable
+//
 val getValue(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -414,6 +446,9 @@ val getValue(nodePtr Strom, char *name){
 	return uzel->symbol->value;
 }
 
+//
+// returns type of variable
+//
 int getType(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -425,6 +460,9 @@ int getType(nodePtr Strom, char *name){
 	return uzel->symbol->type;
 }
 
+//
+// generates instructions for loading parameter values in function call
+//
 void loadParameters(nodePtr Strom, char *name){
 	nodePtr uzel;
 	uzel = nodeSearch(Strom, name);
@@ -456,11 +494,10 @@ instruction("POPS", operand, NULL, NULL, "LF", NULL, NULL);
 	}while (lastParameter != uzel->symbol->function.parameters);
 }
 
+//
+// inserts predefined functions into symtable
+//
 void preparePredefined(nodePtr *Strom){
-//Length( s As String) As Integer
-//SubStr( s As String, i As Integer, n As Integer) As String
-//Asc( s As String, i As Integer) As Integer
-//Chr( i As Integer) As String
 	int type;
 
 	String *functionName = NULL;

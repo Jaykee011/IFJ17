@@ -3,7 +3,6 @@
 #	File			Makefile
 #	Description		Makefile for gcc
 #	Author			Michal Zilvar (xzilva02)
-#	Last update		12:15, 29-10-2017
 
 CFLAGS=-std=c99 -Wall -pedantic -g
 NAME=IFJ17

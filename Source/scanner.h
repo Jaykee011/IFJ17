@@ -3,7 +3,6 @@
  *	File			scanner.h
  *	Description		Header file for scanner.c
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		10:48, 28-11-2017
  */
 
 #ifndef SCANNERH

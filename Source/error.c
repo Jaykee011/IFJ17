@@ -3,7 +3,6 @@
  *	File			error.c
  *	Description		Error handle, free memory and exit program
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		18:03, 19-11-2017
  */
 
 #ifndef ERRORC

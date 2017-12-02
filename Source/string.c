@@ -3,7 +3,6 @@
  *	File			string.c
  *	Description		Operations with unlimited long strings
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		18:32, 19-11-2017
  */
 
 #include "includes.h"

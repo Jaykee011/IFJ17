@@ -20,10 +20,7 @@ archiv/string.h
 archiv/symtable.c
 archiv/symtable.h
 archiv/xzaple36.tgz
-Interpret/ic17int
-Interpret/out1
-Interpret/README
-Interpret/substr
+Interpret/*
 Source/error.o
 Source/IFJ17
 Source/out

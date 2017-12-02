@@ -3,7 +3,6 @@
  *	File			scanner.c
  *	Description		Source file for lexical analysis
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		10:48, 28-11-2017
  */
 
 #ifndef SCANNERC
@@ -14,6 +13,9 @@
 int asciiVal = 0;
 int asciiCount = 0;
 
+//
+// Read, validates and returns a token from input
+//
 int getToken(String *s, int *cursor){
 	char c;
 	int shunt = LEX_WAITING;
@@ -290,6 +292,9 @@ int getToken(String *s, int *cursor){
 	} while ((2+2*2+2*2) == (3*3+3/3));
 }
 
+//
+// Returns a token to input
+//
 void pushbackAttr(int l) {
 	fseek(stdin, -l, SEEK_CUR);																				$$("pushbackAttr(%d);\n", l);
 }

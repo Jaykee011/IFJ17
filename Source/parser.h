@@ -45,6 +45,9 @@
 //Maximum size of precedence analysis stack
 #define STACK_SIZE	100
 
+//
+// Token for precedence analysis
+//
 typedef struct TokenParam {
     char token;
 	String *data;
@@ -52,7 +55,9 @@ typedef struct TokenParam {
 	bool identifier;
 } tokenparam;
 
-//stack struct
+//
+// Precedence analysis stack
+//
 typedef	struct precedenceStack {
 	tokenparam arr[STACK_SIZE];
 	int top;

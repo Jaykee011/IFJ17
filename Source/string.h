@@ -3,7 +3,6 @@
  *	File			string.h
  *	Description		Header file for strings
  *	Author			Michal Zilvar (xzilva02)
- *	Last update		18:58, 19-11-2017
  */
 
 #ifndef STRINGH 

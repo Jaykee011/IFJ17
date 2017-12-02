@@ -1,6 +1,7 @@
-#ifndef INCLUDESH 	// obaleni pro vicenasobny preklad
+#ifndef INCLUDESH 
 #define INCLUDESH 
 
+// all required header files
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

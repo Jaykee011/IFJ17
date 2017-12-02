@@ -83,12 +83,15 @@
 #define T_TRUE              179
 #define T_WHILE             180
 
-#define T_EOL               198 // \n
+#define T_EOL               198 // \n || \r
 #define T_EOF               199
 
 #define FINE                0
 #define FAIL                1
 
+//
+// Magic constants for data types and metaTypes
+//
 #define INTEGER             1
 #define DOUBLE              2
 #define STRING              3
