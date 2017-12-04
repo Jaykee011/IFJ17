@@ -33,7 +33,7 @@ extern nodePtr symtable;
 //COL	- INPUT CHAR
 //ROW	- TOP TERMINAL ON STACK
 int precTable[15][15] = {
-	//		 ID		(	)	+	-	*	/	\	<	>  <=  >=  ==  !=	$
+	//		 ID		(	)	+	-	*	/	\	<	>  <=  >=  ==  <>	$
 	/* ID */{ E,	E,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R },
 	/*  ( */{ L,	L,	EQ,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	L,	E },
 	/*  ) */{ E,	E,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R,	R },

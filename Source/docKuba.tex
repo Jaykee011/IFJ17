@@ -1,0 +1,542 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[left=2cm, text={17cm, 24cm}, top=2.5cm]{geometry}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{parallel,enumitem}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usepackage{graphicx}
+
+
+\begin{document}
+\begin{titlepage}
+	\centering
+	\includegraphics[width=0.15\textwidth]{VUT_symbol_barevne_CMYK_CZ}\par\vspace{1cm}
+	\vspace{1cm}
+	{\huge\bfseries Projekt do předmětu IFJ\par}
+	\vspace{1.5cm}
+	{\scshape\Large Tým 057, varianta I \par}
+	\vspace{2cm}
+	{\Large Jakub Zapletal (xzaple36) - vedoucí - 25\%\par}
+	{\Large Michal Zilvar (xzilva02) - 25\%\par}
+	{\Large Martin Studený (xstude23) - 25\%\par}
+	{\Large Radek Wildmann (xwildm00) - 25\%\par}
+	\vfill
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\section{Lexikální analýza}
+
+Lexikální analyzátor je implementován pomocí konečného stavového automatu dle zadání.
+
+V naší implementaci pro generování tokenu slouží funkce \textbf{int getToken(String *s, int *cursor)}, která vrací integerovský identifikátor tokenu ( viz. \textit{define.h} ), prvním parametrem vrací identifikátor, případně klíčové slovo a pro možnost opakovaného čtení slovo a vrácení zpět ještě druhým parametrem počet přečtených znaků pro identifikaci tokenu.
+
+Vracení tokenů na vstup jsme původně dělali tak, že jsme funkci, která toto obstarávala, předali řetězec reprezentující token a podle něj byl posunut kurzor vstupu. Toto bylo ovšem problematické, jelikož to nebralo v potaz whitespace, který se na vstupu vyskytoval a proto jsme se uchýlili k předávání a uchovávání informace a tom, kolik bylo přečteno znaků pro identifikaci tokenu. Toto náš problém vyřešilo.
+
+Další mírně problematickým úkolem bylo zpracování řetězcových literálů. pro potřeby interpretu bylo nutné některé znaky nahrazovat escape sekvencemi. toto jsme původně dělali až během sémantických akcí, ale nakonec jsme se rozhodli, že to provedeme již během lexikální analýzy.
+
+\section{Syntaktická a sémantická analýza}
+Syntaktická analýza je prováděna pomocí rekurzivního sestupu, během nějž zároveň dochází k sémantické analýze a generování instrukcí pro interpret. 
+Zvolený způsob řešení přesně odpovídá metodě, která byla probírána na přednáškách.
+
+\subsection{Precedenční syntaktická analýza}
+Precedenční analýza byla implementována přesně podle algoritmu v prezentaci, tedy za použití zásobníku. V průběhu tohoto algoritmu jsou prováděny i veškeré nutné typové konverze a generování instrukcí.
+
+Pro potřeby precedenční analýzy byla vytvořena datová struktura \textit{tokenparam}.
+Tato struktura reprezentuje token s informacemi, které jsou nápomocné při precedenční analýze. 
+Struktura obsahuje identifikátor tokenu, který se mírně liší od identifikátoru, který je používaný ve zbytku překladače a to proto, aby se tímto identifikátorem zároveň mohla indexovat precedenční tabulka, která byla realizována jako dvourozměrné pole. 
+Dále je tam uložen datový typ, přepínač, indikující, zda se jedná o proměnnou či literál, a hodnota literálu či proměnné, která byla použita při debuggování.
+
+Struktura je definována takto:
+\begin{verbatim}
+typedef struct TokenParam {
+    char token;
+    String *data;
+    int type;
+    bool identifier;
+} tokenparam;
+\end{verbatim}
+
+Při řešení syntaktické analýzy byla problematickou pouze analýza precedenční. Vyzkoušeli jsme více způsobů uchovávání informace o tokenech, ale nakonec jsme zvolili definování tokenu jako struktury a potřebné informace si uchovávali v ní. Ve výsledku to bylo mnohem vhodnější řešení než prve používané globální proměnné.
+
+\subsection{Sémantická analýza}
+
+Sémantická analýza a generování sémantických akcí probíhá spolu se syntaktickou analýzou. V průběhu vývoje jsme měli 2 různé iterace sémantické analýzy. 
+
+V naší první iteraci probíhaly všechny kontroly a sémantické akce až po tom, co jsme syntakticky zkontrolovali celý příkaz. Například pokud se jednalo o definici proměnné s její inicializací, nejprve jsme syntakticky zkontrolovali celý příkaz až po konec řádku a pak zkontrolovali zda proměnná neexistuje, vložili ji do tabulky symbolů a vygenerovali příslušnou instrukci.
+Postupně jsme však naráželi na problém toho, že jsme si museli pamatovat zbytečně mnoho informací zpět, které jsme museli ukládat do globálních proměnných nebo si je předávat parametry. Obzvláště krkolomné se toto ukázalo být u definice funkce s parametry. Tyto parametry jsme si ukládali postupně do globálního lineárního seznamu, který jsme potom najednou vložili do tabulky symbolů fce.
+
+Řešení, které jsme implementovali poté, a u nějž jsme i zůstali, je předčasné vkládání symbolů do tabulky a následné upravování jejich atributů. Toto se ukázalo jako příjemnější řešení. Například při zpracování definice funkce vložíme symbol do tabulky hned po přečtení id funkce a následně vkládáme parametry po jednom už přímo do tabulky a nemusíme si je pamatovat. 
+
+Samotné instrukce jsou generováný v průběhu analýzy a okamžitě vypisovány na stdout tak, jak jsou generovány.
+
+\section{Tabulka symbolů}
+Jelikož zadání jinou formu ani nepřipouštělo, je tabulka symbolů implementována pomocí binárního vyhledávacího stromu. Binární strom jsme již dělali v domácí úloze v předmětu IAL. Pro potřeby překladače jsme tento strom museli podstatně změnit. Základní funkce jsou však v principu stejné. Složitější je především z důvodu velkého množství informací, který musí každý uzel obsahovat, včetně například vnořeného stromu.
+
+\subsection{Struktura uzlu}
+Každý uzel představuje buď funkci, nebo proměnnou. Proměnná ani funkce nesmí mít stejný název, je tedy zajištěna jedinečnost. Proto název představuje přímo klíč uzlu. klíč je vždy malým písmem, bylo totiž potřeba ošetřit fakt, že překládaný jazyk je case-insensitive.
+
+Princip řazení je obdobný abecednímu řazení. Toho je docíleno porovnáváním hodnot znaků v ASCII tabulce. Hodnoty s menší hodnotou jsou vlevo, s vyšší vpravo.
+
+Všechny důležité informace jsou v uloženy v datové struktuře \textit{load}, na kterou odkazuje \textit{loadPtr symbol}.
+
+\begin{verbatim}
+struct node {
+    char key[64];
+    struct node *lPtr;
+    struct node *rPtr;
+    loadPtr symbol;
+};
+\end{verbatim}
+
+
+\subsection{Informace o uzlu}
+Informace o tom, zda uzel představuje proměnnou, nebo funkci, je uložena ve struktuře \textit{load}. Konkrétně v proměnné \textit{metaType} - pokud se rovná 1, jde o proměnnou, pokud se rovná 2, jde o funkci.
+
+Proměnná \textit{type} zase určuje datový typ. Pro \textit{type=1} je datový typ integer, pro \textit{type=2} double a pro \textit{type=3} je datový typ string.
+
+Ve struktuře \textit{value} se pak nachází konkrétní hodnota.
+
+Booleovské proměnná \textit{defined} je pouze pro funkce a ukazuje, jestli už byla funkce definovaná. \textit{Initialized} je naopak pouze pro proměnné a ukazuje, jestli už proměnná byla inicializovaná.
+
+Struktura \textit{functInfo} je opět pouze pro funkce a nese informaci o tom, jestli již byla funkce deklarovaná, jestli už se v kódu narazilo na \textit{return}, a především obsahuje parametry, které byly funkci předány. Ty jsou obsaženy v lineárním seznamu \textit{parameters}. Zároveň se v \textit{functInfo} nachází ukazatel na vnořený strom, který eviduje lokální proměnné.
+
+
+\begin{Parallel}[v]{0.48\textwidth}{0.48\textwidth}
+\ParallelLText{\noindent
+\begin{verbatim}
+typedef struct load {
+    bool defined;
+    bool initialized;
+    int type;
+    int metaType;
+    val value;
+    functInfo function;
+} *loadPtr;
+
+struct parameters{
+    char name[64];
+    int type;
+    param next;
+};
+\end{verbatim}
+}
+\ParallelRText{\noindent
+\begin{verbatim}
+typedef struct value {
+    int i;
+    double d;
+    String *s;
+    bool b;
+} val;
+
+typedef struct {
+    param parameters;
+    param declaredParameters;
+    nodePtr functTable;
+    bool hasReturn;
+    bool declared;
+} functInfo;
+\end{verbatim}
+}
+\ParallelPar
+\end{Parallel}
+
+\section{Operace s pamětí}
+
+Vzhledem k množství operací s dynamicky alokovanou pamětí bylo velmi náročné ošetřit ztráty paměti, takzvané \textbf{memory leaky}. Z toho důvodu jsem se rozhodl o systematickou správu a dohled nad jakoukoliv alokací a uvolněním. Byl implementován jednosměrný lineární seznam a dceřiná funkce pro alokaci a uvolnění. S jakýmkoliv zavoláním alokace paměti ukládáme nový ukazatel na konec lineárního seznamu. Při uvolnění paměti pak procházíme seznam a je nutné ukazatel vymazat i z něj. Při jakémkoliv konci programu jsou vyčištěny všechny aktuální dynamicky alokované ukazatelé. Díky tomu se nám podařilo zabránit všem memory leakům na úkor paměti a procesoru. Překladač je program, který se spouští pouze příkazem uživatele a nezpracovává data non-stop. Z toho důvodu si takové ošetření můžeme dovolit, leč není nejlepším řešením.
+
+\section{Vývoj}
+
+Od loňského roku jsme se s týmem poučili jelikož jsme minulý rok s projektem jako tým pohořeli, rozhodli jsme se pro jiný přístup. Loni byl náš postup poněkud chaotický, na začátku jsme si každý zadali téma a pracovali na něm ve vakuu, což se nám extrémně vymstilo při pokusu o spojení částí do jednoho celku.
+
+Letos jsme však pracovali na projektu zásadně společně a to okamžitě po odhalení zadání, všichni pohromadě, tak, aby každý věděl na čem dělají ti druzí a mohli se podle toho zařídit a případně hned říct co potřebuje od toho druhého a části kompilátoru kterou programuje. Díky tomu, že jsme programovali zásadně pohromadě se nám dařilo mnohem lépe jednotlivé části propojit a setkali jsme se s menším množstvím problémů typu "musíme revertovat každý druhý commit protože si neustále mažeme soubory". I tak jsme se ale párkrát setkali s nutností řešit kolize a podobně. Takové problémy se ale pohromadě řeší mnohem lépe.
+
+Celkově jsme s týmovou prací i s postupem vývoje letos spokojeni a dařilo se nám mnohem lépe jak po komunikační tak po implementační stránce.
+
+\section{Závěr}
+
+Ve výsledku jsme s projektem spokojeni. I přesto, že byl projekt zjednodušen oproti loňskému zadání, které jsme nezvládli, se nám zdá být projekt stále tím nejtěžším, který jsme museli na FITu dělat. Nejtěžší na projektu je rozhodně týmová práce, nustnost koordinovat svoje úsilí a dát jednotlivé části projektu dohromady. I přes obtížnost je to ovšem rozhodně jeden z nejzajímavějších projektů na kterém jsme pracovali. 
+
+\newpage
+
+\section{Rozdělení práce}
+
+Při práci jsme si jednotlivé úseky rozdělili jen orientačně, často se stalo, že jsme na jedné části pracovali ve více lidech. Naše původní rozdělení práce ovšem vypadalo takto:
+
+\begin{itemize}  
+\item \textbf{Martin Studený} - Martin pracoval převážně na tabulce symbolů a na funkcích pro sémantickou kontrolu a sémantických akcích.
+\item \textbf{Radek Wildmann} - Radek implementoval precedenční syntaktickou analýzu a základ knihovny \textit{string.c}. 
+\item \textbf{Michal Zilvar} - Michal pracoval na knihovně \textit{string.c} a na funkcích pro správu a úklid paměti alokované našimi funkcemi. Dále vytvořil funkci pro generování instrukcí interpretu. 
+\item \textbf{Jakub Zapletal} - Jakub pracoval na syntaktické analýze, sémantické analýze a generování instrukcí interpretu.
+\end{itemize}
+
+Každý si svoji část implementace dokumentoval sám.
+
+\newpage
+
+\section{LL tabulka}
+
+\begin{center}
+    \setlength{\tabcolsep}{1pt}
+    \begin{tabular}{c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c }
+    & eps & if & eof & eol & decl & funct & expr & ( & ) & then & as & else & id & lit & int & double & str & scope & end & , & ret & = & dim & in & print & do & while & loop \\ \hline
+    PROGRAM  & 1 &  &  &  & 1 & 1 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    FUNCTIONS & 3 &  &  &  & 2 & 2 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    FUNCTION  &  &  &  &  & 4 & 5 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    PARAMS  & 7 &  &  &  &  &  &  &  &  &  &  &  & 6 &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    NPARAM  & 9 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 8 &  &  &  &  &  &  &  & \\ \hline
+    PARAM  &  &  &  &  &  &  &  &  &  &  &  &  & 10 &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    SCOPE  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 11 &  &  &  &  &  &  &  &  & \\ \hline
+    FCOMMANDS  & 15 & 13 &  &  &  &  &  &  &  &  &  &  & 13 &  &  &  &  &  &  &  & 12 &  & 14 & 13 & 13 & 13 &  & \\ \hline
+    FCOMMAND  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 16 &  &  &  &  &  &  & \\ \hline
+    SCOMMANDS  & 19 & 18 &  &  &  &  &  &  &  &  &  &  & 18 &  &  &  &  &  &  &  &  &  & 17 & 18 & 18 & 18 &  & \\ \hline
+    SCOMMAND  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 20 &  &  &  &  & \\ \hline
+    COMMANDS  & 22 & 21 &  &  &  &  &  &  &  &  &  &  & 21 &  &  &  &  &  &  &  &  &  &  & 21 & 21 & 21 &  & \\ \hline
+    COMMAND  &  & 26 &  &  &  &  &  &  &  &  &  &  & 23 &  &  &  &  &  &  &  &  &  &  & 24 & 25 & 27 &  & \\ \hline
+    VARDEF  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 28 &  &  &  &  & \\ \hline
+    DEFINIT  & 30 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 29 &  &  &  & \\ \hline
+    INIT  &  &  &  &  &  &  & 31 &  &  &  &  &  & 32 &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    FCALL  &  &  &  &  &  &  &  &  &  &  &  &  & 33 &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    CPARAMS  & 35 &  &  &  &  &  &  &  &  &  &  &  & 34 & 34 &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    NCPARAM  & 37 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 36 &  &  &  &  &  &  &  & \\ \hline
+    CPARAM  &  &  &  &  &  &  &  &  &  &  &  &  & 38 & 38 &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    INPUT  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 39 &  &  &  & \\ \hline
+    PRINT  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 40 &  &  & \\ \hline
+    NEXPR  & 42 &  &  &  &  &  & 41 &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    BRANCH  &  & 43&  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    LOOP  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 44 & \\ \hline
+    TYPE  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 45 & 46 & 47 &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    TERM  &  &  &  &  &  &  &  &  &  &  &  &  & 49 & 48 &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ \hline
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\section{Pravidla gramatiky}
+
+\begin{center}
+    \begin{tabular}{ c | l }
+        1 & PROGRAM     $\rightarrow$ FUNCTIONS SCOPE eof \\ \hline
+        2 & FUNCTIONS   $\rightarrow$ FUNCTION FUNCTIONS \\ \hline
+        3 & FUNCTIONS   $\rightarrow$ epsilon \\ \hline
+        4 & FUNCTION    $\rightarrow$ Declare Function id lb PARAMS rb As TYPE eol \\ \hline
+        5 & FUNCTION    $\rightarrow$ Function id lb PARAMS rb As TYPE eol FCOMMANDS End Function \\ \hline
+        6 & PARAMS      $\rightarrow$  PARAM NPARAM \\ \hline
+        7 & PARAMS      $\rightarrow$  epsilon  \\ \hline
+        8 & NPARAM      $\rightarrow$ comma PARAM NPARAM \\ \hline
+        9 & NPARAM      $\rightarrow$ epsilon \\ \hline
+        10 & PARAM       $\rightarrow$ id As TYPE \\ \hline
+        11 & SCOPE       $\rightarrow$ Scope eol SCOMMANDS End Scope \\ \hline
+        12 & FCOMMANDS   $\rightarrow$ FCOMMAND FCOMMANDS \\ \hline
+        13 & FCOMMANDS   $\rightarrow$ COMMAND FCOMMANDS \\ \hline
+        14 & FCOMMANDS   $\rightarrow$ SCOMMAND FCOMMANDS \\ \hline
+        15 & FCOMMANDS   $\rightarrow$ epsilon \\ \hline
+        16 & FCOMMAND    $\rightarrow$ Return EXPR eol \\ \hline
+        17 & SCOMMANDS   $\rightarrow$ SCOMMAND SCOMMANDS \\ \hline
+        18 & SCOMMANDS   $\rightarrow$ COMMAND SCOMMANDS \\ \hline
+        19 & SCOMMANDS   $\rightarrow$ epsilon \\ \hline
+        20 & SCOMMAND    $\rightarrow$ VARDEF eol \\ \hline
+        21 & COMMANDS    $\rightarrow$ COMMAND COMMANDS \\ \hline
+        22 & COMMANDS    $\rightarrow$ epsilon \\ \hline
+        23 & COMMAND     $\rightarrow$ id equals INIT eol \\ \hline
+        24 & COMMAND     $\rightarrow$ INPUT eol \\ \hline
+        25 & COMMAND     $\rightarrow$ PRINT eol \\ \hline
+        26 & COMMAND     $\rightarrow$ BRANCH eol \\ \hline
+        27 & COMMAND     $\rightarrow$ LOOP eol \\ \hline
+        28 & VARDEF      $\rightarrow$ Dim id As TYPE DEFINIT \\ \hline
+        29 & DEFINIT     $\rightarrow$ equals INIT \\ \hline
+        30 & DEFINIT     $\rightarrow$  epsilon \\ \hline
+        31 & INIT        $\rightarrow$ EXPR \\ \hline
+        32 & INIT        $\rightarrow$ FCALL \\ \hline
+        33 & FCALL       $\rightarrow$ id lb CPARAMS rb \\ \hline
+        34 & CPARAMS     $\rightarrow$ CPARAM NCPARAM \\ \hline
+        35 & CPARAMS     $\rightarrow$ epsilon \\ \hline
+        36 & NCPARAM     $\rightarrow$ comma CPARAM NCPARAM \\ \hline
+        37 & NCPARAM     $\rightarrow$ epsilon  \\ \hline
+        38 & CPARAM      $\rightarrow$ TERM \\ \hline
+        39 & INPUT       $\rightarrow$ Input id \\ \hline
+        40 & PRINT       $\rightarrow$ print EXPR semicolon NEXPR \\ \hline
+        41 & NEXPR       $\rightarrow$ EXPR semicolon NEXPR \\ \hline
+        42 & NEXPR       $\rightarrow$ epsilon \\ \hline
+        43 & BRANCH      $\rightarrow$ If EXPR Then eol COMMANDS Else eol COMMANDS End If \\ \hline
+        44 & LOOP        $\rightarrow$ Do While EXPR eol COMMANDS Loop \\ \hline
+        45 & TYPE        $\rightarrow$ Integer \\ \hline
+        46 & TYPE        $\rightarrow$ Double \\ \hline
+        47 & TYPE        $\rightarrow$ String \\ \hline
+        48 & TERM        $\rightarrow$ literal \\ \hline
+        49 & TERM        $\rightarrow$ id \\
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\section{Tabulka precedenční analýzy}
+
+\begin{center}
+    \begin{tabular}{ c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c}
+        & ID & ( & ) & + & - & * & / & \setminus & $<$ & $>$ & $<=$ & $>=$ & == & $<>$ & \$\\ \hline
+        ID &  &  & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] \\ \hline
+        ( & [ & [ & = & [ & [ & [ & [ & [ & [ & [ & [ & [ & [ & [ & \\ \hline
+        ) &  &  & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] \\ \hline
+        + & [ & [ & ] & ] & ] & [ & [ & [ & ] & ] & ] & ] & ] & ] & ]\\ \hline
+        - & [ & [ & ] & ] & ] & [ & [ & [ & ] & ] & ] & ] & ] & ] & ]\\ \hline
+        * & [ & [ & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ]\\ \hline
+        / & [ & [ & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ] & ]\\ \hline
+        \setminus & [ & [ & ] & ] & ] & [ & [ & ] & ] & ] & ] & ] & ] & ] & ]\\ \hline
+        $<$ & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        $>$ & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        $<=$ & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        $>=$ & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        == & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        $<>$ & [ & [ & ] & [ & [ & [ & [ & [ &  &  &  &  &  &  & ]\\ \hline
+        \$ & [ & [ &  & [ & [ & [ & [ & [ & [ & [ & [ & [ & [ & [ & \\ \hline
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\section{Stavový automat pro lexikální analýzu}
+
+\begin{center}
+    \begin{tikzpicture}[scale=0.2]
+    \tikzstyle{every node}+=[inner sep=0pt]
+    \draw [black] (13.9,-41.2) circle (3);
+    \draw (13.9,-41.2) node {$S$};
+    \draw [black] (16.9,-5.7) circle (3);
+    \draw (16.9,-5.7) node {$F1$};
+    \draw [black] (16.9,-5.7) circle (2.4);
+    \draw [black] (25.3,-3.6) circle (3);
+    \draw (25.3,-3.6) node {$S1$};
+    \draw [black] (35,-3.6) circle (3);
+    \draw (35,-3.6) node {$F2$};
+    \draw [black] (35,-3.6) circle (2.4);
+    \draw [black] (26.9,-12) circle (3);
+    \draw (26.9,-12) node {$S2$};
+    \draw [black] (43.6,-14.6) circle (3);
+    \draw (43.6,-14.6) node {$S3$};
+    \draw [black] (49.3,-5.1) circle (3);
+    \draw (49.3,-5.1) node {$F3$};
+    \draw [black] (49.3,-5.1) circle (2.4);
+    \draw [black] (4.6,-11.3) circle (3);
+    \draw (4.6,-11.3) node {$F17$};
+    \draw [black] (4.6,-11.3) circle (2.4);
+    \draw [black] (3.4,-53.5) circle (3);
+    \draw (3.4,-53.5) node {$F4$};
+    \draw [black] (3.4,-53.5) circle (2.4);
+    \draw [black] (13.9,-53.5) circle (3);
+    \draw (13.9,-53.5) node {$S4$};
+    \draw [black] (25.3,-54.6) circle (3);
+    \draw (25.3,-54.6) node {$S5$};
+    \draw [black] (29.5,-60) circle (3);
+    \draw (29.5,-60) node {$F5$};
+    \draw [black] (29.5,-60) circle (2.4);
+    \draw [black] (73.6,-52.3) circle (3);
+    \draw (73.6,-52.3) node {$F7$};
+    \draw [black] (73.6,-52.3) circle (2.4);
+    \draw [black] (69.3,-41.2) circle (3);
+    \draw (69.3,-41.2) node {$F8$};
+    \draw [black] (69.3,-41.2) circle (2.4);
+    \draw [black] (62.5,-38.6) circle (3);
+    \draw (62.5,-38.6) node {$F9$};
+    \draw [black] (62.5,-38.6) circle (2.4);
+    \draw [black] (57.8,-25.2) circle (3);
+    \draw (57.8,-25.2) node {$F10$};
+    \draw [black] (57.8,-25.2) circle (2.4);
+    \draw [black] (61,-31.7) circle (3);
+    \draw (61,-31.7) node {$F13$};
+    \draw [black] (61,-31.7) circle (2.4);
+    \draw [black] (74.8,-33.2) circle (3);
+    \draw (74.8,-33.2) node {$F14$};
+    \draw [black] (74.8,-33.2) circle (2.4);
+    \draw [black] (23.7,-21.4) circle (3);
+    \draw (23.7,-21.4) node {$F16$};
+    \draw [black] (23.7,-21.4) circle (2.4);
+    \draw [black] (69.3,-10.4) circle (3);
+    \draw (69.3,-10.4) node {$S7$};
+    \draw [black] (77.6,-20.5) circle (3);
+    \draw (77.6,-20.5) node {$S8$};
+    \draw [black] (66.9,-24.5) circle (3);
+    \draw (66.9,-24.5) node {$F11$};
+    \draw [black] (66.9,-24.5) circle (2.4);
+    \draw [black] (11.6,-60) circle (3);
+    \draw (11.6,-60) node {$S6$};
+    \draw [black] (71.1,-46.4) circle (3);
+    \draw (71.1,-46.4) node {$F6$};
+    \draw [black] (71.1,-46.4) circle (2.4);
+    \draw [black] (76.2,-27) circle (3);
+    \draw (76.2,-27) node {$F12$};
+    \draw [black] (76.2,-27) circle (2.4);
+    \draw [black] (74.2,-60) circle (3);
+    \draw (74.2,-60) node {$F15$};
+    \draw [black] (74.2,-60) circle (2.4);
+    \draw [black] (50,-25.2) circle (3);
+    \draw (50,-25.2) node {$F20$};
+    \draw [black] (50,-25.2) circle (2.4);
+    \draw [black] (42,-27) circle (3);
+    \draw (42,-27) node {$F19$};
+    \draw [black] (42,-27) circle (2.4);
+    \draw [black] (33.7,-29.5) circle (3);
+    \draw (33.7,-29.5) node {$F18$};
+    \draw [black] (33.7,-29.5) circle (2.4);
+    \draw [black] (15.23,-38.51) -- (22.37,-24.09);
+    \fill [black] (22.37,-24.09) -- (21.57,-24.58) -- (22.46,-25.03);
+    \draw (18.1,-30.2) node [left] {$/$};
+    \draw [black] (14.15,-38.21) -- (16.65,-8.69);
+    \fill [black] (16.65,-8.69) -- (16.08,-9.44) -- (17.08,-9.53);
+    \draw (16.02,-23.51) node [right] {$0..9$};
+    \draw [black] (19.81,-4.97) -- (22.39,-4.33);
+    \fill [black] (22.39,-4.33) -- (21.49,-4.04) -- (21.73,-5.01);
+    \draw (21.64,-5.2) node [below] {$.$};
+    \draw [black] (28.3,-3.6) -- (32,-3.6);
+    \fill [black] (32,-3.6) -- (31.2,-3.1) -- (31.2,-4.1);
+    \draw (30.15,-4.1) node [below] {$0..9$};
+    \draw [black] (32.92,-5.76) -- (28.98,-9.84);
+    \fill [black] (28.98,-9.84) -- (29.9,-9.61) -- (29.18,-8.92);
+    \draw (31.48,-9.27) node [right] {$e,E$};
+    \draw [black] (19.44,-7.3) -- (24.36,-10.4);
+    \fill [black] (24.36,-10.4) -- (23.95,-9.55) -- (23.42,-10.4);
+    \draw (20.1,-9.35) node [below] {$e,E$};
+    \draw [black] (37.68,-2.277) arc (144:-144:2.25);
+    \draw (42.25,-3.6) node [right] {$0..9$};
+    \fill [black] (37.68,-4.92) -- (38.03,-5.8) -- (38.62,-4.99);
+    \draw [black] (40.608,-14.797) arc (-88.91327:-108.78525:32.015);
+    \fill [black] (40.61,-14.8) -- (39.8,-14.31) -- (39.82,-15.31);
+    \draw (34.42,-15.08) node [below] {$+,-$};
+    \draw [black] (46.677,-6.555) arc (-62.71099:-83.0476:49.757);
+    \fill [black] (46.68,-6.55) -- (45.74,-6.48) -- (46.2,-7.37);
+    \draw (40.21,-10.48) node [below] {$0..9$};
+    \draw [black] (45.14,-12.03) -- (47.76,-7.67);
+    \fill [black] (47.76,-7.67) -- (46.92,-8.1) -- (47.77,-8.62);
+    \draw (47.09,-11.11) node [right] {$0..9$};
+    \draw [black] (66.536,-11.566) arc (-67.75215:-85.12336:135.708);
+    \fill [black] (66.54,-11.57) -- (65.61,-11.41) -- (65.98,-12.33);
+    \draw (53.45,-14.44) node [below] {$'$};
+    \draw [black] (67.977,-7.72) arc (234:-54:2.25);
+    \draw (69.3,-3.15) node [above] {$\scriptstyle\{char\}-\{',EOF\}$};
+    \fill [black] (70.62,-7.72) -- (71.5,-7.37) -- (70.69,-6.78);
+    \draw [black] (71.63,-12.287) arc (47.5975:31.22801:25.282);
+    \fill [black] (76.2,-17.85) -- (76.21,-16.91) -- (75.36,-17.42);
+    \draw (74.67,-13.47) node [right] {$'$};
+    \draw [black] (13.9,-44.2) -- (13.9,-50.5);
+    \fill [black] (13.9,-50.5) -- (14.4,-49.7) -- (13.4,-49.7);
+    \draw (13.4,-47.35) node [left] {$'$};
+    \draw [black] (10.9,-53.5) -- (6.4,-53.5);
+    \fill [black] (6.4,-53.5) -- (7.2,-54) -- (7.2,-53);
+    \draw (8.65,-53) node [above] {$\scriptstyle\setminus n,\setminus r$};
+    \draw [black] (75.7,-18.18) -- (71.2,-12.72);
+    \fill [black] (71.2,-12.72) -- (71.33,-13.65) -- (72.1,-13.02);
+    \draw (73.89,-16.88) node [left] {$\scriptstyle\{char\}-\{/,EOF\}$};
+    \draw [black] (13.01,-38.34) -- (5.49,-14.16);
+    \fill [black] (5.49,-14.16) -- (5.25,-15.08) -- (6.21,-14.78);
+    \draw (8.48,-26.89) node [left] {$a..z,A..Z,_$};
+    \draw [black] (3.673,-8.459) arc (225.80399:-62.19601:2.25);
+    \draw (6.83,-4.0) node [above] {$\scriptstyle{a..z,A..Z,0..9,_}$};
+    \fill [black] (6.29,-8.84) -- (7.21,-8.61) -- (6.49,-7.91);
+    \draw [black] (15.84,-43.48) -- (23.36,-52.32);
+    \fill [black] (23.36,-52.32) -- (23.22,-51.38) -- (22.46,-52.03);
+    \draw (19.05,-49.34) node [left] {$!$};
+    \draw [black] (22.51,-55.7) -- (14.39,-58.9);
+    \fill [black] (14.39,-58.9) -- (15.32,-59.07) -- (14.95,-58.14);
+    \draw (19.31,-57.82) node [below] {$"$};
+    \draw [black] (14.6,-60) -- (26.5,-60);
+    \fill [black] (26.5,-60) -- (25.7,-59.5) -- (25.7,-60.5);
+    \draw (20.55,-60.5) node [below] {$"$};
+    \draw [black] (10.739,-62.862) arc (10.98989:-277.01011:2.25);
+    \draw (-0.04,-65.42) node [below] {$\scriptstyle\{char\}-\{",EOF\}$};
+    \fill [black] (8.81,-61.06) -- (7.92,-60.72) -- (8.12,-61.7);
+    \draw [black] (1.8,-46.9) -- (11.19,-42.48);
+    \fill [black] (11.19,-42.48) -- (10.25,-42.37) -- (10.68,-43.27);
+    \draw [black] (10.932,-40.856) arc (291.12043:3.12043:2.25);
+    \draw (7.61,-36.22) node [left] {$space,tab$};
+    \fill [black] (12.37,-38.63) -- (12.55,-37.71) -- (11.61,-38.07);
+    \draw [black] (56.172,-27.719) arc (-35.21612:-104.73386:36.782);
+    \fill [black] (56.17,-27.72) -- (55.3,-28.08) -- (56.12,-28.66);
+    \draw (39.7,-41.59) node [below] {$\scriptstyle<$};
+    \draw [black] (60.79,-24.97) -- (63.91,-24.73);
+    \fill [black] (63.91,-24.73) -- (63.07,-24.29) -- (63.15,-25.29);
+    \draw (62.23,-24.28) node [above] {$\scriptstyle=$};
+    \draw [black] (73.307,-27.785) arc (-78.69629:-112.4782:22.168);
+    \fill [black] (73.31,-27.78) -- (72.42,-27.45) -- (72.62,-28.43);
+    \draw (66.61,-28.69) node [below] {$\scriptstyle>$};
+    \draw [black] (63.98,-32.02) -- (71.82,-32.88);
+    \fill [black] (71.82,-32.88) -- (71.08,-32.29) -- (70.97,-33.29);
+    \draw (67.67,-33.04) node [below] {$\scriptstyle=$};
+    \draw [black] (58.878,-33.82) arc (-47.11742:-110.07563:41.221);
+    \fill [black] (58.88,-33.82) -- (57.95,-34) -- (58.63,-34.73);
+    \draw (39.58,-44.62) node [below] {$\scriptstyle>$};
+    \draw [black] (59.993,-40.247) arc (-58.56236:-115.31307:45.753);
+    \fill [black] (59.99,-40.25) -- (59.05,-40.24) -- (59.57,-41.09);
+    \draw (38.62,-47.44) node [below] {$\scriptstyle\setminus$};
+    \draw [black] (66.828,-42.899) arc (-57.3291:-122.6709:46.735);
+    \fill [black] (66.83,-42.9) -- (65.89,-42.91) -- (66.42,-43.75);
+    \draw (41.6,-50.79) node [below] {$\scriptstyle*$};
+    \draw [black] (68.441,-47.788) arc (-64.13461:-126.25425:50.773);
+    \fill [black] (68.44,-47.79) -- (67.5,-47.69) -- (67.94,-48.59);
+    \draw (41.53,-53.25) node [below] {$\scriptstyle+$};
+    \draw [black] (70.779,-53.319) arc (-71.64157:-129.42385:57.486);
+    \fill [black] (70.78,-53.32) -- (69.86,-53.1) -- (70.18,-54.05);
+    \draw (41.74,-55.85) node [below] {$\scriptstyle-$};
+    \draw [black] (11.95,-43.48) -- (5.35,-51.22);
+    \fill [black] (5.35,-51.22) -- (6.25,-50.93) -- (5.49,-50.29);
+    \draw (3.8,-47.79) node [right] {$\scriptstyle\setminus n,\setminus r$};
+    \draw [black] (16.162,-8.596) arc (13.43896:-274.56104:2.25);
+    \draw (10.5,-11.32) node [below] {$0..9$};
+    \fill [black] (14.15,-6.88) -- (13.26,-6.58) -- (13.49,-7.55);
+    \draw [black] (71.249,-60.538) arc (-80.97989:-133.6524:65.198);
+    \fill [black] (71.25,-60.54) -- (70.38,-60.17) -- (70.54,-61.16);
+    \draw (40.71,-58.94) node [below] {$\scriptstyle=$};
+    \draw [black] (15.956,-39.016) arc (135.45274:80.55152:66.942);
+    \fill [black] (15.96,-39.02) -- (16.87,-38.8) -- (16.16,-38.09);
+    \draw (39.29,-22.78) node [above] {$\scriptstyle/$};
+    \draw [black] (52.155,-4.216) arc (134.93106:-153.06894:2.25);
+    \draw (56.67,-6.37) node [right] {$0..9$};
+    \fill [black] (51.74,-6.83) -- (51.95,-7.75) -- (52.66,-7.04);
+    \draw [black] (16.48,-39.67) -- (31.12,-31.03);
+    \fill [black] (31.12,-31.03) -- (30.17,-31) -- (30.68,-31.86);
+    \draw (25.50,-35.85) node [below] {$\scriptstyle{EOF}$};
+    \draw [black] (40.048,-29.277) arc (-42.90353:-83.47806:37.415);
+    \fill [black] (40.05,-29.28) -- (39.14,-29.52) -- (39.87,-30.2);
+    \draw (30.34,-37.7) node [below] {$\scriptstyle)$};
+    \draw [black] (48.383,-27.726) arc (-35.17806:-97.01483:33.557);
+    \fill [black] (48.38,-27.73) -- (47.51,-28.09) -- (48.33,-28.67);
+    \draw (35.37,-39.58) node [below] {$\scriptstyle($};
+    \end{tikzpicture}
+\end{center}
+
+\section{Koncové stavy automatu pro lexikální analýzu}
+
+\begin{center}
+    \begin{tabular}{ c | c | c}
+        Stav & Programová konstanta & Znaky \\ \hline
+        F1 & L\_INT & celočíselný literál \\ \hline
+        F2 & L\_FLOAT & desetinný literál \\ \hline
+        F3 & L\_FLOAT & desetinný literal s exponentem \\ \hline
+        F4 & T\_EOL & konec řádku \\ \hline
+        F5 & L\_STRING & řetězcový literál \\ \hline
+        F6 & T\_ADD & + \\ \hline
+        F7 & T\_SUB & - \\ \hline
+        F8 & T\_TIMES & * \\ \hline
+        F9 & T\_IDIV & \textbackslash \\ \hline
+        F10 & T\_LT & $<$ \\ \hline
+        F11 & T\_LTE & $<=$ \\ \hline
+        F12 & T\_NEQ & $<>$ \\ \hline
+        F13 & T\_GT & $>$ \\ \hline
+        F14 & T\_GTE & $>=$ \\ \hline
+        F15 & T\_EQ & $=$ \\ \hline
+        F16 & T\_DIV & / \\ \hline
+        F17 & T\_ID nebo T\_\textit{KEYWORD} & identifikátor nebo klíčové slovo \\ \hline
+        F18 & T\_EOF & konec souboru \\ \hline
+        F19 & T\_RB & ) \\ \hline
+        F20 & T\_LB & ( \\
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\end{document}
